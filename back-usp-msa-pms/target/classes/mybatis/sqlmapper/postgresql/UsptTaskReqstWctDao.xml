@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptTaskReqstWctDao">
+
+	<!-- 과제신청사업비 등록-->
+	<insert id="insert">
+		/** UsptTaskReqstWctDao.insert */
+		insert into usp_api.uspt_task_reqst_wct
+			(
+				 task_reqst_wct_id
+				,bsns_wtpln_id
+				,bsns_year
+				,sport_budget
+				,alotm_cash
+				,alotm_acthng
+				,creatr_id
+				,creat_dt
+				,updusr_id
+				,updt_dt
+			) values (
+				 #{taskReqstWctId}
+				,#{bsnsPlanDocId}
+				,#{bsnsYear}
+				,#{sportBudget}
+				,#{alotmCash}
+				,#{alotmActhng}
+				,#{creatorId}
+				,#{createdDt}
+				,#{updaterId}
+				,#{updatedDt}
+			)
+	</insert>
+
+	<!-- 과제신청사업비 변경-->
+	<update id="update">
+		/** UsptTaskReqstWctDao.update */
+		update usp_api.uspt_task_reqst_wct
+			  set   sport_budget		= #{sportBudget}
+					,alotm_cash			= #{alotmCash}
+					,alotm_acthng		= #{alotmActhng}
+					,updusr_id			= #{updaterId}
+					,updt_dt				= #{updatedDt}
+		where  task_reqst_wct_id	= #{taskReqstWctId}
+			and bsns_wtpln_id		= #{bsnsPlanDocId}
+			and bsns_year				= #{bsnsYear}
+	</update>
+
+	<!-- 과제신청사업비 삭제-->
+	<delete id="delete">
+		/** UsptTaskReqstWctDao.delete */
+		delete from usp_api.uspt_task_reqst_wct
+               where	 task_reqst_wct_id = #{taskReqstWctId}
+                 <if test='bsnsPlanDocId != null and bsnsPlanDocId != ""'>
+			      and bsns_wtpln_id   = #{bsnsPlanDocId}
+			     </if>
+			       <if test='bsnsYear != null and bsnsYear != ""'>
+			       and bsns_year             = #{bsnsYear}
+			     </if>
+	</delete>
+
+	<!-- 과제신청사업비 사업계획서ID 삭제-->
+	<delete id="deleteBsnsPlanDocIdAll">
+		/** UsptTaskReqstWctDao.delete */
+		delete from usp_api.uspt_task_reqst_wct
+               where	 bsns_wtpln_id   = #{bsnsPlanDocId}
+	</delete>
+
+	<!-- 과제신청사업비 조회 -->
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptTaskReqstWct">
+		/** UsptTaskReqstWctDao.selectList */
+		select
+				 task_reqst_wct_id
+				,bsns_wtpln_id						as	bsns_plan_doc_id
+				,bsns_year
+				,coalesce(sport_budget,0)		as sport_budget/*지원예산*/
+				,coalesce(alotm_cash,0)			as alotm_cash	/*부담금현금*/
+				,coalesce(alotm_acthng,0)		as alotm_acthng	/*부담금현물*/
+				,coalesce(alotm_cash + alotm_acthng,0) as alotm_sum /*소계*/
+				,coalesce(sport_budget +alotm_cash + alotm_acthng,0)  as alotm_sum_tot /*합계*/
+				,creatr_id	as creator_id
+				,creat_dt	as created_dt
+				,updusr_id	as updater_id
+				,updt_dt	as updated_dt
+		from usp_api.uspt_task_reqst_wct
+	  where	1=1
+	    and 	 bsns_wtpln_id = #{bsnsPlanDocId}
+			order by bsns_year
+	</select>
+
+	<!-- 과제신청사업비 조회 -->
+	<select id="selectOne" resultType="aicluster.pms.common.entity.UsptTaskReqstWct">
+		/** UsptTaskReqstWctDao.selectOne */
+		select
+				 task_reqst_wct_id
+				,bsns_plan_doc_id
+				,bsns_year
+				,coalesce(sport_budget,0)		as sport_budget/*지원예산*/
+				,coalesce(alotm_cash,0)			as alotm_cash	/*부담금현금*/
+				,coalesce(alotm_acthng,0)		as alotm_acthng	/*부담금현물*/
+				,coalesce(alotm_cash + alotm_acthng,0) as alotm_sum /*소계*/
+				,coalesce(sport_budget +alotm_cash + alotm_acthng,0)  as alotm_sum_tot /*합계*/
+				,creator_id
+				,created_dt
+				,updater_id
+				,updated_dt
+		from usp_api.uspt_task_reqst_wct
+	  where	1=1
+	    and task_reqst_wct_id = #{taskReqstWctId}
+			order by bsns_year
+	</select>
+
+	<!-- 과제신청사업비 년도별사업비ID -->
+	<select id="selectBsnsYearList" resultType="aicluster.pms.common.entity.UsptTaskReqstWct">
+		/** UsptTaskReqstWctDao.selectBsnsYearMax */
+			select  task_reqst_wct_id 		/*과제신청사업비ID*/
+				    , bsns_year					/*사업년도*/
+			from usp_api.uspt_task_reqst_wct	  	/**과제신청사업비*/
+ 		  where bsns_plan_doc_id = #{bsnsPlanDocId}
+
+	</select>
+</mapper>

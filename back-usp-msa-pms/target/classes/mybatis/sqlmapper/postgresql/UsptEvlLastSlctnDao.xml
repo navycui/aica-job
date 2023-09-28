@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlLastSlctnDao">
+
+	<insert id="insert">
+		/** UsptEvlLastSlctnDao.insert */
+		insert into usp_api.uspt_evl_last_slctn
+			(
+				evl_last_slctn_id
+				, evl_plan_id
+				, last_slctn_process_div_code
+				, last_slctn_at
+				, last_slctn_dt
+				, slctn_dspth_at
+				, slctn_dspth_dt
+				, slctn_sndng_mth_code
+				, slctn_sndng_cn
+				, ptrmsn_dspth_at
+				, ptrmsn_dspth_dt
+				, ptrmsn_sndng_mth_code
+				, ptrmsn_sndng_cn
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{evlLastSlctnId}
+				, #{evlPlanId}
+				, #{lastSlctnProcessDivCd}
+				, #{lastSlctn}
+				, #{lastSlctnDt}
+				, #{slctnDspth}
+				, #{slctnDspthDt}
+				, #{slctnSndngMth}
+				, #{slctnSndngCn}
+				, #{ptrmsnDspth}
+				, #{ptrmsnDspthDt}
+				, #{ptrmsnSndngMth}
+				, #{ptrmsnSndngCn}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptEvlLastSlctnDao.update */
+		update usp_api.uspt_evl_last_slctn
+		set
+			last_slctn_at			= #{lastSlctn}
+			, last_slctn_dt			= #{lastSlctnDt}
+			, slctn_dspth_at		= #{slctnDspth}
+			, slctn_dspth_dt		= #{slctnDspthDt}
+			, slctn_sndng_mth_code	= #{slctnSndngMth}
+			, slctn_sndng_cn		= #{slctnSndngCn}
+			, ptrmsn_dspth_at		= #{ptrmsnDspth}
+			, ptrmsn_dspth_dt		= #{ptrmsnDspthDt}
+			, ptrmsn_sndng_mth_code	= #{ptrmsnSndngMth}
+			, ptrmsn_sndng_cn		= #{ptrmsnSndngCn}
+			, updusr_id				= #{updaterId}
+			, updt_dt				= #{updatedDt}
+			, last_slctn_process_div_code = #{lastSlctnProcessDivCd}
+		where
+			evl_last_slctn_id = #{evlLastSlctnId}
+	</update>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptEvlLastSlctn">
+		/** UsptEvlLastSlctnDao.select */
+		select
+			evl_last_slctn_id				as evl_last_slctn_id
+			, evl_plan_id					as evl_plan_id
+			, last_slctn_process_div_code	as last_slctn_process_div_cd
+			, last_slctn_at					as last_slctn
+			, last_slctn_dt					as last_slctn_dt
+			, slctn_dspth_at				as slctn_dspth
+			, slctn_dspth_dt				as slctn_dspth_dt
+			, slctn_sndng_mth_code			as slctn_sndng_mth
+			, slctn_sndng_cn				as slctn_sndng_cn
+			, ptrmsn_dspth_at				as ptrmsn_dspth
+			, ptrmsn_dspth_dt				as ptrmsn_dspth_dt
+			, ptrmsn_sndng_mth_code			as ptrmsn_sndng_mth
+			, ptrmsn_sndng_cn				as ptrmsn_sndng_cn
+			, creatr_id						as creator_id
+			, creat_dt						as created_dt
+			, updusr_id						as updater_id
+			, updt_dt						as updated_dt
+		from usp_api.uspt_evl_last_slctn
+		where
+			evl_last_slctn_id = #{evlLastSlctnId}
+	</select>
+
+
+	<sql id="selectList_where">
+		<where>
+			<if test='bsnsYear != null and bsnsYear !=""'>
+				and sub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='processSttus != null and processSttus != ""'>
+				and sub.process_sttus = #{processSttus}
+			</if>
+			<if test='dspthSttus != null and dspthSttus != ""'>
+				and sub.dspth_sttus = #{dspthSttus}
+			</if>
+			<if test='pblancNm != null and pblancNm != ""'>
+				and sub.pblanc_nm like concat('%', #{pblancNm}, '%')
+			</if>
+			<if test='keyword != null and keyword != ""'>
+				<choose>
+					<when test='keywordDiv == "chrgDeptNm"'> and sub.chrg_dept_nm like concat('%', #{keyword}, '%') </when>
+					<when test='keywordDiv == "chargerNm"'> and sub.charger_nm like concat('%', #{keyword}, '%') </when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectListCount" resultType="Long">
+		/** UsptEvlLastSlctnDao.selectListCount */
+		select
+			count(sub.evl_last_slctn_id)
+		from (
+				select
+					uels.evl_last_slctn_id
+					, case when uels.last_slctn_at = true then 'SLCTN' else 'ING' end 		as process_sttus
+					, ub.bsns_year
+					, ubp.pblanc_nm
+					, ub.chrg_dept_nm
+					, ci.mber_nm							as charger_nm
+					, case when uels.slctn_dspth_at = true and uels.ptrmsn_dspth_at = true then 'COMPT' else 'ING' end 		as dspth_sttus
+				from usp_api.uspt_evl_last_slctn uels
+					inner join usp_api.uspt_evl_plan uep
+						on uep.evl_plan_id = uels.evl_plan_id
+						and uep.evl_ty_code = '${@aicluster.pms.common.util.Code@EVL_TYPE_01_CODE}'
+						and uep.evl_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STTUS_03_CODE}'
+						and uep.use_at = true
+					inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+						on ubpr.pblanc_id = uep.pblanc_id
+						and ubpr.rcept_ordr = uep.rcept_ordr
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpr.pblanc_id
+					inner join usp_api.uspt_bsns ub
+						on ub.bsns_code = ubp.bsns_code
+					inner join usp_api.uspt_bsns_charger ubc
+						on ubc.bsns_code = ub.bsns_code
+						and ubc.reprsnt_charger_at = true
+					inner join usp_api.uspt_bsns_charger ubc1
+						on ubc1.bsns_code = ub.bsns_code
+						and ubc1.insider_id = #{insiderId}
+					inner join auth_api.cmmt_emp_info ci
+						on ci.mber_id = ubc.insider_id
+			) sub
+		<include refid="selectList_where"/>
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.SelectionListDto">
+		/** UsptEvlLastSlctnDao.selectList */
+		select
+			sub.*
+			, row_number() over (order by sub.creat_dt desc) as rn
+		from (
+				select
+					uels.evl_last_slctn_id
+					, case when uels.last_slctn_at = true then 'SLCTN' else 'ING' end					as process_sttus
+					, ub.bsns_year
+					, ubp.pblanc_nm
+					, case when ubp.ordtm_rcrit_at = true then '상시모집' else '정시모집' end				as ordtm_rcrit
+					, case when ubp.ordtm_rcrit_at = true then ubpr.rcept_ordr || '차' else '' end		as rcept_odr
+					, ub.chrg_dept_nm
+					, ci.mber_nm																		as charger_nm
+					, uels.last_slctn_dt
+					, case when uels.slctn_dspth_at = true and uels.ptrmsn_dspth_at = true then 'COMPT' else 'ING' end		as dspth_sttus
+					, uels.creat_dt
+				from usp_api.uspt_evl_last_slctn uels
+					inner join usp_api.uspt_evl_plan uep
+						on uep.evl_plan_id = uels.evl_plan_id
+						and uep.evl_ty_code = '${@aicluster.pms.common.util.Code@EVL_TYPE_01_CODE}'
+						and uep.evl_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STTUS_03_CODE}'
+						and uep.use_at = true
+					inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+						on ubpr.pblanc_id = uep.pblanc_id
+						and ubpr.rcept_ordr = uep.rcept_ordr
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpr.pblanc_id
+					inner join usp_api.uspt_bsns ub
+						on ub.bsns_code = ubp.bsns_code
+					inner join usp_api.uspt_bsns_charger ubc
+						on ubc.bsns_code = ub.bsns_code
+						and ubc.reprsnt_charger_at = true
+					inner join usp_api.uspt_bsns_charger ubc1
+						on ubc1.bsns_code = ub.bsns_code
+						and ubc1.insider_id = #{insiderId}
+					inner join auth_api.cmmt_emp_info ci
+						on ci.mber_id = ubc.insider_id
+			) sub
+		<include refid="selectList_where"/>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+	<select id="selectSlctnDetail" resultType="aicluster.pms.common.dto.SlctnDetailDto">
+		/** UsptEvlLastSlctnDao.selectSlctnDetail */
+		select
+			uels.evl_last_slctn_id
+			, uels.last_slctn_at								as last_slctn
+			, uels.last_slctn_dt
+			, uels.last_slctn_process_div_code																				as last_slctn_process_div_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@LSPD_CODE_GROUP}', uels.last_slctn_process_div_code)	as last_slctn_process_div
+			, case when uels.slctn_dspth_at = true and uels.ptrmsn_dspth_at = true then 'COMPT' else 'ING' end				as dspth_sttus
+			, ub.bsns_nm
+			, ub.bsns_year
+			, ubp.pblanc_nm
+			, ubp.pblanc_no
+			, case when ubp.ordtm_rcrit_at = true then '상시모집' else '정시모집' end				as ordtm_rcrit
+			, case when ubp.ordtm_rcrit_at = true then ubpr.rcept_ordr || '차' else '' end		as rcept_odr
+			, ub.chrg_dept_nm
+			, ci.mber_nm																		as charger_nm
+			, ubc1.charger_author_code															as charger_author_cd
+			, uep.wct_mdat_dlbrt_at																as wct_mdat_dlbrt
+			, usb.bsns_ty_code																	as bsns_type_cd
+		from usp_api.uspt_evl_last_slctn uels
+			inner join usp_api.uspt_evl_plan uep
+				on uep.evl_plan_id = uels.evl_plan_id
+				and uep.evl_ty_code = '${@aicluster.pms.common.util.Code@EVL_TYPE_01_CODE}'
+				and uep.evl_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STTUS_03_CODE}'
+				and uep.use_at = true
+			inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+				on ubpr.pblanc_id = uep.pblanc_id
+				and ubpr.rcept_ordr = uep.rcept_ordr
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpr.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.reprsnt_charger_at = true
+			inner join usp_api.uspt_stdr_bsns usb
+				on usb.stdr_bsns_code = ub.stdr_bsns_code
+			inner join usp_api.uspt_bsns_charger ubc1
+				on ubc1.bsns_code = ub.bsns_code
+				and ubc1.insider_id = #{insiderId}
+			inner join auth_api.cmmt_emp_info ci
+				on ci.mber_id = ubc.insider_id
+		where
+			uels.evl_last_slctn_id = #{evlLastSlctnId}
+	</select>
+
+	<select id="selectSlctnTrgetList" resultType="aicluster.pms.common.dto.SlctnTrgetListDto">
+		/** UsptEvlLastSlctnDao.selectSlctnTrgetList */
+		select
+			ubpa.apply_id
+			, ubpa.rcept_no													as receipt_no
+			, ubpa.mber_id													as member_id
+			, cm.mber_nm													as member_nm
+			, ulst.slctn_at													as slctn
+			, case when ulst.slctn_at = true then '선정' else '탈락' end		as slctn_at
+			, ulst.last_slctn_trget_id
+			, ubs.bsns_slctn_trget_id										as bsns_slctn_id
+			, ubs.tot_wct													as total_wct
+			, ubs.sport_budget
+			, ubs.alotm_cash
+			, ubs.alotm_acthng
+			, row_number() over (order by ubpa.rcept_no)					as rn
+			, ubp.bsns_bgnde
+			, ubp.bsns_endde
+		from usp_api.uspt_evl_last_slctn uels
+			inner join usp_api.uspt_evl_plan uep
+				on uep.evl_plan_id = uels.evl_plan_id
+				and uep.evl_ty_code = '${@aicluster.pms.common.util.Code@EVL_TYPE_01_CODE}'
+				and uep.evl_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STTUS_03_CODE}'
+				and uep.use_at = true
+			inner join usp_api.uspt_evl_step ues
+				on ues.evl_plan_id = uep.evl_plan_id
+				and ues.sort_ordr = (select max(sort_ordr) from usp_api.uspt_evl_step where evl_plan_id = uep.evl_plan_id)
+				and ues.evl_step_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STEP_03_CODE}'
+			inner join usp_api.uspt_evl_trget uet
+				on uet.evl_step_id = ues.evl_step_id
+				and uet.slctn_at = true
+			inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+				on ubpr.pblanc_id = uep.pblanc_id
+				and ubpr.rcept_ordr = uep.rcept_ordr
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.pblanc_id = ubpr.pblanc_id
+				and ubpa.rcept_ordr = ubpr.rcept_ordr
+				and ubpa.rcept_sttus_code = '${@aicluster.pms.common.util.Code@RS_COMPT_CODE}'
+				and ubpa.apply_id = uet.apply_id
+			inner join auth_api.cmmt_mber_info cm
+				on cm.mber_id = ubpa.mber_id
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpr.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.insider_id = #{insiderId}
+			left outer join usp_api.uspt_last_slctn_trget ulst
+				on ulst.evl_last_slctn_id = uels.evl_last_slctn_id
+				and ulst.apply_id = uet.apply_id
+			left outer join usp_api.uspt_bsns_slctn_trget ubs
+				on ubs.last_slctn_trget_id = ulst.last_slctn_trget_id
+		where
+			uels.evl_last_slctn_id = #{evlLastSlctnId}
+	</select>
+
+	<select id="selectDspthTrgetList" resultType="aicluster.pms.common.dto.DspthTrgetListDto">
+		select
+			cm.mber_id								as member_id
+			, cm.mber_nm							as member_nm
+			, cm.encpt_email						as enc_email
+			, cm.encpt_mbtlnum						as enc_mobile_no
+		from usp_api.uspt_evl_last_slctn uels
+			inner join usp_api.uspt_last_slctn_trget ulst
+				on ulst.evl_last_slctn_id = uels.evl_last_slctn_id
+				and ulst.slctn_at = #{slctn}
+			inner join usp_api.uspt_evl_plan uep
+				on uep.evl_plan_id = uels.evl_plan_id
+				and uep.evl_ty_code = '${@aicluster.pms.common.util.Code@EVL_TYPE_01_CODE}'
+				and uep.evl_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STTUS_03_CODE}'
+				and uep.use_at = true
+			inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+				on ubpr.pblanc_id = uep.pblanc_id
+				and ubpr.rcept_ordr = uep.rcept_ordr
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.pblanc_id = ubpr.pblanc_id
+				and ubpa.rcept_ordr = ubpr.rcept_ordr
+				and ubpa.apply_id = ulst.apply_id
+				and ubpa.rcept_sttus_code = '${@aicluster.pms.common.util.Code@RS_COMPT_CODE}'
+			inner join auth_api.cmmt_mber_info cm
+				on cm.mber_id = ubpa.mber_id
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpr.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.insider_id = #{insiderId}
+		where
+			uels.evl_last_slctn_id = #{evlLastSlctnId}
+	</select>
+
+
+</mapper>

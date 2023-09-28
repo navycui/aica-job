@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptCnvnChangeReqDao">
+
+
+	<!-- ******************************************************************* 협약변경관리   FRONT ********************************************************************** -->
+
+	<insert id="insert">
+		/** UsptCnvnChangeReqDao.insert */
+	insert into usp_api.uspt_cnvn_change_reqst (
+					 cnvn_change_reqst_id
+					,bsns_cnvn_id
+					,cnvn_change_iem_div_code
+					,cnvn_change_sttus_code
+					,cnvn_change_ty_code
+					,resn_cn
+					,creatr_id
+					,creat_dt
+				) values (
+					 #{cnvnChangeReqId}
+					,#{bsnsCnvnId}
+					,#{changeIemDivCd}
+					,#{cnvnChangeSttusCd}
+					,#{cnvnChangeTypeCd}
+					,#{resnCn}
+					,#{creatorId}
+					,#{createdDt}
+				)
+	</insert>
+
+	<update id="update">
+		/** UsptCnvnChangeReqDao.update */
+			update usp_api.uspt_cnvn_change_reqst
+				 set cnvn_change_iem_div_code 	= #{changeIemDivCd}
+					 ,cnvn_change_sttus_code 		= #{cnvnChangeSttusCd}
+					 ,cnvn_change_ty_code 			=	#{cnvnChangeTypeCd}
+					 ,resn_cn							= #{resnCn}
+   		 where cnvn_change_reqst_id  = #{cnvnChangeReqId}
+      		and bsns_cnvn_id           = #{bsnsCnvnId}
+	</update>
+
+	<!--협약변경관리  신청내역 조회 총건수-->
+	<select id="selectCnvnChangeReqListCnt" resultType="long">
+		/** UsptCnvnChangeReqDao.selectCnvnChangeReqListCnt */
+						select  count(1)
+						from usp_api.uspt_bsns  							ub			/**사업*/
+				 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+						   on ub.bsns_code = ubp.bsns_code
+						 and ubp.use_at = true
+			 		   inner join usp_api.uspt_bsns_pblanc_applcnt 	ubpa /**사업공고신청자*/
+						  on ubp.pblanc_id = ubpa.pblanc_id
+			  	 inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+				          on  ubpa.apply_id = ubc.apply_id
+				inner join usp_api.uspt_bsns_wtpln 					ubpd			/**사업계획서*/
+					on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+				inner join usp_api.uspt_cnvn_change_reqst   					uccr		/**협약변경요청*/
+						 on ubc.bsns_cnvn_id = uccr.bsns_cnvn_id
+						 and uccr.creatr_id = #{memberId}
+	</select>
+
+	<!--협약변경관리  신청내역 조회 -->
+	<select id="selectCnvnChangeReqList" resultType="aicluster.pms.common.entity.UsptCnvnChangeReq">
+		/** UsptCnvnChangeReqDao.selectCnvnChangeReqList */
+	  			select a.*
+				from(
+					select  ubpa.rcept_no as receipt_no					/*접수번호*/
+						     	, '[' || ubpa.rcept_no || '] ' || ubpd.task_korean_nm 		as task_nm_ko	/*과제명*/
+						   		, uccr.cnvn_change_iem_div_code 							as change_iem_div_cd				/*협약변경항목구분*/
+	   							, fn_cmm_get_code_nm('CHANGE_IEM_DIV', uccr.cnvn_change_iem_div_code ) as change_iem_div_nm	/*협약변경항목구분명*/
+	   							, uccr.cnvn_change_sttus_code as cnvn_change_sttus_cd				/*협약변경상태*/
+	   							, fn_cmm_get_code_nm('CNVN_CHANGE_STTUS', uccr.cnvn_change_sttus_code ) as cnvn_change_sttus_nm	/*협약변경상태명*/
+	   							, uccr.resn_cn													/* 사유*/
+	   							, to_char(uccr.creat_dt ,'yyyy-mm-dd')	as req_de	/*신청일*/
+						   		, uccr.cnvn_change_reqst_id 				as cnvn_change_req_id			/*협약변경요청ID*/
+						   		, uccr.bsns_cnvn_id					/*사업협약ID */
+								, ubpd.bsns_wtpln_id 		as bsns_plan_doc_id			 		/*사업계획서ID*/
+								, ubpd.bsns_slctn_trget_id	as bsns_slctn_id							/*사업선정대상ID */
+						        , row_number() over (order by uccr.creat_dt desc) as rn
+						from usp_api.uspt_bsns  								ub			/**사업*/
+				 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+						   on ub.bsns_code = ubp.bsns_code
+						 and ubp.use_at = true
+			 		   inner join usp_api.uspt_bsns_pblanc_applcnt 	ubpa /**사업공고신청자*/
+						  on ubp.pblanc_id = ubpa.pblanc_id
+			  	 inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+				          on  ubpa.apply_id = ubc.apply_id
+				inner join usp_api.uspt_bsns_wtpln 					ubpd			/**사업계획서*/
+					on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+				inner join usp_api.uspt_cnvn_change_reqst   					uccr		/**협약변경요청*/
+						 on ubc.bsns_cnvn_id = uccr.bsns_cnvn_id
+						 and uccr.creatr_id = #{memberId}
+				) a
+		where 1=1
+		  <if test='bsnsCnvnId != null and bsnsCnvnId != ""'>
+		      	 and  a.bsns_cnvn_id = #{bsnsCnvnId}		/*사업협약ID*/
+		    </if>
+		    <if test='cnvnChangeSttusCd != null and cnvnChangeSttusCd != ""'>
+		 		and   a.cnvn_change_sttus_cd		= #{cnvnChangeSttusCd}
+		  </if>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+	<!--협약변경관리  변경요청에서 신청건만 조회 -->
+	<select id="selectCnvnChangeReqCCHS01" resultType="string">
+		/** UsptCnvnChangeReqDao.selectCnvnChangeReqCCHS01 */
+	  		select  a.cnvn_change_sttus_cd
+			  from (
+						select
+						   		 uccr.cnvn_change_iem_div_code as change_iem_div_cd				/*협약변경항목구분*/
+	   							, fn_cmm_get_code_nm('CHANGE_IEM_DIV', uccr.cnvn_change_iem_div_code) as change_iem_div_nm	/*협약변경항목구분명*/
+	   							, uccr.cnvn_change_sttus_code as cnvn_change_sttus_cd				/*협약변경상태*/
+	   							, fn_cmm_get_code_nm('CNVN_CHANGE_STTUS', uccr.cnvn_change_sttus_code) as cnvn_change_sttus_nm	/*협약변경상태명*/
+						        , row_number() over (order by uccr.creat_dt desc) as rn
+						from  usp_api.uspt_cnvn_change_reqst 	uccr		/**협약변경요청*/
+					  where 1=1
+						 and uccr.creatr_id 				= #{memberId}
+						 and uccr.bsns_cnvn_id 		= #{bsnsCnvnId} 	/*사업협약ID*/
+						 and uccr.cnvn_change_iem_div_code 	= #{changeIemDivCd}
+					) a
+     		where 1=1
+     		 and ( a.cnvn_change_sttus_cd='CCHS01' or a.cnvn_change_sttus_cd='CCHS05')	/*신청 or 승인*/
+	</select>
+
+	<!--협약변경관리 변경신청  기본정보 조회 -->
+	<select id="selectCnvnChangeBaseInfoFront" resultType="aicluster.pms.common.entity.UsptCnvnChangeReq">
+		/** UsptCnvnChangeReqDao.selectCnvnChangeBaseInfoFront */
+					select  ubpa.rcept_no as receipt_no					/*접수번호*/
+							, ubp.bsns_bgnde									/*사업시작일*/
+							, ubp.bsns_endde									/*사업종료일*/
+					     	, ubpd.task_korean_nm as task_nm_ko		/*과제명*/
+					     	, ubpd.task_eng_nm  	as task_nm_en 		/*과제명_영문*/
+					     	, ubpd.apply_realm_id as apply_fie_id  	/*지원분야*/
+					     	, (select apply_realm_nm from usp_api.uspt_bsns_apply_realm where apply_realm_id = ubpd.apply_realm_id)  as apply_fie_nm
+					     	, coalesce(ubpd.prtcmpny_co,0)   			as partcptn_company_cnt 		/** 참여기업수 */
+	    					, coalesce(ubpd.smlpz_co,0)                  	as smlpz_cnt 				 /** 중소기업수 */
+	    					, coalesce(ubpd.eoms_co,0)                   	as mspz_cnt				/** 중견기업수 */
+	    					, coalesce(ubpd.etc_co,0)						as etc_cnt					/** 기타수 */
+	    					, coalesce(ubpd.tot_wct,0)					 	as total_wct					/** 총사업비 */
+					   		, uccr.cnvn_change_iem_div_code as change_iem_div_cd				/*협약변경항목구분*/
+   							, fn_cmm_get_code_nm('CHANGE_IEM_DIV', uccr.cnvn_change_iem_div_code ) as change_iem_div_nm	/*협약변경항목구분명*/
+   							, uccr.cnvn_change_sttus_code as cnvn_change_sttus_cd				/*협약변경상태*/
+   							, fn_cmm_get_code_nm('CNVN_CHANGE_STTUS', uccr.cnvn_change_sttus_code ) as cnvn_change_sttus_nm	/*협약변경상태명*/
+   							, uccr.resn_cn			/* 사유*/
+   							, case when uccr.creat_dt is null then  to_char(now() ,'yyyy-mm-dd')
+							   		  else to_char( uccr.creat_dt ,'yyyy-mm-dd')   end 		as req_de    	/*신청일*/
+   							, uccr.cnvn_change_ty_code as cnvn_change_type_cd								/*협약변경유형*/
+   							, fn_cmm_get_code_nm('CNVN_CHANGE_TYPE', uccr.cnvn_change_ty_code ) as cnvn_change_typenm	/*협약변경유형명*/
+   							, ubpd.mber_id 			as member_id								/*사업자(주관사ID)*/
+	    					, ubpd.bsns_wtpln_id	as bsns_plan_doc_id						/*사업계획서ID*/
+	    					, ubc.bsns_cnvn_id														/*사업협약ID */
+	    					, uccr.cnvn_change_reqst_id as cnvn_change_req_id			/*협약변경요청ID*/
+					from usp_api.uspt_bsns  								ub			/**사업*/
+			 inner join  usp_api.uspt_bsns_pblanc 						ubp 		/**사업공고*/
+					   on ub.bsns_code   = ubp.bsns_code
+					 and ubp.use_at  = true
+		 		   inner join usp_api.uspt_bsns_pblanc_applcnt 		ubpa 	/**사업공고신청자*/
+					  on ubp.pblanc_id = ubpa.pblanc_id
+		  	 inner join usp_api.uspt_bsns_cnvn 							ubc 		/*사업협약*/
+			          on  ubpa.apply_id = ubc.apply_id
+			inner join usp_api.uspt_bsns_wtpln 							ubpd		/**사업계획서*/
+				on ubc.bsns_wtpln_id = ubpd.bsns_wtpln_id
+		left outer join usp_api.uspt_cnvn_change_reqst   			uccr		/**협약변경요청*/
+					 on ubc.bsns_cnvn_id = uccr.bsns_cnvn_id
+				    and  uccr.cnvn_change_iem_div_code     = #{changeIemDivCd}
+          where  1=1
+          	 and  ubc.bsns_cnvn_id = #{bsnsCnvnId}		/*사업협약ID*/
+          	 <if test='cnvnChangeReqId != null and cnvnChangeReqId != ""'>
+          		 and uccr.cnvn_change_reqst_id = #{cnvnChangeReqId}		/*협약변경요청ID*/
+			</if>
+	</select>
+
+	<!--협약변경관리 협약변경상태코드 변경 -->
+	<update id="updateCnvnChangeSttus">
+		/** UsptCnvnChangeReqDao.updateCnvnChangeSttus */
+			update usp_api.uspt_cnvn_change_reqst
+				 set cnvn_change_sttus_code	= #{cnvnChangeSttusCd}
+   		    where cnvn_change_reqst_id 		= #{cnvnChangeReqId}
+	</update>
+
+
+	<!--협약변경관리 변경신청  기본정보 조회 -->
+	<select id="selectCnvnChangeRegCnt" resultType="Long">
+		/** UsptCnvnChangeReqDao.selectCnvnChangeRegCnt */
+				  select    count(1)
+				from usp_api.uspt_cnvn_change_reqst   					uccr		/**협약변경요청*/
+             where  1=1
+          	 	 and uccr.cnvn_change_reqst_id 	= #{cnvnChangeReqId}			/*협약변경요청ID*/
+          	 	 and uccr.cnvn_change_iem_div_code     = #{changeIemDivCd}			/*협약변경항목구분*/
+          	 	 and uccr.cnvn_change_sttus_code 		  = #{cnvnChangeSttusCd}		/*협약변경상태코드*/
+	</select>
+
+
+	<!-- ******************************************************************* 협약변경관리   ADMIN ********************************************************************** -->
+
+	<!--협약변경관리  신청내역 목록조회 총건수-->
+	<select id="selectCnvnChangeReqListAdminCnt" resultType="long">
+		/** UsptCnvnChangeReqDao.selectCnvnChangeReqListAdminCnt */
+					select count(1)
+				from(
+						   select	uccr.cnvn_change_reqst_id as cnvn_change_req_id
+						       , (select mber_nm from auth_api.cmmt_mber_info cm  where cm.mber_id = ubpd.mber_id )		as member_nm	/*사업자명(주관사명)*/
+							from usp_api.uspt_bsns  								ub			/**사업*/
+					 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+							   on ub.bsns_code   = ubp.bsns_code
+							 and ubp.use_at = true
+				 		   inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa /**사업공고신청자*/
+							  on ubp.pblanc_id = ubpa.pblanc_id
+				  	 inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+					          on  ubpa.apply_id = ubc.apply_id
+					inner join usp_api.uspt_bsns_wtpln 					ubpd			/**사업계획서*/
+						on ubc.bsns_wtpln_id = ubpd.bsns_wtpln_id
+					inner join usp_api.uspt_cnvn_change_reqst   					uccr		/**협약변경요청*/
+							 on ubc.bsns_cnvn_id = uccr.bsns_cnvn_id
+					where 1=1
+				 <if test='cnvnChangeSttusCd != null and cnvnChangeSttusCd != ""'>
+				 		 and uccr.cnvn_change_sttus_code  =  #{cnvnChangeSttusCd}			/*협약변경상태*/
+				 </if>
+				 <if test='cnvnChangeTypeCd != null and cnvnChangeTypeCd != ""'>
+				 		 and uccr.cnvn_change_ty_code  =  #{cnvnChangeTypeCd}			/*협약변경유형코드*/
+				 </if>
+				 <if test='changeIemDivCd != null and changeIemDivCd != ""'>
+				 		 and uccr.cnvn_change_iem_div_code =  #{changeIemDivCd}			/*협약변경항목구분명*/
+				 </if>
+				  <if test='taskNmKo != null and taskNmKo != ""'>
+			 			and ubpd.task_korean_nm like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+			 	 </if>
+				) a
+		where 1=1
+		 <if test='memberNm != null and memberNm != ""'>
+		 		 and a.member_nm =  #{memberNm}			/*사업자명-이름*/
+		 </if>
+	</select>
+
+	<!--협약변경관리  신청내역 목록조회 -->
+	<select id="selectCnvnChangeReqListAdmin" resultType="aicluster.pms.common.dto.CnvnChangeDto">
+		/** UsptCnvnChangeReqDao.selectCnvnChangeReqListAdmin */
+	  			select a.*
+				from(
+							select  row_number() over (order by uccr.creat_dt desc) as rn
+									, uccr.cnvn_change_sttus_code as cnvn_change_sttus_cd				/*협약변경상태-처리상태*/
+		   							, fn_cmm_get_code_nm('CNVN_CHANGE_STTUS', uccr.cnvn_change_sttus_code ) as cnvn_change_sttus_nm	/*협약변경상태명-처리상태*/
+									, ubpa.rcept_no 					as receipt_no					/*접수번호*/
+							     	, ubpd.task_korean_nm 		as task_nm_ko					/*과제명*/
+							     	, uccr.cnvn_change_ty_code 	as cnvn_change_type_cd 	/*협약변경유형코드(G:CNVN_CHANGE_TYPE)*/
+		   							, fn_cmm_get_code_nm('CNVN_CHANGE_TYPE', uccr.cnvn_change_ty_code) as cnvn_change_type_nm	/*협약변경유형코드*/
+							   		, uccr.cnvn_change_iem_div_code 	as change_iem_div_cd				/*협약변경항목구분*/
+		   							, fn_cmm_get_code_nm('CHANGE_IEM_DIV', uccr.cnvn_change_iem_div_code ) as change_iem_div_nm	/*협약변경항목구분명*/
+		   							, ubpd.mber_id  as member_id /*사업자ID*/
+		   							, (select cm.mber_nm  from auth_api.cmmt_mber_info  cm where cm.mber_id = ubpd.mber_id )		as member_nm	/*사업자명(주관사명)*/
+		   							, to_char(uccr.creat_dt ,'yyyy-mm-dd')	as req_de	/*신청일*/
+							   		, uccr.cnvn_change_reqst_id 				as cnvn_change_req_id			/*협약변경요청ID*/
+							   		, uccr.bsns_cnvn_id																	/*사업협약ID */
+									, ubpd.bsns_wtpln_id 						as bsns_plan_doc_id				/*사업계획서ID*/
+									, ubpd.bsns_slctn_trget_id as bsns_slctn_id					/*사업선정대상ID */
+							from usp_api.uspt_bsns  							ub			/**사업*/
+					 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+							   on ub.bsns_code  = ubp.bsns_code
+							 and ubp.use_at = true
+				 		   inner join usp_api.uspt_bsns_pblanc_applcnt 	ubpa /**사업공고신청자*/
+							  on ubp.pblanc_id = ubpa.pblanc_id
+				  	 inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+					          on  ubpa.apply_id = ubc.apply_id
+					inner join usp_api.uspt_bsns_wtpln 						ubpd			/**사업계획서*/
+						on ubc.bsns_wtpln_id = ubpd.bsns_wtpln_id
+					inner join usp_api.uspt_cnvn_change_reqst   		uccr		/**협약변경요청*/
+							 on ubc.bsns_cnvn_id = uccr.bsns_cnvn_id
+				 where 1=1
+				  <if test='cnvnChangeSttusCd != null and cnvnChangeSttusCd != ""'>
+				 		 and uccr.cnvn_change_sttus_code =  #{cnvnChangeSttusCd}			/*협약변경상태*/
+				 </if>
+				 <if test='cnvnChangeTypeCd != null and cnvnChangeTypeCd != ""'>
+				 		 and uccr.cnvn_change_ty_code  =  #{cnvnChangeTypeCd}			/*협약변경유형코드*/
+				 </if>
+				 <if test='changeIemDivCd != null and changeIemDivCd != ""'>
+				 		 and uccr.cnvn_change_iem_div_code =  #{changeIemDivCd}			/*협약변경항목구분*/
+				 </if>
+				 <if test='taskNmKo != null and taskNmKo != ""'>
+			 			and ubpd.task_korean_nm  like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+			 	 </if>
+				) a
+		where 1=1
+			 <if test='memberNm != null and memberNm != ""'>
+			 		 and a.member_nm =  #{memberNm}			/*사업자명*/
+			 </if>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+	<!--협약변경관리 변경신청  기본정보 조회 -->
+	<select id="selectCnvnChangeBaseInfo" resultType="aicluster.pms.common.entity.UsptCnvnChangeReq">
+		/** UsptCnvnChangeReqDao.selectCnvnChangeBaseInfo */
+					select        to_char(uccr.creat_dt ,'yyyy-mm-dd')		as req_de						/*신청일*/
+									, uccr.cnvn_change_sttus_code 			as cnvn_change_sttus_cd	/*협약변경상태-처리상태*/
+		   							, fn_cmm_get_code_nm('CNVN_CHANGE_STTUS', uccr.cnvn_change_sttus_code ) as cnvn_change_sttus_nm	/*협약변경상태명-처리상태*/
+									, ubpa.rcept_no 					as receipt_no					/*접수번호*/
+							     	, ubpd.task_korean_nm 		as task_nm_ko					/*과제명*/
+							     	, uccr.cnvn_change_ty_code	as cnvn_change_type_cd 	/*협약변경유형코드(G:CNVN_CHANGE_TYPE)*/
+		   							, fn_cmm_get_code_nm('CNVN_CHANGE_TYPE', uccr.cnvn_change_ty_code)	as cnvn_change_type_nm	/*협약변경유형코드*/
+							   		, uccr.cnvn_change_iem_div_code 															as change_iem_div_cd		/*협약변경항목구분*/
+		   							, fn_cmm_get_code_nm('CHANGE_IEM_DIV', uccr.cnvn_change_iem_div_code ) 								as change_iem_div_nm	/*협약변경항목구분명*/
+		   							, (select cm.mber_nm  from auth_api.cmmt_mber_info  cm where cm.mber_id = ubpd.mber_id )		as member_nm
+		   							, utr.rspnber_nm						/*과제책임자명*/
+		   							, utr.encpt_mbtlnum as enc_mbtlnum 					/*과제책임자명_휴대폰*/
+		   							, utr.encpt_email 		as enc_email 						/*과제책임자명_이메일*/
+		   							, utr.task_rspnber_id					/** 과제책임자ID */
+			    					, coalesce(ubpd.prtcmpny_co,0)   			as partcptn_company_cnt 		/** 참여기업수 */
+			    					, coalesce(ubpd.smlpz_co,0)                   as smlpz_cnt 				 /** 중소기업수 */
+			    					, coalesce(ubpd.eoms_co,0)                    as mspz_cnt				/** 중견기업수 */
+			    					, coalesce(ubpd.etc_co,0)						 as etc_cnt					/** 기타수 */
+			    					, coalesce(ubpd.tot_wct,0)					  	as total_wct					/** 총사업비 */
+			    					, ubp.bsns_bgnde					/*사업시작일*/
+									, ubp.bsns_endde					/*사업종료일*/
+									, ubpd.mber_id 				  as member_id				/*사업자(주관사ID)*/
+							   		, uccr.cnvn_change_reqst_id as cnvn_change_req_id			/*협약변경요청ID*/
+							   		, uccr.bsns_cnvn_id					/*사업협약ID */
+									, ubpd.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+									, ubpd.bsns_slctn_trget_id as bsns_slctn_id					/*사업선정대상ID */
+									, uccr.creatr_id 			as applcnt_id		/*변경신청자ID */
+							from usp_api.uspt_bsns  								ub			/**사업*/
+					 inner join  usp_api.uspt_bsns_pblanc 						ubp 		/**사업공고*/
+							   on ub.bsns_code   = ubp.bsns_code
+							 and ubp.use_at = true
+				 		   inner join usp_api.uspt_bsns_pblanc_applcnt 		ubpa /**사업공고신청자*/
+							  on ubp.pblanc_id = ubpa.pblanc_id
+				  	 inner join usp_api.uspt_bsns_cnvn 							ubc 			/*사업협약*/
+					          on  ubpa.apply_id = ubc.apply_id
+					inner join usp_api.uspt_bsns_wtpln 							ubpd			/**사업계획서*/
+						on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+					inner join usp_api.uspt_cnvn_change_reqst   			uccr		/**협약변경요청*/
+							 on ubc.bsns_cnvn_id = uccr.bsns_cnvn_id
+               left outer join usp_api.uspt_task_rspnber 						utr			/**과제책임자*/
+				 	     on ubpd.bsns_wtpln_id  = utr.bsns_wtpln_id 	/*사업계획서ID*/
+             where  1=1
+          	 	 and uccr.cnvn_change_reqst_id = #{cnvnChangeReqId}			/*협약변경요청ID*/
+          	 	 and uccr.cnvn_change_iem_div_code  =  #{changeIemDivCd}				/*협약변경항목구분*/
+	</select>
+
+<!-- ******************************************************************* 협약변경관리 변경 내역   ********************************************************************** -->
+		<!--협약변경  신청내역 목록조회 총건수-->
+	<select id="selectProcessHistCnt" resultType="long">
+		/** UsptCnvnChangeReqDao.selectProcessHistCnt */
+			select count(1)
+			  from ( select a.*
+						from(
+								   select  ubpa.rcept_no as receipt_no									/*접수번호*/
+									     	, ubpd.task_korean_nm as task_nm_ko		/*과제명*/
+				   							, ub.bsns_year 						/*사업년도*/
+				   							, ub.bsns_nm  						/*사업명*/
+									   		, (select cm.mber_nm  from auth_api.cmmt_mber_info  cm where cm.mber_id = ubpd.mber_id )		as member_nm
+									   		, uccr.bsns_cnvn_id					/*사업협약ID */
+									from usp_api.uspt_bsns  								ub			/**사업*/
+							 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+									   on ub.bsns_code  = ubp.bsns_code
+									 and ubp.use_at = true
+						 		   inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa /**사업공고신청자*/
+									  on ubp.pblanc_id = ubpa.pblanc_id
+						  	 inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+							          on  ubpa.apply_id = ubc.apply_id
+							inner join usp_api.uspt_bsns_wtpln 					ubpd			/**사업계획서*/
+								on ubc.bsns_wtpln_id = ubpd.bsns_wtpln_id
+							inner join usp_api.uspt_cnvn_change_reqst   					uccr		/**협약변경요청*/
+									 on ubc.bsns_cnvn_id = uccr.bsns_cnvn_id
+							where 1=1
+						   <if test='bsnsYear != null and bsnsYear != ""'>
+					 			and ub.bsns_year =  #{bsnsYear}			/*사업년도*/
+					 	 	</if>
+					 	 	<if test='bsnsNm != null and bsnsNm != ""'>
+					 			and ub.bsns_nm 	like concat('%', #{bsnsNm}, '%') 			/*사업명*/
+					 	 	</if>
+					 	 	 <if test='taskNmKo != null and taskNmKo != ""'>
+					 			and ubpd.task_korean_nm like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+					 	 	</if>
+					 	 	 <if test='receiptNo != null and receiptNo != ""'>
+					 			and ubpa.rcept_no like concat('%', #{receiptNo}, '%')  	/*접수번호*/
+					 	 	</if>
+						) a
+				where 1=1
+				 <if test='memberNm != null and memberNm != ""'>
+				 		 and a.member_nm =  #{memberNm}			/*사업자명*/
+				 </if>
+				 group by a.receipt_no, a.task_nm_ko, a.bsns_year, a.bsns_nm, a.member_nm, a.bsns_cnvn_id
+		) b
+	</select>
+
+	<!--협약변경  신청내역 목록조회 -->
+	<select id="selectProcessHistList" resultType="aicluster.pms.common.dto.CnvnChangeDto">
+		/** UsptCnvnChangeReqDao.selectProcessHistList */
+	  			select a.*
+				from(
+							 select  ubpa.rcept_no as receipt_no									/*접수번호*/
+									     	, ubpd.task_korean_nm as task_nm_ko		/*과제명*/
+				   							, ub.bsns_year 						/*사업년도*/
+				   							, ub.bsns_nm  						/*사업명*/
+									   		, (select cm.mber_nm  from auth_api.cmmt_mber_info  cm where cm.mber_id = ubpd.mber_id )		as member_nm
+									   		, uccr.bsns_cnvn_id					/*사업협약ID */
+									from usp_api.uspt_bsns  								ub			/**사업*/
+							 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+									   on ub.bsns_code  = ubp.bsns_code
+									 and ubp.use_at = true
+						 		   inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa /**사업공고신청자*/
+									  on ubp.pblanc_id = ubpa.pblanc_id
+						  	 inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+							          on  ubpa.apply_id = ubc.apply_id
+							inner join usp_api.uspt_bsns_wtpln 					ubpd			/**사업계획서*/
+								on ubc.bsns_wtpln_id = ubpd.bsns_wtpln_id
+							inner join usp_api.uspt_cnvn_change_reqst   					uccr		/**협약변경요청*/
+									 on ubc.bsns_cnvn_id = uccr.bsns_cnvn_id
+							where 1=1
+						   <if test='bsnsYear != null and bsnsYear != ""'>
+					 			and ub.bsns_year =  #{bsnsYear}			/*사업년도*/
+					 	 	</if>
+					 	 	<if test='bsnsNm != null and bsnsNm != ""'>
+					 			and ub.bsns_nm 	like concat('%', #{bsnsNm}, '%') 			/*사업명*/
+					 	 	</if>
+					 	 	 <if test='taskNmKo != null and taskNmKo != ""'>
+					 			and ubpd.task_korean_nm like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+					 	 	</if>
+					 	 	 <if test='receiptNo != null and receiptNo != ""'>
+					 			and ubpa.rcept_no like concat('%', #{receiptNo}, '%')  	/*접수번호*/
+					 	 	</if>
+				) a
+		where 1=1
+			 <if test='memberNm != null and memberNm != ""'>
+			 		 and a.member_nm =  #{memberNm}			/*사업자명*/
+			 </if>
+			 <if test='bsnsCnvnId != null and bsnsCnvnId != ""'>
+			 		 and a.bsns_cnvn_id =  #{bsnsCnvnId}			/*사업협약ID*/
+			 </if>
+			 group by a.receipt_no, a.task_nm_ko, a.bsns_year, a.bsns_nm, a.member_nm, a.bsns_cnvn_id
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+	<!--협약변경  신청상세 기본정보 조회 -->
+	<select id="selectProcessHistBaseInfo" resultType="aicluster.pms.common.dto.CnvnChangeDto">
+		/** UsptCnvnChangeReqDao.selectProcessHistBaseInfo */
+	  			select a.*
+				from(
+							select   ubpa.rcept_no as receipt_no				/*접수번호*/
+							     	, ubpd.task_korean_nm as task_nm_ko				/*과제명*/
+		   							, ub.bsns_year 						/*사업년도*/
+		   							, ub.bsns_nm  						/*사업명*/
+							   		, (select cm.mber_nm  from auth_api.cmmt_mber_info  cm where cm.mber_id = ubpd.mber_id )		as member_nm
+							   		, uccr.bsns_cnvn_id					/*사업협약ID */
+							from usp_api.uspt_bsns  								ub			/**사업*/
+					 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+							   on ub.bsns_code  = ubp.bsns_code
+							 and ubp.use_at = true
+				 		   inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa /**사업공고신청자*/
+							  on ubp.pblanc_id = ubpa.pblanc_id
+				  	 inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+					          on  ubpa.apply_id = ubc.apply_id
+					inner join usp_api.uspt_bsns_wtpln 					ubpd			/**사업계획서*/
+						on ubc.bsns_wtpln_id = ubpd.bsns_wtpln_id
+					inner join usp_api.uspt_cnvn_change_reqst   					uccr		/**협약변경요청*/
+							 on ubc.bsns_cnvn_id = uccr.bsns_cnvn_id
+							and uccr.bsns_cnvn_id  =  #{bsnsCnvnId}			/*사업협약ID*/
+				 where 1=1
+				) a
+		where 1=1
+			 group by a.receipt_no, a.task_nm_ko, a.bsns_year, a.bsns_nm, a.member_nm, a.bsns_cnvn_id
+	</select>
+
+	<!--협약변경  신청상세 변경항목 조회(승인건만 조회)-->
+	<select id="selectChangeChangeIemDiv" resultType="aicluster.pms.common.dto.CnvnChangeChangeIemDivDto">
+		/** UsptCnvnChangeReqDao.selectChangeChangeIemDiv */
+	  			select  uccr.cnvn_change_reqst_id 			as cnvn_change_req_id			/*협약변경요청ID*/
+						, uccr.cnvn_change_iem_div_code 	as change_iem_div_cd			/*협약변경항목구분*/
+						, fn_cmm_get_code_nm('CHANGE_IEM_DIV', uccr.cnvn_change_iem_div_code ) as change_iem_div_nm	/*협약변경항목구분명*/
+			from usp_api.uspt_cnvn_change_reqst uccr
+			where uccr.bsns_cnvn_id = #{bsnsCnvnId}			/*사업협약ID*/
+			    and uccr.cnvn_change_sttus_code='CCHS05'
+			order by uccr.cnvn_change_iem_div_code
+	</select>
+
+</mapper>

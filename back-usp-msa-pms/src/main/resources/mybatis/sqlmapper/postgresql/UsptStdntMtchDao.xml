@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptStdntMtchDao">
+
+	<insert id="insert">
+		/** UsptStdntMtchDao.insert */
+		insert into usp_api.uspt_stdnt_mapng
+			(
+				last_slctn_trget_id
+				, apply_id
+				, creator_id
+				, created_dt
+			) values (
+				#{lastSlctnTrgetId}
+				, #{applyId}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<delete id="delete">
+		/** UsptStdntMtchDao.delete */
+		delete from usp_api.uspt_stdnt_mapng
+		where
+			last_slctn_trget_id = #{lastSlctnTrgetId}
+			and apply_id = #{applyId}
+	</delete>
+
+	<select id="selectMtchStdnListCount" resultType="Long">
+		/** UsptStdntMtchDao.selectMtchStdnListCount */
+		select
+			count(usm.apply_id)
+		from usp_api.uspt_stdnt_mapng usm
+		where
+			usm.last_slctn_trget_id = #{lastSlctnTrgetId}
+	</select>
+
+	<select id="selectMtchStdnList" resultType="aicluster.pms.common.dto.MtchStdnListDto">
+		/** UsptStdntMtchDao.selectMtchStdnList */
+		select
+			usm.last_slctn_trget_id
+			, ubpa.apply_id
+			, ubpa.rcept_no									as receipt_no
+			, ubpa.mber_id									as member_id
+			, cm.mber_nm									as member_nm
+			, ua.schul_nm
+			, row_number() over (order by usm.creat_dt)	as rn
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@HOPE_CODE_GROUP}', ubpat.hope_job_code)		as hope_dty
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@MSVC_CODE_GROUP}', um.msvc_ty_code)			as msvc_type
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@GRDTN_CODE_GROUP}', ua.grdtn_div_code)		as grdtn_div
+		from usp_api.uspt_stdnt_mapng usm
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.apply_id = usm.apply_id
+			inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+				on ubpat.apply_id = ubpa.apply_id
+			inner join auth_api.cmmt_mber_info cm
+				on cm.mber_id = ubpa.mber_id
+			left outer join usp_api.uspt_msvc um
+				on um.mber_id = ubpa.mber_id
+			left outer join (
+				select
+					distinct on(mber_id) mber_id
+					, schul_nm
+					, grdtn_div_code
+				from usp_api.uspt_acdmcr
+				order by mber_id, endde desc, creat_dt desc
+			) ua
+				on ua.mber_id = ubpa.mber_id
+		where
+			usm.last_slctn_trget_id = #{lastSlctnTrgetId}
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+	<sql id="selectStdnList_where">
+		<where>
+			usm.last_slctn_trget_id is null
+			and ubpa.pblanc_id = (
+									select
+										ubpa.pblanc_id
+									from usp_api.uspt_last_slctn_trget ulst
+										inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+											on ubpa.apply_id = ulst.apply_id
+											and ubpa.slctn_at = true
+									where ulst.slctn_at = true
+									and ulst.last_slctn_trget_id = #{lastSlctnTrgetId}
+								)
+			<if test='hopeDtyCd != null and hopeDtyCd != "" '>
+				and ubpat.hope_job_code = #{hopeDtyCd}
+			</if>
+			<if test='receiptNo != null and receiptNo != ""'>
+				and ubpa.rcept_no like concat('%', #{receiptNo}, '%')
+			</if>
+			<if test='memberNm != null and memberNm != ""'>
+				and cm.mber_nm like concat('%', #{memberNm}, '%')
+			</if>
+			<if test='rceptStartDate != null and rceptStartDate != "" '>
+				and ubpa.rcept_dt >= to_date(#{rceptEndDate}, 'YYYYMMDD')
+			</if>
+			<if test='rceptEndDate != null and rceptEndDate != ""'>
+				and ubpa.rcept_dt <![CDATA[<=]]> to_date(#{rceptEndDate}, 'YYYYMMDD')
+			</if>
+		</where>
+	</sql>
+
+
+	<select id="selectStdnListCount" resultType="Long">
+		/** UsptStdntMtchDao.selectMtchStdnList */
+		select
+			count(distinct ubpa.apply_id)
+		from usp_api.uspt_bsns_pblanc_applcnt ubpa
+			inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+				on ubpat.apply_id = ubpa.apply_id
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpa.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_stdr_bsns usb
+				on usb.stdr_bsns_code = ub.stdr_bsns_code
+				and usb.bsns_ty_code = '${@aicluster.pms.common.util.Code@BT_EDC_CODE_GROUP}'
+			inner join auth_api.cmmt_mber_info cm
+				on cm.mber_id = ubpa.mber_id
+				and cm.mber_ty_code = '${@aicluster.pms.common.util.Code@MBR_IND_CODE_GROUP}'
+			left outer join usp_api.uspt_stdnt_mapng usm
+				on usm.last_slctn_trget_id in (
+												select
+													ulst2.last_slctn_trget_id
+												from usp_api.uspt_bsns_pblanc_applcnt ubpa2
+													inner join usp_api.uspt_last_slctn_trget ulst2
+														on ulst2.apply_id = ubpa2.apply_id
+														and ulst2.slctn_at = true
+												where
+													ubpa2.pblanc_id = (
+																		select
+																			ubpa.pblanc_id
+																		from usp_api.uspt_last_slctn_trget ulst
+																			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+																				on ubpa.apply_id = ulst.apply_id
+																		where ulst.slctn_at = true
+																		and ulst.last_slctn_trget_id = #{lastSlctnTrgetId}
+																	)
+													and ubpa2.slctn_at = true
+											)
+				and usm.apply_id = ubpa.apply_id
+		<include refid="selectStdnList_where"/>
+	</select>
+
+	<select id="selectStdnList" resultType="aicluster.pms.common.dto.StdnListDto">
+		/** UsptStdntMtchDao.selectMtchStdnList */
+		select
+			ubpa.apply_id
+			, ubpa.rcept_no									as receipt_no
+			, cm.mber_nm									as member_nm
+			, ubp.pblanc_nm
+			, row_number() over (order by ubpa.creat_dt)	as rn
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@HOPE_CODE_GROUP}', ubpat.hope_job_code)			as hope_dty
+			, case when ubp.ordtm_rcrit_at = true then '상시모집' else '정시모집' end									as ordtm_rcrit
+			, case when ubp.ordtm_rcrit_at = true then concat(cast(ubpa.rcept_ordr as varchar), '차')  else '' end	as rcept_odr
+			, usm.last_slctn_trget_id
+		from usp_api.uspt_bsns_pblanc_applcnt ubpa
+			inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+				on ubpat.apply_id = ubpa.apply_id
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpa.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_stdr_bsns usb
+				on usb.stdr_bsns_code = ub.stdr_bsns_code
+				and usb.bsns_ty_code = '${@aicluster.pms.common.util.Code@BT_EDC_CODE_GROUP}'
+			inner join auth_api.cmmt_mber_info cm
+				on cm.mber_id = ubpa.mber_id
+				and cm.mber_ty_code = '${@aicluster.pms.common.util.Code@MBR_IND_CODE_GROUP}'
+			left outer join usp_api.uspt_stdnt_mapng usm
+				on usm.last_slctn_trget_id in (
+												select
+													ulst2.last_slctn_trget_id
+												from usp_api.uspt_bsns_pblanc_applcnt ubpa2
+													inner join usp_api.uspt_last_slctn_trget ulst2
+														on ulst2.apply_id = ubpa2.apply_id
+														and ulst2.slctn_at = true
+												where
+													ubpa2.pblanc_id = (
+																		select
+																			ubpa.pblanc_id
+																		from usp_api.uspt_last_slctn_trget ulst
+																			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+																				on ubpa.apply_id = ulst.apply_id
+																		where ulst.slctn_at = true
+																		and ulst.last_slctn_trget_id = #{lastSlctnTrgetId}
+																	)
+													and ubpa2.slctn_at = true
+											)
+				and usm.apply_id = ubpa.apply_id
+		<include refid="selectStdnList_where"/>
+	</select>
+
+</mapper>

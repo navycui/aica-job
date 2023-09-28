@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancApplyAtchmnflDao">
+
+
+	<update id="update">
+		/** UsptBsnsPblancApplyAtchmnflDao.update */
+		update usp_api.uspt_bsns_pblanc_apply_atchmnfl
+		set
+			samenss_rate = #{samenssRate}
+			, updusr_id = #{updusrId}
+			, updt_dt = #{updtDt}
+		where
+			apply_id = #{applyId}
+			and atchmnfl_id = #{atchmnflId}
+	</update>
+
+	<select  id="selectAtchmnflSetupId" resultType="String">
+		/** UsptBsnsPblancApplyAtchmnflDao.selectAtchmnflSetupId */
+		select atchmnfl_setup_id
+		from usp_api.uspt_bsns_pblanc_apply_atchmnfl
+		where apply_id 	=	 #{applyId}
+	  	and atchmnfl_id	=  #{atchmnflId}
+	</select>
+</mapper>

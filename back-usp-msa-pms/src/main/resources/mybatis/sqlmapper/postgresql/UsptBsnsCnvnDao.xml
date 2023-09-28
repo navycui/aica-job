@@ -1,0 +1,1036 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsCnvnDao">
+
+	<sql id="selectList_where">
+		<where>
+			ubc.cnvn_sttus_code = '${@aicluster.pms.common.util.Code@CNVN_STTS_CMP}'
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and ub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='processSttus != null and processSttus != ""'>
+				<choose>
+					<when test='processSttus == "I"'>
+						and ube.bsns_excclc_id is null
+					</when>
+					<otherwise>
+						and ube.bsns_excclc_id is not null
+					</otherwise>
+				</choose>
+			</if>
+			<if test='keyword != null and keyword != ""'>
+				<choose>
+					<when test='keywordDiv == "receiptNo"'>
+						and ubpa.rcept_no  like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "taskNm"'>
+						and ubpd.task_korean_nm  like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "bsnsNm"'>
+						and ub.bsns_nm like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "memberNm"'>
+						and cm.mber_nm  like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "bizrno"'>
+						and cm.bizrno like concat('%', #{keyword}, '%')
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectListCount" resultType="Long">
+		/** UsptBsnsCnvnDao.selectListCount */
+		select
+			count(ubc.bsns_cnvn_id)
+		from usp_api.uspt_bsns_cnvn ubc
+			inner join usp_api.uspt_bsns_wtpln ubpd
+				on ubpd.bsns_wtpln_id  = ubc.bsns_wtpln_id
+			inner join usp_api.uspt_task_reqst_wct utrw
+				on utrw.bsns_wtpln_id= ubpd.bsns_wtpln_id
+			inner join usp_api.uspt_bsns_slctn_trget ubs
+				on ubs.bsns_slctn_trget_id= ubpd.bsns_slctn_trget_id
+			inner join usp_api.uspt_last_slctn_trget ulst
+				on ulst.last_slctn_trget_id = ubs.last_slctn_trget_id
+			inner join usp_api.uspt_evl_last_slctn uels
+				on uels.evl_last_slctn_id = ulst.evl_last_slctn_id
+			inner join usp_api.uspt_evl_plan uep
+				on uep.evl_plan_id = uels.evl_plan_id
+			inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+				on ubpr.pblanc_id = uep.pblanc_id
+				and ubpr.rcept_ordr = uep.rcept_ordr
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.pblanc_id = ubpr.pblanc_id
+				and ubpa.rcept_ordr = ubpr.rcept_ordr
+				and ubpa.apply_id = ulst.apply_id
+			inner join auth_api.cmmt_mber_info cm
+				on cm.mber_id = ubpa.mber_id
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpr.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc2
+				on ubc2.bsns_code= ub.bsns_code
+				and ubc2.insider_id = #{insiderId}
+			left outer join usp_api.uspt_bsns_excclc ube
+				on ube.bsns_cnvn_id = ubc.bsns_cnvn_id
+				and ube.task_reqst_wct_id = utrw.task_reqst_wct_id
+		<include refid="selectList_where"/>
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.ExcclcListDto">
+		/** UsptBsnsCnvnDao.selectList */
+		select
+			ubc.bsns_cnvn_id
+			, ubc.cnvn_bgnde
+			, ubc.cnvn_endde
+			, ubpa.rcept_no					as receipt_no
+			, ubpd.tot_wct					as total_wct
+			, ubpd.task_korean_nm			as task_nm
+			, ub.bsns_nm
+			, ub.bsns_year
+			, cm.mber_nm					as member_nm
+			, cm.bizrno
+			, utrw.task_reqst_wct_id
+			, utrw.bsns_year				as reqst_bsns_year
+			, ube.creat_dt					as created_dt
+			, case when ube.bsns_excclc_id is null then '대기중' else '등록완료' end as process_sttus
+			, row_number() over (order by ubc.creat_dt desc) as rn
+		from usp_api.uspt_bsns_cnvn ubc
+			inner join usp_api.uspt_bsns_wtpln ubpd
+				on ubpd.bsns_wtpln_id  = ubc.bsns_wtpln_id
+			inner join usp_api.uspt_task_reqst_wct utrw
+				on utrw.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+			inner join usp_api.uspt_bsns_slctn_trget ubs
+				on ubs.bsns_slctn_trget_id  = ubpd.bsns_slctn_trget_id
+			inner join usp_api.uspt_last_slctn_trget ulst
+				on ulst.last_slctn_trget_id = ubs.last_slctn_trget_id
+			inner join usp_api.uspt_evl_last_slctn uels
+				on uels.evl_last_slctn_id = ulst.evl_last_slctn_id
+			inner join usp_api.uspt_evl_plan uep
+				on uep.evl_plan_id = uels.evl_plan_id
+			inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+				on ubpr.pblanc_id = uep.pblanc_id
+				and ubpr.rcept_ordr = uep.rcept_ordr
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.pblanc_id = ubpr.pblanc_id
+				and ubpa.rcept_ordr  = ubpr.rcept_ordr
+				and ubpa.apply_id = ulst.apply_id
+			inner join auth_api.cmmt_mber_info cm
+				on cm.mber_id  = ubpa.mber_id
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpr.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc2
+				on ubc2.bsns_code = ub.bsns_code
+				and ubc2.insider_id = #{insiderId}
+			left outer join usp_api.uspt_bsns_excclc ube
+				on ube.bsns_cnvn_id = ubc.bsns_cnvn_id
+				and ube.task_reqst_wct_id = utrw.task_reqst_wct_id
+		<include refid="selectList_where"/>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+	<select id="selectDetail" resultType="aicluster.pms.common.dto.ExcclcDto">
+		/** UsptBsnsCnvnDao.selectDetail */
+		select
+			ubc.bsns_cnvn_id
+			, ubc.apply_id
+			, ub.bsns_nm
+			, cm.mber_id as member_id
+			, cm.mber_nm as member_nm
+			, cm.bizrno
+			, cm.ceo_nm
+			, cm.encpt_mbtlnum as encpt_mbtlnum
+			, cm.charger_nm
+			, ubpd.task_korean_nm as task_nm
+			, ubpa.rcept_no as receipt_no
+			, ubc.cnvn_bgnde
+			, ubc.cnvn_endde
+			, ubc.cnvn_sttus_code as cnvn_sttus_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@CNVN_CODE_GROUP}', ubc.cnvn_sttus_code ) as cnvn_sttus
+			, utrw.bsns_year
+			, utrw.sport_budget
+			, (utrw.alotm_cash + utrw.alotm_acthng) as alotm
+			, (utrw.sport_budget + utrw.alotm_cash + utrw.alotm_acthng) as wct_totamt
+			, utrw.bsns_year	as reqst_bsns_year
+			, utrw.task_reqst_wct_id
+			, ube.excut_sbsidy
+			, ube.excut_bsnm_alotm
+			, ube.excut_cnvn_totamt
+			, ube.atchmnfl_group_id as attachment_group_id
+			, ubc2.charger_author_code as charger_author_cd
+		from usp_api.uspt_bsns_cnvn ubc
+			inner join usp_api.uspt_bsns_wtpln ubpd
+				on ubpd.bsns_wtpln_id = ubc.bsns_wtpln_id
+			inner join usp_api.uspt_task_reqst_wct utrw
+				on utrw.bsns_wtpln_id = ubpd.bsns_wtpln_id
+			inner join usp_api.uspt_bsns_slctn_trget ubs
+				on ubs.bsns_slctn_trget_id = ubpd.bsns_slctn_trget_id
+			inner join usp_api.uspt_last_slctn_trget ulst
+				on ulst.last_slctn_trget_id = ubs.last_slctn_trget_id
+			inner join usp_api.uspt_evl_last_slctn uels
+				on uels.evl_last_slctn_id = ulst.evl_last_slctn_id
+			inner join usp_api.uspt_evl_plan uep
+				on uep.evl_plan_id = uels.evl_plan_id
+			inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+				on ubpr.pblanc_id = uep.pblanc_id
+				and ubpr.rcept_ordr  = uep.rcept_ordr
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.pblanc_id = ubpr.pblanc_id
+				and ubpa.rcept_ordr  = ubpr.rcept_ordr
+				and ubpa.apply_id = ulst.apply_id
+			inner join auth_api.cmmt_mber_info cm
+				on cm.mber_id = ubpa.mber_id
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpr.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc2
+				on ubc2.bsns_code  = ub.bsns_code
+				and ubc2.insider_id = #{insiderId}
+			left outer join usp_api.uspt_bsns_excclc ube
+				on ube.bsns_cnvn_id = ubc.bsns_cnvn_id
+				and ube.task_reqst_wct_id = utrw.task_reqst_wct_id
+		where
+			ubc.cnvn_sttus_code  = '${@aicluster.pms.common.util.Code@CNVN_STTS_CMP}'
+			and ubc.bsns_cnvn_id = #{bsnsCnvnId}
+			and utrw.task_reqst_wct_id = #{taskReqstWctId}
+	</select>
+
+<!-- 사업협약 등록 -->
+	<insert id="insert">
+		/** UsptBsnsCnvnDao.insert */
+		insert into usp_api.uspt_bsns_cnvn
+					(
+						bsns_cnvn_id
+						,bsns_wtpln_id
+						,apply_id
+						,cnvn_sttus_code
+						,cnvn_de
+						,cnvn_bgnde
+						,cnvn_endde
+						,cnvn_bdt
+						,bsnm_sign_dt
+						,bsnm_cert_session_id
+						,bsnsg_sign_dt
+						,bsnsg_sign_id
+						,bsnsg_nm
+						,bsnsg_ceo_nm
+						,bsnsg_bizrno
+						,cnvn_trmnat_de
+						,cnvn_trmnat_div_code
+						,redemp_trget_amount
+						,redemp_compt_amount
+						,redemp_de
+						,cnvn_trmnat_resn_cn
+						,cnvn_atchmnfl_group_id
+						,cnvn_trmnat_atchmnfl_group_id
+						,creatr_id
+						,creat_dt
+						,updusr_id
+						,updt_dt
+						)
+						values(
+						  #{bsnsCnvnId}
+						 , #{bsnsPlanDocId}
+						 , #{applyId}
+						 , #{cnvnSttusCd}
+						 , #{cnvnDe}
+						 , #{cnvnBgnde}
+						 , #{cnvnEndde}
+						 , #{cnvnBdt}
+						 , #{bsnmSignDt}
+						 , #{bsnmCertSessionId}
+						 , #{bsnsMgcSignDt}
+						 , #{bsnsMgcSignId}
+						 , #{bsnsMgcNm}
+						 , #{bsnsMgcCeoNm}
+						 , #{bsnsMgcBizrno}
+						 , #{cnvnTrmnatDe}
+						 , #{cnvnTrmnatResnCnDivCd}
+						 , #{redempTrgamt}
+						 , #{redempComptAmount}
+						 , #{redempDe}
+						 , #{cnvnTrmnatResnCn}
+						 , #{cnvnFileGroupId}
+						 , #{cnvnTrmnatFileGroupId}
+						 , #{creatorId}
+						 , #{createdDt}
+						 , #{updaterId}
+						 , #{updatedDt}
+						)
+	</insert>
+
+	<!-- 사업계획서ID로 사업협약 삭제(사업계획서 승인 취소시) -->
+	<delete id="deleteByBsnsPlanDocId">
+		/** UsptBsnsCnvnDao.deleteByBsnsPlanDocId */
+		delete from usp_api.uspt_bsns_cnvn
+				where bsns_wtpln_id  = #{bsnsPlanDocId}
+	</delete>
+
+	<select id="selectCnvnSttusByBsnsPlanDocId" resultType="aicluster.pms.common.entity.UsptBsnsCnvn">
+		/** UsptBsnsCnvnDao.selectCnvnSttusByBsnsPlanDocId */
+		select bsns_cnvn_id
+		       , cnvn_sttus_code
+		 from usp_api.uspt_bsns_cnvn
+		where bsns_wtpln_id  = #{bsnsPlanDocId}
+	</select>
+
+	<!-- 협약서 목록 건수조회 front-->
+	<select id="selectFrontBsnsCnvnListCnt" resultType="long">
+			/** UsptBsnsCnvnDao.selectBsnsCnvnListCnt */
+			select count(1)
+			from (
+				select a.*
+				  from (
+							select  ub.bsns_nm  								/*사업명*/
+									, ub.bsns_year  							/*사업년도*/
+									, ubpa.rcept_no as receipt_no			/*접수번호*/
+							     	, ubp.pblanc_nm 							/*공고명*/
+							     	, ubpd.task_korean_nm as task_nm_ko		/*과제명*/
+							   		, utr.rspnber_nm		     						 /*책임자명*/
+							   		, ubc.cnvn_sttus_code as cnvn_sttus_cd		/*협약상태코드(G:CNVN_STTUS)*/
+							   		, fn_cmm_get_code_nm('CNVN_STTUS', ubc.cnvn_sttus_code ) as cnvn_sttus_nm	/*협약상태명*/
+							   		, ubc.bsns_cnvn_id					/*사업협약ID */
+							   		, ubc.apply_id							/** 신청ID */
+							   		, ubc.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+							   		, ubpa.mber_id
+							   		, ubc.cnvn_de						/*협약일자*/
+							from usp_api.uspt_bsns  								ub			/**사업*/
+					 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+							   on ub.bsns_code = ubp.bsns_code
+							 and ubp.use_at = true
+					 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+						       on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+					inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+					         on  ubpa.apply_id = ubc.apply_id
+				 	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+					 	     on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+					inner join usp_api.uspt_task_rspnber 						utr			/**과제책임자*/
+							     on ubpd.bsns_wtpln_id  = utr.bsns_wtpln_id
+					where 1=1
+						and ubpa.mber_id = #{memberId}
+					union
+						select  ub.bsns_nm  								/*사업명*/
+									, ub.bsns_year  							/*사업년도*/
+									, ubpa.rcept_no as receipt_no			/*접수번호*/
+							     	, ubp.pblanc_nm 							/*공고명*/
+							     	, ubpd.task_korean_nm as task_nm_ko		/*과제명*/
+							   		, utr.rspnber_nm		     						 /*책임자명*/
+							   		, ubc.cnvn_sttus_code as cnvn_sttus_cd		/*협약상태코드(G:CNVN_STTUS)*/
+							   		, fn_cmm_get_code_nm('CNVN_STTUS', ubc.cnvn_sttus_code ) as cnvn_sttus_nm	/*협약상태명*/
+							   		, ubc.bsns_cnvn_id					/*사업협약ID */
+							   		, ubc.apply_id							/** 신청ID */
+							   		, ubc.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+							   		, ubcps.mber_id
+							   		, ubc.cnvn_de						/*협약일자*/
+							from usp_api.uspt_bsns  								ub			/**사업*/
+					 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+							   on ub.bsns_code = ubp.bsns_code
+							 and ubp.use_at = true
+					 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+						       on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+					inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+					         on  ubpa.apply_id = ubc.apply_id
+				 	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+					 	     on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+					inner join usp_api.uspt_task_rspnber 						utr			/**과제책임자*/
+							     on ubpd.bsns_wtpln_id  = utr.bsns_wtpln_id
+					inner	join usp_api.uspt_bsns_cnvn_prtcmpny_sign ubcps
+					      on ubcps.bsns_cnvn_id =ubc.bsns_cnvn_id
+					 where 1=1
+						and ubcps.mber_id = #{memberId}
+					) a
+				where 1=1
+					 <if test='cnvnDeStart != null and cnvnDeStart != ""'>
+			 				and a.cnvn_de >= #{cnvnDeStart}
+			 	 	</if>
+			 	 	 <if test='cnvnDeEnd != null and cnvnDeEnd != ""'>
+			 				and a.cnvn_de <![CDATA[<=]]> #{cnvnDeEnd}
+			 	 	</if>
+					<choose>
+						<when test='cnvnSttusCd != null and cnvnSttusCd != ""'>
+							and a.cnvn_sttus_cd 	= #{cnvnSttusCd}			/*협약상태코드*/
+						</when>
+						<otherwise>
+							and a.cnvn_sttus_cd 	in ('CNST03', 'CNST04', 'CNST05') /* 서면요청, 서명완료, 협약완료*/
+						</otherwise>
+					</choose>
+			 	 	 <if test='pblancNm  != null and  pblancNm  != ""'>
+			 				and a.pblanc_nm like concat('%', #{pblancNm}, '%') 			/*공고명*/
+			 	 	</if>
+			 	 	 <if test='taskNmKo != null and taskNmKo != ""'>
+			 				and a.task_nm_ko  like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+			 	 	</if>
+				group by 	  a.bsns_nm, a.bsns_year, a.receipt_no, a.pblanc_nm, a.task_nm_ko, a.rspnber_nm, a.cnvn_sttus_cd
+					 	 , a.cnvn_sttus_nm, a.bsns_cnvn_id, a.apply_id, a.bsns_plan_doc_id,a.mber_id,a.cnvn_de
+				) b
+			where 1=1
+	</select>
+
+	<!-- 협약서 목록 조회 front-->
+	<select id="selectFrontBsnsCnvnList" resultType="aicluster.pms.common.entity.UsptBsnsCnvn">
+			/** UsptBsnsCnvnDao.selectFrontBsnsCnvnList */
+			select b.*
+			        , row_number() over (order by b.receipt_no desc) as rn
+			from (
+				select a.*
+				  from (
+							select  ub.bsns_nm  								/*사업명*/
+									, ub.bsns_year  							/*사업년도*/
+									, ubpa.rcept_no as receipt_no			/*접수번호*/
+							     	, ubp.pblanc_nm 							/*공고명*/
+							     	, ubpd.task_korean_nm as task_nm_ko		/*과제명*/
+							   		, utr.rspnber_nm		     						 /*책임자명*/
+							   		, ubc.cnvn_sttus_code as cnvn_sttus_cd		/*협약상태코드(G:CNVN_STTUS)*/
+							   		, fn_cmm_get_code_nm('CNVN_STTUS', ubc.cnvn_sttus_code ) as cnvn_sttus_nm	/*협약상태명*/
+							   		, ubc.bsns_cnvn_id					/*사업협약ID */
+							   		, ubc.apply_id							/** 신청ID */
+							   		, ubc.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+							   		, ubpa.mber_id
+							   		, ubc.cnvn_de						/*협약일자*/
+							from usp_api.uspt_bsns  								ub			/**사업*/
+					 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+							   on ub.bsns_code = ubp.bsns_code
+							 and ubp.use_at = true
+					 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+						       on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+					inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+					         on  ubpa.apply_id = ubc.apply_id
+				 	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+					 	     on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+					inner join usp_api.uspt_task_rspnber 						utr			/**과제책임자*/
+							     on ubpd.bsns_wtpln_id  = utr.bsns_wtpln_id
+					where 1=1
+						and ubpa.mber_id = #{memberId}
+					union
+						select  ub.bsns_nm  								/*사업명*/
+									, ub.bsns_year  							/*사업년도*/
+									, ubpa.rcept_no as receipt_no			/*접수번호*/
+							     	, ubp.pblanc_nm 							/*공고명*/
+							     	, ubpd.task_korean_nm as task_nm_ko		/*과제명*/
+							   		, utr.rspnber_nm		     						 /*책임자명*/
+							   		, ubc.cnvn_sttus_code as cnvn_sttus_cd		/*협약상태코드(G:CNVN_STTUS)*/
+							   		, fn_cmm_get_code_nm('CNVN_STTUS', ubc.cnvn_sttus_code ) as cnvn_sttus_nm	/*협약상태명*/
+							   		, ubc.bsns_cnvn_id					/*사업협약ID */
+							   		, ubc.apply_id							/** 신청ID */
+							   		, ubc.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+							   		, ubcps.mber_id
+							   		, ubc.cnvn_de						/*협약일자*/
+							from usp_api.uspt_bsns  								ub			/**사업*/
+					 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+							   on ub.bsns_code = ubp.bsns_code
+							 and ubp.use_at = true
+					 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+						       on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+					inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+					         on  ubpa.apply_id = ubc.apply_id
+				 	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+					 	     on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+					inner join usp_api.uspt_task_rspnber 						utr			/**과제책임자*/
+							     on ubpd.bsns_wtpln_id  = utr.bsns_wtpln_id
+					inner	join usp_api.uspt_bsns_cnvn_prtcmpny_sign ubcps
+					      on ubcps.bsns_cnvn_id =ubc.bsns_cnvn_id
+					 where 1=1
+						and ubcps.mber_id = #{memberId}
+					) a
+				where 1=1
+					 <if test='cnvnDeStart != null and cnvnDeStart != ""'>
+			 				and a.cnvn_de >= #{cnvnDeStart}
+			 	 	</if>
+			 	 	 <if test='cnvnDeEnd != null and cnvnDeEnd != ""'>
+			 				and a.cnvn_de <![CDATA[<=]]> #{cnvnDeEnd}
+			 	 	</if>
+					<choose>
+						<when test='cnvnSttusCd != null and cnvnSttusCd != ""'>
+							and a.cnvn_sttus_cd 	= #{cnvnSttusCd}			/*협약상태코드*/
+						</when>
+						<otherwise>
+							and a.cnvn_sttus_cd 	in ('CNST03', 'CNST04', 'CNST05') /* 서면요청, 서명완료, 협약완료*/
+						</otherwise>
+					</choose>
+			 	 	 <if test='pblancNm  != null and  pblancNm  != ""'>
+			 				and a.pblanc_nm like concat('%', #{pblancNm}, '%') 			/*공고명*/
+			 	 	</if>
+			 	 	 <if test='taskNmKo != null and taskNmKo != ""'>
+			 				and a.task_nm_ko  like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+			 	 	</if>
+				group by 	  a.bsns_nm, a.bsns_year, a.receipt_no, a.pblanc_nm, a.task_nm_ko, a.rspnber_nm, a.cnvn_sttus_cd
+					 	 , a.cnvn_sttus_nm, a.bsns_cnvn_id, a.apply_id, a.bsns_plan_doc_id,a.mber_id,a.cnvn_de
+			) b
+			where 1=1
+				offset #{beginRowNum} -1
+				limit #{itemsPerPage}
+	</select>
+
+	<!-- 협약 상세정보 조회 및 해지정보 -->
+	<select id="selectBsnsCnvnDetail" resultType="aicluster.pms.common.entity.UsptBsnsCnvn">
+	  		/** UsptBsnsCnvnDao.selectFrontBsnsCnvnDetail */
+		 	select  ub.bsns_nm  						/*사업명*/
+			    	, ubc.cnvn_sttus_code as cnvn_sttus_cd					/*협약상태코드(G:CNVN_STTUS)*/
+			   		, fn_cmm_get_code_nm('CNVN_STTUS', ubc.cnvn_sttus_code ) as cnvn_sttus_nm	/*협약상태명*/
+			   		, ubpd.task_korean_nm as task_nm_ko					/*과제명*/
+			   		, ubc.cnvn_de							/*협약일자*/
+			   		, ubc.cnvn_bgnde 					/*협약시작일*/
+			   		, ubc.cnvn_endde 					/*협약종료일*/
+			   		, ubc.cnvn_bdt 						/*협약서본문*/
+			   		, ubc.cnvn_atchmnfl_group_id as cnvn_file_group_id 			/*협약파일그룹ID*/
+			   		, ubc.bsnsg_sign_id as bsns_mgc_sign_id				/*사업단서명ID*/
+			   		, case when ubc.bsnsg_nm  is null then '인공지능산업융합사업단'
+			   		          else ubc.bsnsg_nm end 			as bsns_mgc_nm				/*사업단명*/
+			   		, ubc.bsnsg_ceo_nm 							as bsns_mgc_ceo_nm		/*사업단대표자명*/
+			   		, ubc.bsnsg_bizrno 							as bsns_mgc_bizrno			/*사업단사업자번호*/
+			   		, ubc.bsnsg_sign_dt 							as bsns_mgc_sign_dt			/*사업단서명일시	*/
+			   		, to_char(ubc.bsnsg_sign_dt  ,'YYYY-MM-DD HH24:MI')	as char_bsns_mgc_sign_dt	/*char_사업단서명일시	*/
+			   		, ubpd.mber_id as member_id																			/*사업자(주관사ID)*/
+			   		, (select mber_nm  from auth_api.cmmt_mber_info where mber_id = ubpd.mber_id)		as member_nm	/*사업자명(주관사명)*/
+					, (select ceo_nm	 from auth_api.cmmt_mber_info where mber_id  = ubpd.mber_id )		as ceo_nm			/*주사업자 대표자명*/
+					 , (select bizrno 	 from auth_api.cmmt_mber_info  where mber_id  = ubpd.mber_id  )		as bizrno			/*주사업자 대표자사업자번호*/
+			   		, ubc.bsnm_sign_dt															/*주사업자 서명일시*/
+			   		, to_char(ubc.bsnm_sign_dt ,'YYYY-MM-DD HH24:MI')	as char_bsnm_sign_dt					/*char_주사업자 서명일시	*/
+			   		, ubc.cnvn_trmnat_de 					/*협약해지일*/
+			   		, ubc.cnvn_trmnat_resn_div_code as cnvn_trmnat_resn_cn_div_cd	/*협약해지사유구분코드*/
+			   		, fn_cmm_get_code_nm('CNVN_TRMNAT_RESN_CN_DIV', ubc.cnvn_trmnat_resn_div_code ) as cnvn_trmnat_resn_cn_div_nm
+			   		, ubc.cnvn_trmnat_resn_cn   		/*해지사유내용*/
+			   		, ubc.redemp_trget_amount as redemp_trgamt					/*환수대상금액*/
+			   		, ubc.redemp_compt_amount		/*환수완료금액*/
+			   		, ubc.redemp_de 						/*환수일*/
+			   		, ubc.cnvn_trmnat_atchmnfl_group_id as cnvn_trmnat_file_group_id	/*협약해지첨부파일그룹ID*/
+			   		, ubc.bsns_cnvn_id					/*사업협약ID */
+					, ubc.apply_id							/*신청ID */
+					, ubc.bsns_wtpln_id as bsns_plan_doc_id				/*사업계획서ID*/
+		from usp_api.uspt_bsns  								ub			/**사업*/
+	 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+			   on ub.bsns_code  = ubp.bsns_code
+			 and ubp.use_at = true
+	 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+		       on ubp.pblanc_id = ubpa.pblanc_id
+ 	  inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+		        on  ubpa.apply_id = ubc.apply_id
+	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+				on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+		  where ubc.bsns_cnvn_id 	= #{bsnsCnvnId}
+	 	     and ubc.apply_id 		=	#{applyId}
+	 	    <if test='cnvnSttusCd != null and cnvnSttusCd != ""'>
+				and ubc.cnvn_sttus_code	= #{cnvnSttusCd}			/*협약상태코드*/
+			</if>
+	</select>
+
+	<!-- 협약서 서명시 파일그룹ID 변경 -->
+	<update id="updateCnvnFileGroupId">
+		/** UsptBsnsCnvnDao.updateCnvnFileGroupId */
+			update usp_api.uspt_bsns_cnvn
+			 	 set  cnvn_atchmnfl_group_id  = #{cnvnFileGroupId}
+				  	 , updusr_id       = #{updaterId}
+					 , updt_dt      = #{updatedDt}
+			where bsns_cnvn_id 		= #{bsnsCnvnId}
+		   	  and apply_id 			= #{applyId}
+	</update>
+
+	<!-- 주관업체 서명 -->
+	<update id="updateBsnmSignDt">
+		/** UsptBsnsCnvnDao.updateBsnmSignDt */
+			update usp_api.uspt_bsns_cnvn
+			 	 set  bsnm_sign_dt =  #{bsnmSignDt}
+			 	     , bsnm_cert_session_id = #{bsnmCertSessionId}
+				  	 , updusr_id       = #{updaterId}
+					 , updt_dt      		= #{updatedDt}
+			where bsns_cnvn_id 		= #{bsnsCnvnId}
+		   	  and apply_id 			= #{applyId}
+	</update>
+
+	<!-- 협약 상태 변경 -->
+	<update id="updateCnvnSttus">
+		/** UsptBsnsCnvnDao.updateCnvnSttus */
+			update usp_api.uspt_bsns_cnvn
+			 	 set  cnvn_sttus_code = #{cnvnSttusCd}
+				  	 , updusr_id       = #{updaterId}
+					 , updt_dt      		= #{updatedDt}
+			where bsns_cnvn_id 		= #{bsnsCnvnId}
+		   	  and apply_id 			= #{applyId}
+	</update>
+
+
+	<!-- 협약서 report -->
+	<select id="selectBsnsCnvnDocInfo" resultType="aicluster.pms.common.entity.UsptBsnsCnvn">
+	  		/** UsptBsnsCnvnDao.selectBsnsCnvnDocInfo */
+			select  ub.bsns_nm  						/*사업명*/
+			        , ubc.cnvn_sttus_code as cnvn_sttus_cd					/*협약상태코드(G:CNVN_STTUS)*/
+			   		, fn_cmm_get_code_nm('CNVN_STTUS', ubc.cnvn_sttus_code ) as cnvn_sttus_nm	/*협약상태명*/
+			   		, ubpd.task_korean_nm as task_nm_ko					/*과제명*/
+			   		, ubc.cnvn_de							/*협약일자*/
+			   		, ubc.cnvn_bgnde 					/*협약시작일*/
+			   		, ubc.cnvn_endde 					/*협약종료일*/
+			   		, ubc.cnvn_bdt 						/*협약서본문*/
+			   		, ubc.bsnsg_sign_id as bsns_mgc_sign_id				/*사업단서명ID*/
+			   		, case when ubc.bsnsg_nm is null then '인공지능산업융합사업단'
+			   		          else ubc.bsnsg_nm  	end 	as bsns_mgc_nm				/*사업단명*/
+			   		, ubc.bsnsg_ceo_nm 				 		as bsns_mgc_ceo_nm		/*사업단대표자명*/
+			   		, ubc.bsnsg_bizrno 						as bsns_mgc_bizrno			/*사업단사업자번호*/
+			   		, ubc.bsnsg_sign_dt 						as bsns_mgc_sign_dt			/*사업단서명일시	*/
+			   		, to_char(ubc.bsnsg_sign_dt  ,'YYYY-MM-DD HH24:MI')	as bsns_mgc_sign_dt	/*char_사업단서명일시	*/
+			   		, ubpd.mber_id as member_id															/*사업자(주관사ID)*/
+			   		, (select mber_nm  from auth_api.cmmt_mber_info where mber_id  = ubpd.mber_id)		as member_nm	/*사업자명(주관사명)*/
+					, (select ceo_nm 	  from auth_api.cmmt_mber_info where mber_id  = ubpd.mber_id)		as ceo_nm			/*주사업자 대표자명*/
+					, (select bizrno		  from auth_api.cmmt_mber_info where mber_id  = ubpd.mber_id)		as bizrno			/*주사업자 대표자사업자번호*/
+			   		, ubc.bsnm_sign_dt															/*주사업자 서명일시*/
+			   		, to_char(ubc.bsnm_sign_dt ,'YYYY-MM-DD HH24:MI')	as char_bsnm_sign_dt					/*char_주사업자 서명일시	*/
+			   		, ubc.bsns_cnvn_id				/*사업협약ID */
+					, ubc.apply_id						/** 신청ID */
+					, ubc.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+			from usp_api.uspt_bsns  								ub			/**사업*/
+	 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+			   on ub.bsns_code  = ubp.bsns_code
+			 and ubp.use_at = true
+	 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+		       on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+ 	  inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+		        on  ubpa.apply_id = ubc.apply_id
+	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+				on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+		 where ubc.bsns_cnvn_id 	= #{bsnsCnvnId}
+	 	    and ubc.apply_id 		=	#{applyId}
+	</select>
+
+<!-- *******************************************************************    ADMIN ********************************************************************** -->
+	<!-- 협약서 목록 건수조회-->
+	<select id="selectBsnsCnvnListCnt" resultType="long">
+			/** UsptBsnsCnvnDao.selectBsnsCnvnListCnt */
+				  	  select count(1)
+			from (
+						select (select mber_nm as member_nm
+								    from auth_api.cmmt_mber_info
+								  where mber_id  = ubpd.mber_id  )		as member_nm	/*사업자명(주관사명)*/
+						   		, ubc.bsns_cnvn_id				/*사업협약ID */
+						   		, ubc.apply_id						/* 신청ID */
+						   		, ubc.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+						from usp_api.uspt_bsns  								ub			/**사업*/
+				 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+						   on ub.bsns_code   = ubp.bsns_code
+						 and ubp.use_at= true
+				 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+					       on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+				inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+				         on  ubpa.apply_id = ubc.apply_id
+			 	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+				 	     on ubc.bsns_wtpln_id = ubpd.bsns_wtpln_id
+               inner join usp_api.uspt_task_rspnber 						utr			/**과제책임자*/
+						     on ubpd.bsns_wtpln_id  = utr.bsns_wtpln_id
+				inner join usp_api.uspt_bsns_charger ubch
+					 		  on ubch.bsns_code = ub.bsns_code
+							and ubch.insider_id = #{insiderId}
+				 where 1=1
+					  <if test='bsnsYear != null and bsnsYear != ""'>
+			 			and ub.bsns_year =  #{bsnsYear}			/*사업년도*/
+			 	 	</if>
+			 	 	<if test='bsnsNm != null and bsnsNm != ""'>
+			 			and ub.bsns_nm 	like concat('%', #{bsnsNm}, '%') 			/*사업명*/
+			 	 	</if>
+			 	 	<if test='cnvnSttusCd != null and cnvnSttusCd != ""'>
+						and ubc.cnvn_sttus_code= #{cnvnSttusCd}			/*협약상태코드*/
+					</if>
+			 	 	<if test='cnvnDeStart != null and cnvnDeStart != "" and cnvnDeEnd != null and cnvnDeEnd != ""'>
+			 			and ubc.cnvn_de between #{cnvnDeStart} and #{cnvnDeEnd}	/*협약일자*/
+			 	 	</if>
+			 	 	 <if test='taskNmKo != null and taskNmKo != ""'>
+			 			and ubpd.task_korean_nm like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+			 	 	</if>
+			 	 	<if test='rspnberNm != null and rspnberNm != ""'>
+			 			and utr.rspnber_nm like concat('%', #{rspnberNm}, '%')  	/*과제책임자명*/
+			 	 	</if>
+			 	 	<if test='receiptNo != null and receiptNo != ""'>
+			 	 		and ubpa.rcept_no  like concat('%', #{receiptNo}, '%')  		/*접수번호*/
+			 	 	</if>
+					) a
+					where 1=1
+					<if test='memberNm != null and memberNm != ""'>
+			 			and a.member_nm  like concat('%', #{memberNm}, '%')  	/*주관업체명*/
+			 	 	</if>
+
+			</select>
+
+	<!-- 협약서 목록 조회-->
+	<select id="selectBsnsCnvnList" resultType="aicluster.pms.common.entity.UsptBsnsCnvn">
+			/** UsptBsnsCnvnDao.selectBsnsCnvnList */
+			select a.*
+			        , row_number() over (order by a.receipt_no  desc) as rn
+			from (
+						select  ub.bsns_nm  						/*사업명*/
+								, ub.bsns_year  					/*사업년도*/
+								, ubpa.rcept_no as receipt_no					/*접수번호*/
+						     	, ubp.pblanc_nm 					/*공고명*/
+						     	, ubpd.task_korean_nm as task_nm_ko				/*과제명*/
+						   		, ubc.cnvn_sttus_code as cnvn_sttus_cd				/*협약상태코드(G:CNVN_STTUS)*/
+						   		, fn_cmm_get_code_nm('CNVN_STTUS', ubc.cnvn_sttus_code ) as cnvn_sttus_nm	/*협약상태명*/
+						   		, (select mber_nm from auth_api.cmmt_mber_info where mber_id = ubpd.mber_id  )	 as member_nm	/*사업자명(주관사명)*/
+								, ubc.cnvn_de						/*협약일자*/
+								, ubc.cnvn_trmnat_de 			/*협약해지일*/
+								, utr.rspnber_nm		     	 	/*과제책임자명*/
+						   		, ubc.bsns_cnvn_id				/*사업협약ID */
+						   		, ubc.apply_id						/* 신청ID */
+						   		, ubc.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+							from usp_api.uspt_bsns  								ub			/**사업*/
+				 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+						   on ub.bsns_code   = ubp.bsns_code
+						 and ubp.use_at= true
+				 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+					       on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+				inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+				         on  ubpa.apply_id = ubc.apply_id
+			 	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+				 	     on ubc.bsns_wtpln_id = ubpd.bsns_wtpln_id
+               inner join usp_api.uspt_task_rspnber 						utr			/**과제책임자*/
+						     on ubpd.bsns_wtpln_id  = utr.bsns_wtpln_id
+			   inner join usp_api.uspt_bsns_charger ubch
+					 		  on ubch.bsns_code = ub.bsns_code
+							and ubch.insider_id = #{insiderId}
+				 where 1=1
+					  <if test='bsnsYear != null and bsnsYear != ""'>
+			 			and ub.bsns_year =  #{bsnsYear}			/*사업년도*/
+			 	 	</if>
+			 	 	<if test='bsnsNm != null and bsnsNm != ""'>
+			 			and ub.bsns_nm 	like concat('%', #{bsnsNm}, '%') 			/*사업명*/
+			 	 	</if>
+			 	 	<if test='cnvnSttusCd != null and cnvnSttusCd != ""'>
+						and ubc.cnvn_sttus_code= #{cnvnSttusCd}			/*협약상태코드*/
+					</if>
+			 	 	<if test='cnvnDeStart != null and cnvnDeStart != "" and cnvnDeEnd != null and cnvnDeEnd != ""'>
+			 			and ubc.cnvn_de between #{cnvnDeStart} and #{cnvnDeEnd}	/*협약일자*/
+			 	 	</if>
+			 	 	 <if test='taskNmKo != null and taskNmKo != ""'>
+			 			and ubpd.task_korean_nm like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+			 	 	</if>
+			 	 	<if test='rspnberNm != null and rspnberNm != ""'>
+			 			and utr.rspnber_nm like concat('%', #{rspnberNm}, '%')  	/*과제책임자명*/
+			 	 	</if>
+			 	 	<if test='receiptNo != null and receiptNo != ""'>
+			 	 		and ubpa.rcept_no  like concat('%', #{receiptNo}, '%')  		/*접수번호*/
+			 	 	</if>
+					) a
+					where 1=1
+					<if test='memberNm != null and memberNm != ""'>
+			 			and a.member_nm  like concat('%', #{memberNm}, '%')  	/*주관업체명*/
+			 	 	</if>
+				offset #{beginRowNum} -1
+				limit #{itemsPerPage}
+	</select>
+
+	<!-- 협약상태코드 조회-->
+	<select id="selectCnvnSttusCd" resultType="string">
+		/** UsptBsnsCnvnDao.selectCnvnSttusCd */
+			select cnvn_sttus_code as cnvn_sttus_cd
+			 from usp_api.uspt_bsns_cnvn
+		   	where bsns_cnvn_id		= #{bsnsCnvnId}		/*사업협약ID*/
+		 		and apply_id			= #{applyId}			/*신청ID*/
+	</select>
+
+	<!-- 협약서 생성 -->
+	<update id="updateCnvnCnclsCreat">
+		/** UsptBsnsCnvnDao.updateCnvnCnclsCreat */
+			update  usp_api.uspt_bsns_cnvn
+	 			  set   cnvn_sttus_code 		=	#{cnvnSttusCd}   		/*협약상태코드(G:CNVN_STTUS)*/
+						, cnvn_de        		=  #{cnvnDe}         		/*협약일자*/
+						, cnvn_bgnde  		= #{cnvnBgnde}     		/*협약시작일*/
+						, cnvn_endde  			= #{cnvnEndde}    		/*협약종료일*/
+						, cnvn_bdt      			= #{cnvnBdt}         		/*협약서본문*/
+						, bsnsg_nm				= #{bsnsMgcNm}			/*사업단명*/
+						, bsnsg_ceo_nm  		= #{bsnsMgcCeoNm}	/*사업단대표자명*/
+						, bsnsg_bizrno 	 	= #{bsnsMgcBizrno}	/*사업단사업자번호*/
+						 , updusr_id   		 = #{updaterId}
+		 				 , updt_dt       	 = #{updatedDt}
+				where bsns_cnvn_id			 = #{bsnsCnvnId}			/*사업협약ID*/
+		  		   and apply_id				 = #{applyId}				 /*신청ID*/
+	</update>
+
+	<!-- 협약완료(사업단서명) -->
+	<update id="updateCnvnCnclsComplete">
+		/** UsptBsnsCnvnDao.updateCnvnCnclsComplete */
+			update  usp_api.uspt_bsns_cnvn
+	 			  set   cnvn_sttus_code 		=	#{cnvnSttusCd}   		/*협약상태코드(G:CNVN_STTUS)*/
+						 , bsnsg_sign_dt 	= #{bsnsMgcSignDt}	/*사업단서명일시*/
+						 , bsnsg_sign_id 	= #{bsnsMgcSignId} 	/*사업단서명ID*/
+						 , bsnm_cert_session_id = #{bsnmCertSessionId} 	/*사업자인증서세션ID*/
+						 , updusr_id   		 = #{updaterId}
+		 				 , updt_dt       	 = #{updatedDt}
+				where bsns_cnvn_id			 = #{bsnsCnvnId}			/*사업협약ID*/
+		  		   and apply_id				 = #{applyId}				 /*신청ID*/
+	</update>
+
+	<!-- 협약서명초기화(서명재요청, 서명취소) -->
+	<update id="updateCnvnCnclsInit">
+		/** UsptBsnsCnvnDao.updateCnvnCnclsInit */
+			update  usp_api.uspt_bsns_cnvn
+	 			  set   cnvn_sttus_code 		=	#{cnvnSttusCd}   		/*협약상태코드(G:CNVN_STTUS)*/
+						 , bsnm_sign_dt		= #{bsnmSignDt}			/*사업자서명일시*/
+						 , updusr_id   		 = #{updaterId}
+		 				 , updt_dt       	 = #{updatedDt}
+				where bsns_cnvn_id			 = #{bsnsCnvnId}			/*사업협약ID*/
+		  		   and apply_id				 = #{applyId}				 /*신청ID*/
+	</update>
+
+<!-- ******************************************************************* 협약해지관리   ADMIN ********************************************************************** -->
+	<!-- 협약서 목록 건수조회-->
+	<select id="selectCnvnTrmnatListCnt" resultType="long">
+			/** UsptBsnsCnvnDao.selectCnvnTrmnatListCnt */
+				  	  select count(1)
+			from (
+						select  (select mber_nm
+								    from auth_api.cmmt_mber_info
+								  where mber_id  = ubpd.mber_id  )		as member_nm	/*사업자명(주관사명)*/
+						   		, ubc.bsns_cnvn_id				/*사업협약ID */
+						   		, ubc.apply_id						/* 신청ID */
+						   		, ubc.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+						from usp_api.uspt_bsns  								ub			/**사업*/
+				 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+						   on ub.bsns_code  = ubp.bsns_code
+						 and ubp.use_at = true
+				 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+					       on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+				inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+				         on  ubpa.apply_id = ubc.apply_id
+			 	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+				 	     on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+               inner join usp_api.uspt_task_rspnber 						utr			/**과제책임자*/
+						     on ubpd.bsns_wtpln_id  = utr.bsns_wtpln_id
+				 where 1=1
+				 	<if test='cnvnSttusCd != null and cnvnSttusCd != ""'>
+						and ubc.cnvn_sttus_code 	= #{cnvnSttusCd}			/*협약상태코*/
+					</if>
+					 <if test='bsnsYear != null and bsnsYear != ""'>
+			 			and ub.bsns_year =  #{bsnsYear}			/*사업년도*/
+			 	 	</if>
+			 	 	<if test='cnvnTrmnatDeStart != null and cnvnTrmnatDeStart != "" and cnvnTrmnatDeEnd != null and cnvnTrmnatDeEnd != ""'>
+			 			and ubc.cnvn_trmnat_de between #{cnvnTrmnatDeStart} and #{cnvnTrmnatDeEnd}	/*협약해지일*/
+			 	 	</if>
+			 	 	<if test='receiptNo != null and receiptNo != ""'>
+			 				and ubpa.rcept_no  =  #{receiptNo}			/*접수번호*/
+			 	 	</if>
+			 	 	 <if test='taskNmKo != null and taskNmKo != ""'>
+			 			and ubpd.task_korean_nm  like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+			 	 	</if>
+			 	 	<if test='bsnsNm != null and bsnsNm != ""'>
+			 			and ub.bsns_nm 	like concat('%', #{bsnsNm}, '%') 			/*사업명*/
+			 	 	</if>
+					) a
+					where 1=1
+					<if test='memberNm != null and memberNm != ""'>
+			 			and a.member_nm  like concat('%', #{memberNm}, '%')  	/*주관업체명*/
+			 	 	</if>
+	</select>
+
+	<!-- 협약서 해지 목록 조회-->
+	<select id="selectCnvnTrmnatList" resultType="aicluster.pms.common.entity.UsptBsnsCnvn">
+			/** UsptBsnsCnvnDao.selectCnvnTrmnatList */
+			select a.*
+			        , row_number() over (order by a.receipt_no  desc) as rn
+			from (
+						select  ub.bsns_nm  						/*사업명*/
+								, ub.bsns_year  					/*사업년도*/
+								, ubpa.rcept_no as receipt_no					/*접수번호*/
+						     	, ubp.pblanc_nm 					/*공고명*/
+						     	, ubpd.task_korean_nm as task_nm_ko				/*과제명*/
+						   		, ubc.cnvn_sttus_code as cnvn_sttus_cd				/*협약상태코드(G:CNVN_STTUS)*/
+						   		, fn_cmm_get_code_nm('CNVN_STTUS', ubc.cnvn_sttus_code ) as cnvn_sttus_nm	/*협약상태명*/
+						   		, (select mber_nm  from auth_api.cmmt_mber_info where mber_id  = ubpd.mber_id )	as member_nm	/*사업자명(주관사명)*/
+								, utr.rspnber_nm		     	 	/*과제책임자명*/
+								, ubc.cnvn_bgnde 				/*협약시작일*/
+			   					, ubc.cnvn_endde 				/*협약종료일*/
+								, ubc.cnvn_trmnat_de 			/*협약해지일*/
+								, ubc.cnvn_trmnat_resn_div_code as cnvn_trmnat_resn_cn_div_cd             /*협약해지사유구분코드*/
+								, fn_cmm_get_code_nm('CNVN_TRMNAT_RESN_CN_DIV', ubc.cnvn_trmnat_resn_div_code ) as cnvn_trmnat_resn_cn_div_nm	/*협약해지사유구분코드*/
+						   		, ubc.bsns_cnvn_id				/*사업협약ID */
+						   		, ubc.apply_id						/* 신청ID */
+						   		, ubc.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+						from usp_api.uspt_bsns  								ub			/**사업*/
+				 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+						   on ub.bsns_code  = ubp.bsns_code
+						 and ubp.use_at = true
+				 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+					       on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+				inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+				         on  ubpa.apply_id = ubc.apply_id
+			 	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+				 	     on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+               inner join usp_api.uspt_task_rspnber 						utr			/**과제책임자*/
+						     on ubpd.bsns_wtpln_id  = utr.bsns_wtpln_id
+				 where 1=1
+					<if test='cnvnSttusCd != null and cnvnSttusCd != ""'>
+						and ubc.cnvn_sttus_code 	= #{cnvnSttusCd}			/*협약상태코*/
+					</if>
+					 <if test='bsnsYear != null and bsnsYear != ""'>
+			 			and ub.bsns_year =  #{bsnsYear}			/*사업년도*/
+			 	 	</if>
+			 	 	<if test='cnvnTrmnatDeStart != null and cnvnTrmnatDeStart != "" and cnvnTrmnatDeEnd != null and cnvnTrmnatDeEnd != ""'>
+			 			and ubc.cnvn_trmnat_de between #{cnvnTrmnatDeStart} and #{cnvnTrmnatDeEnd}	/*협약해지일*/
+			 	 	</if>
+			 	 	<if test='receiptNo != null and receiptNo != ""'>
+			 				and ubpa.rcept_no  =  #{receiptNo}			/*접수번호*/
+			 	 	</if>
+			 	 	 <if test='taskNmKo != null and taskNmKo != ""'>
+			 			and ubpd.task_korean_nm  like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+			 	 	</if>
+			 	 	<if test='bsnsNm != null and bsnsNm != ""'>
+			 			and ub.bsns_nm 	like concat('%', #{bsnsNm}, '%') 			/*사업명*/
+			 	 	</if>
+					) a
+					where 1=1
+					<if test='memberNm != null and memberNm != ""'>
+			 			and a.member_nm  like concat('%', #{memberNm}, '%')  	/*주관업체명*/
+			 	 	</if>
+				offset #{beginRowNum} -1
+				limit #{itemsPerPage}
+	</select>
+
+	<!-- 협약 해지정보 상세 -->
+	<select id="selectCnvnTrmnatDetail" resultType="aicluster.pms.common.entity.UsptBsnsCnvn">
+	  		/** UsptBsnsCnvnDao.selectCnvnTrmnatDetail */
+						select  ub.bsns_nm  						/*사업명*/
+								, ub.bsns_year  					/*사업년도*/
+								, ubpa.rcept_no as receipt_no					/*접수번호*/
+						     	, ubpd.task_korean_nm as task_nm_ko				/*과제명*/
+						   		, (select mber_nm from auth_api.cmmt_mber_info where mber_id = ubpd.mber_id )	as member_nm	/*사업자명(주관사명)*/
+						   		, utr.rspnber_nm		     	 	/*과제책임자명*/
+						   		, ubc.cnvn_sttus_code as cnvn_sttus_cd				/*협약상태코드(G:CNVN_STTUS)*/
+						   		, ubc.cnvn_trmnat_de 			/*협약해지일*/
+						   		, ubc.cnvn_trmnat_resn_div_code as cnvn_trmnat_resn_cn_div_cd			/*협약해지사유구분코드*/
+						   		, fn_cmm_get_code_nm('CNVN_TRMNAT_RESN_CN_DIV', ubc.cnvn_trmnat_resn_div_code ) as cnvn_trmnat_resn_cn_div_nm
+						   		, ubc.cnvn_trmnat_resn_cn   		/*해지사유내용*/
+						   		, ubc.redemp_trget_amount as redemp_trgamt					/*환수대상금액*/
+						   		, ubc.redemp_compt_amount		/*환수완료금액*/
+						   		, ubc.redemp_de 						/*환수일*/
+						   		, ubc.cnvn_trmnat_atchmnfl_group_id as cnvn_trmnat_file_group_id	/*협약해지첨부파일그룹ID*/
+					   			, ubpd.mber_id as member_id				/*사업자(주관사ID)*/
+						   		, ubc.bsns_cnvn_id				/*사업협약ID */
+						   		, ubc.apply_id						/* 신청ID */
+						   		, ubc.bsns_wtpln_id as bsns_plan_doc_id			/*사업계획서ID*/
+						from usp_api.uspt_bsns  								ub			/**사업*/
+				 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+						   on ub.bsns_code  = ubp.bsns_code
+						 and ubp.use_at = true
+				 inner join usp_api.uspt_bsns_pblanc_applcnt 			ubpa 	/**사업공고신청자*/
+					       on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+				inner join usp_api.uspt_bsns_cnvn 						ubc 			/*사업협약*/
+				         on  ubpa.apply_id = ubc.apply_id
+			 	inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+				 	     on ubc.bsns_wtpln_id = ubpd.bsns_wtpln_id
+			     inner join usp_api.uspt_task_rspnber 						utr			/**과제책임자*/
+					     on ubpd.bsns_wtpln_id  = utr.bsns_wtpln_id
+		  where ubc.bsns_cnvn_id 	= #{bsnsCnvnId}
+	 	     and ubc.apply_id 		=	#{applyId}
+	</select>
+
+	<!-- 협약 해지등록 -->
+	<update id="updateCnvnTrmnat">
+		/** UsptBsnsCnvnDao.updateCnvnTrmnat */
+			update  usp_api.uspt_bsns_cnvn
+	 			  set   cnvn_sttus_code 				=	#{cnvnSttusCd}   				/*협약상태코드(G:CNVN_STTUS)*/
+						, cnvn_trmnat_de 				=	#{cnvnTrmnatDe} 			/*협약해지일*/
+						, cnvn_trmnat_resn_div_code 	=	#{cnvnTrmnatResnCnDivCd} 	/*협약해지사유구분코드*/
+						, cnvn_trmnat_resn_cn   	=	#{cnvnTrmnatResnCn} 		/*해지사유내용*/
+						, redemp_trget_amount 	=	#{redempTrgamt} 			/*환수대상금액*/
+					 	, redemp_compt_amount	=	#{redempComptAmount} 	/*환수완료금액*/
+						, redemp_de 					= #{redempDe}					/*환수일*/
+						, cnvn_trmnat_atchmnfl_group_id = #{cnvnTrmnatFileGroupId}	 /*협약해지첨부파일그룹ID */
+		 				, updusr_id   		 			= #{updaterId}
+		 				, updt_dt       	 		= #{updatedDt}
+				where bsns_cnvn_id			 = #{bsnsCnvnId}			/*사업협약ID*/
+		  		   and apply_id				 = #{applyId}				 /*신청ID*/
+	</update>
+
+	<!-- 협약 해지 취소 변경 -->
+	<update id="updateCnvnSttusCancel">
+		/** UsptBsnsCnvnDao.updateCnvnSttus */
+			update usp_api.uspt_bsns_cnvn
+			 	 set  cnvn_sttus_code = #{cnvnSttusCd}
+				  	 , updusr_id       = #{updaterId}
+					 , updt_dt      = #{updatedDt}
+			where bsns_cnvn_id 		= #{bsnsCnvnId}
+		   	  and apply_id 			= #{applyId}
+	</update>
+
+	<!-- ******************************************************************* 협약변경관리   FRONT ********************************************************************** -->
+	<!--협약변경관리 변경요청 조회(최신 협약일 기준)  -->
+	<select id="selectCnvnChangeReqMaxOne" resultType="aicluster.pms.common.entity.UsptBsnsCnvn">
+		/** UsptBsnsCnvnDao.selectCnvnChangeReqMaxOne */
+	   select a.*
+		from (
+					select  ub.bsns_nm  						/*사업명*/
+							, ub.bsns_year  					/*사업년도*/
+							, ubpa.rcept_no as receipt_no					/*접수번호*/
+					     	, ubpd.task_korean_nm as task_nm_ko				/*과제명*/
+					     	, ubc.cnvn_de							/*협약일자*/
+					     	, ubc.cnvn_bgnde 					/*협약시작일*/
+							, ubc.cnvn_endde 					/*협약종료일*/
+					   		, ubc.cnvn_sttus_code as cnvn_sttus_cd				/*협약상태코드(G:CNVN_STTUS)*/
+					   		, fn_cmm_get_code_nm('CNVN_STTUS', ubc.cnvn_sttus_code  ) as cnvn_sttus_nm	/*협약상태명*/
+					   		, ubc.bsns_cnvn_id				/*사업협약ID */
+					   		, ubc.apply_id						/** 신청ID */
+					   		, ubpd.bsns_wtpln_id as bsns_plan_doc_id		/*사업계획서ID*/
+					   		, ubpd.bsns_slctn_trget_id as bsns_slctn_id				/*사업선정대상ID */
+					        , row_number() over (order by ubc.cnvn_de desc) as rn
+					from usp_api.uspt_bsns  								ub			/**사업*/
+			 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+					   on ub.bsns_code = ubp.bsns_code
+					 and ubp.use_at = true
+		 		   inner join usp_api.uspt_bsns_pblanc_applcnt 	ubpa 	/**사업공고신청자*/
+					  on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+		  	 inner join usp_api.uspt_bsns_cnvn 						ubc		/*사업협약*/
+			          on  ubpa.apply_id = ubc.apply_id
+			inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+					 on ubc.bsns_wtpln_id = ubpd.bsns_wtpln_id
+			    where 1=1
+					and ub.bsns_year = #{bsnsYear}
+			 		and ubpd.task_korean_nm  like concat('%', #{taskNmKo}, '%')  	/*과제명*/
+			 		and ubc.cnvn_sttus_code='CNST05'			/*협약완료*/
+			 		and ubpd.creatr_id = #{memberId}
+			 ) a
+ 		where rn = 1
+	</select>
+
+	<!--협약변경관리 변경요청 조회(사업년도)  -->
+	<select id="selectCnvnChangeReqBsnsYear" resultType="String">
+		/** UsptBsnsCnvnDao.selectCnvnChangeReqBsnsYear */
+	   				select	 ub.bsns_year  					/*사업년도*/
+					from usp_api.uspt_bsns  								ub			/**사업*/
+			 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+					   on ub.bsns_code   = ubp.bsns_code
+					 and ubp.use_at = true
+		 		   inner join usp_api.uspt_bsns_pblanc_applcnt 	ubpa 	/**사업공고신청자*/
+					  on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+		  	 inner join usp_api.uspt_bsns_cnvn 						ubc		/*사업협약*/
+			          on  ubpa.apply_id = ubc.apply_id
+			inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+					 on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+			    where 1=1
+			 		and ubc.cnvn_sttus_code	='CNST05'			/*협약완료*/
+			 		and ubpd.creatr_id = #{memberId}
+            group by ub.bsns_year
+	</select>
+
+	<!--협약변경관리 변경요청 조회(과제명)  -->
+	<select id="selectCnvnChangeReqTaskNm" resultType="String">
+		/** UsptBsnsCnvnDao.selectCnvnChangeReqTaskNm */
+	   				select	  ubpd.task_korean_nm as task_nm_ko				/*과제명*/
+					from usp_api.uspt_bsns  								ub			/**사업*/
+			 inner join  usp_api.uspt_bsns_pblanc 					ubp 		/**사업공고*/
+					   on ub.bsns_code  = ubp.bsns_code
+					 and ubp.use_at = true
+		 		   inner join usp_api.uspt_bsns_pblanc_applcnt 	ubpa 	/**사업공고신청자*/
+					  on ubp.pblanc_id = ubpa.pblanc_id  			/*공공id*/
+		  	 inner join usp_api.uspt_bsns_cnvn 						ubc		/*사업협약*/
+			          on  ubpa.apply_id = ubc.apply_id
+			inner join usp_api.uspt_bsns_wtpln 					ubpd		/**사업계획서*/
+					 on ubc.bsns_wtpln_id  = ubpd.bsns_wtpln_id
+			    where 1=1
+					and ub.bsns_year = #{bsnsYear}
+			 		and ubc.cnvn_sttus_code ='CNST05'			/*협약완료*/
+			 		and ubpd.creatr_id = #{memberId}
+			 	group by ubpd.task_korean_nm
+	</select>
+
+</mapper>

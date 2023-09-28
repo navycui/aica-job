@@ -1,0 +1,733 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancDao">
+
+	<sql id="selectList_where">
+		<where>
+			ubp.use_at = true
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and ub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='bsnsNm != null and bsnsNm != ""'>
+				and ub.bsns_nm like concat('%', #{bsnsNm}, '%')
+			</if>
+			<if test='pblancNm != null and pblancNm != ""'>
+				and ubp.pblanc_nm like concat('%', #{pblancNm}, '%')
+			</if>
+			<if test='pblancSttusCd != null and pblancSttusCd != ""'>
+				and ubp.pblanc_sttus_code = #{pblancSttusCd}
+			</if>
+			<if test='ntce != null'>
+				and ubp.ntce_at = #{ntce}
+			</if>
+			<if test='pblancId != null and pblancId != ""'>
+				and ubp.pblanc_id = #{pblancId}
+			</if>
+			<if test='rceptBgndeStart != null and rceptBgndeStart != "" '>
+				and ubp.rcept_bgnde >= #{rceptBgndeStart}
+			</if>
+			<if test='rceptBgndeEnd != null and rceptBgndeEnd != ""'>
+				and ubp.rcept_bgnde <![CDATA[<=]]> #{rceptBgndeEnd}
+			</if>
+			<if test='rceptEnddeStart != null and rceptEnddeStart != "" '>
+				and ubp.rcept_endde >= #{rceptEnddeStart}
+			</if>
+			<if test='rceptEnddeEnd != null and rceptEnddeEnd != ""'>
+				and ubp.rcept_endde <![CDATA[<=]]> #{rceptEnddeEnd}
+			</if>
+			<if test='pblancDayStart != null and pblancDayStart != "" '>
+				and ubp.pblanc_de >= #{pblancDayStart}
+			</if>
+			<if test='pblancDayEnd != null and pblancDayEnd != ""'>
+				and ubp.pblanc_de <![CDATA[<=]]> #{pblancDayEnd}
+			</if>
+			<if test='jobStepCd != null and jobStepCd != ""'>
+				and js.job_step_code = #{jobStepCd}
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.BsnsPblancListDto">
+		/** UsptBsnsPblancDao.selectList */
+		select
+			ubp.pblanc_id
+			, ubp.pblanc_nm
+			, ubp.rcept_bgnde
+			, ubp.rcept_endde
+			, ubp.pblanc_de								as pblanc_day
+			, ub.bsns_year
+			, ub.bsns_code								as bsns_cd
+			, ub.bsns_nm
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@PS_CODE_GROUP}', ubp.pblanc_sttus_code)		as pblanc_sttus
+			, case when ubp.ntce_at = true then '게시중' else '게시안함' end 										as ntce
+			, case when ubp.ordtm_rcrit_at = true then '상시모집' else '정시모집' end								as ordtm_rcrit
+			, row_number() over (order by ubp.creat_dt desc) as rn
+		from usp_api.uspt_bsns_pblanc ubp
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+				left outer join (
+					select
+						bsns_code
+						, job_step_code
+					from usp_api.uspt_bsns_job_step
+					where
+						job_step_code = 'EVL_SLCTN'
+				) js
+				on js.bsns_code = ub.bsns_code
+		<include refid="selectList_where" />
+		<if test="!isExcel">
+			offset #{beginRowNum} -1
+			limit #{itemsPerPage}
+		</if>
+	</select>
+
+	<select id="selectListCount" resultType="Long">
+		/** UsptBsnsPblancDao.selectListCount */
+		select
+			count(ubp.pblanc_id) as cnt
+		from usp_api.uspt_bsns_pblanc ubp
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.insider_id = #{insiderId}
+			left outer join (
+					select
+						bsns_code
+						, job_step_code
+					from usp_api.uspt_bsns_job_step
+					where
+						job_step_code = 'EVL_SLCTN'
+				) js
+				on js.bsns_code = ub.bsns_code
+		<include refid="selectList_where" />
+	</select>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptBsnsPblanc">
+		/** UsptBsnsPblancDao.select */
+		select
+			ubp.pblanc_id
+			, ubp.bsns_code							as bsns_cd
+			, ubp.pblanc_nm
+			, ubp.pblanc_no
+			, ubp.ordtm_rcrit_at					as ordtm_rcrit
+			, ubp.pblanc_de							as pblanc_day
+			, ubp.bsns_bgnde
+			, ubp.bsns_endde
+			, ubp.bsns_scale_amount					as bsns_scale
+			, ubp.slctn_scale
+			, ubp.pblanc_sumry
+			, ubp.rcept_bgnde
+			, ubp.rcept_endde
+			, ubp.rcept_clos_hm						as rcept_closing_hm
+			, ubp.pblanc_sttus_code					as pblanc_sttus_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@PS_CODE_GROUP}', ubp.pblanc_sttus_code) as pblanc_sttus
+			, ubp.ntce_at													as ntce
+			, case when ubp.ntce_at = true then '게시중' else '게시안함' end		as ntceNm
+			, ubp.rdcnt
+			, ubp.use_at							as enabled
+			, ubp.atchmnfl_group_id					as attachment_group_id
+			, ubp.thumb_file_id						as 	thumbnail_file_id
+			, ubp.creatr_id							as creator_id
+			, ubp.creat_dt							as created_dt
+			, ubp.updusr_id							as updater_id
+			, ubp.updt_dt							as updated_dt
+			, ub.bsns_year
+			, ub.bsns_nm
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@TASK_CODE_GROUP}', ub.task_ty_code)					as task_type_nm
+			, (select max(rcept_ordr) from usp_api.uspt_bsns_pblanc_rcept where pblanc_id = ubp.pblanc_id group by pblanc_id )	as rcept_odr
+			, ubc.charger_author_code				as charger_author_cd
+		from usp_api.uspt_bsns_pblanc ubp
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+		where
+			ubp.pblanc_id = #{pblancId}
+			and ubp.use_at = true
+	</select>
+
+	<select id="selectAttachmentGroupId" resultType="String">
+		/** UsptBsnsPblancDao.selectAttachmentGroupId */
+		select
+			ubp.atchmnfl_group_id		as attachment_group_id
+		from usp_api.uspt_bsns_pblanc ubp
+		where
+			ubp.pblanc_id = #{pblancId}
+	</select>
+
+	<select id="selectPblancApplcntCount" resultType="Integer">
+		/** UsptBsnsPblancDao.selectPblancApplcntCount */
+		select count(ubp.pblanc_id)
+		from usp_api.uspt_bsns_pblanc ubp
+			inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+				on ubpr.pblanc_id = ubp.pblanc_id
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.pblanc_id = ubpr.pblanc_id
+				and ubpa.rcept_ordr = ubpr.rcept_ordr
+		where
+			ubp.pblanc_id = #{pblancId}
+	</select>
+
+	<insert id="insert">
+		/** UsptBsnsPblancDao.insert */
+		insert into usp_api.uspt_bsns_pblanc
+			(
+				pblanc_id
+				, bsns_code
+				, pblanc_nm
+				, pblanc_no
+				, ordtm_rcrit_at
+				, pblanc_de
+				, bsns_bgnde
+				, bsns_endde
+				, bsns_scale_amount
+				, slctn_scale
+				, pblanc_sumry
+				, rcept_bgnde
+				, rcept_endde
+				, rcept_clos_hm
+				, pblanc_sttus_code
+				, ntce_at
+				, use_at
+				, rdcnt
+				, atchmnfl_group_id
+				, thumb_file_id
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{pblancId}
+				, #{bsnsCd}
+				, #{pblancNm}
+				, #{pblancNo}
+				, #{ordtmRcrit}
+				, #{pblancDay}
+				, #{bsnsBgnde}
+				, #{bsnsEndde}
+				, #{bsnsScale}
+				, #{slctnScale}
+				, #{pblancSumry}
+				, #{rceptBgnde}
+				, #{rceptEndde}
+				, #{rceptClosingHm}
+				, #{pblancSttusCd}
+				, #{ntce}
+				, #{enabled}
+				, 0
+				, #{attachmentGroupId}
+				, #{thumbnailFileId}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsPblancDao.update */
+		update usp_api.uspt_bsns_pblanc
+		set
+			updusr_id 			= #{updaterId}
+			, updt_dt 			= #{updatedDt}
+			, pblanc_nm			= #{pblancNm}
+			, pblanc_no			= #{pblancNo}
+			, ordtm_rcrit_at	= #{ordtmRcrit}
+			, pblanc_de			= #{pblancDay}
+			, bsns_bgnde		= #{bsnsBgnde}
+			, bsns_endde		= #{bsnsEndde}
+			, bsns_scale_amount	= #{bsnsScale}
+			, slctn_scale		= #{slctnScale}
+			, pblanc_sumry		= #{pblancSumry}
+			, rcept_bgnde		= #{rceptBgnde}
+			, rcept_endde		= #{rceptEndde}
+			, rcept_clos_hm		= #{rceptClosingHm}
+			, atchmnfl_group_id = #{attachmentGroupId}
+		<if test='thumbnailFileId != null and thumbnailFileId != ""'>
+			, thumb_file_id 	= #{thumbnailFileId}
+		</if>
+		where
+			pblanc_id = #{pblancId}
+	</update>
+
+
+	<update id="updatePblancSttus">
+		/** UsptBsnsPblancDao.updatePblancSttus */
+		update usp_api.uspt_bsns_pblanc
+		set
+			updusr_id			= #{updaterId}
+			, updt_dt			= #{updatedDt}
+			, pblanc_sttus_code = #{pblancSttusCd}
+		where
+			pblanc_id = #{pblancId}
+	</update>
+
+	<update id="updateNtce">
+		/** UsptBsnsPblancDao.updateNtce */
+		update usp_api.uspt_bsns_pblanc
+		set
+			updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+			, ntce_at	= #{ntce}
+		where
+			pblanc_id = #{pblancId}
+	</update>
+
+	<delete id="updateUnable">
+		/** UsptBsnsPblancDao.updateUnable */
+		update usp_api.uspt_bsns_pblanc
+		set
+			updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+			, use_at	= #{enabled}
+		where
+			pblanc_id = #{pblancId}
+	</delete>
+
+
+	<select id="selectPblancListCount" resultType="Long">
+		/** UsptBsnsPblancDao.selectPblancListCount */
+		select
+			count(sub.*)
+		from
+			(
+				select
+					ubp.pblanc_id
+					, ubpr.rcept_ordr
+				from usp_api.uspt_bsns_pblanc ubp
+						inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+							on ubpr.pblanc_id = ubp.pblanc_id
+						inner join usp_api.uspt_bsns ub
+							on ub.bsns_code = ubp.bsns_code
+						inner join usp_api.uspt_bsns_charger ubc
+							on ubc.bsns_code = ub.bsns_code
+							and ubc.insider_id = #{insiderId}
+						left outer join usp_api.uspt_slctn_pblanc usp
+							on usp.pblanc_id = ubpr.pblanc_id
+							and usp.rcept_ordr = ubpr.rcept_ordr
+						inner join (
+								select
+									uep.pblanc_id
+									, uep.rcept_ordr
+									, ues.evl_step_id
+									, null	as evl_last_slctn_id
+								 from usp_api.uspt_evl_plan uep
+								 		inner join usp_api.uspt_evl_step ues
+											on ues.evl_plan_id = uep.evl_plan_id
+											and ues.evl_step_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STEP_03_CODE}'
+								where
+									uep.evl_ty_code = '${@aicluster.pms.common.util.Code@EVL_TYPE_01_CODE}'
+									and evl_step_id not in (select evl_step_id from usp_api.uspt_slctn_pblanc where evl_step_id is not null and use_at = true)
+							union all
+								select
+									uep.pblanc_id
+									, uep.rcept_ordr
+									, null	as evl_step_id
+									, uels.evl_last_slctn_id
+								from usp_api.uspt_evl_plan uep
+										inner join usp_api.uspt_evl_last_slctn uels
+											on uels.evl_plan_id = uep.evl_plan_id
+											and uels.last_slctn_at = true
+								where
+									uep.evl_ty_code = '${@aicluster.pms.common.util.Code@EVL_TYPE_01_CODE}'
+									and evl_last_slctn_id not in (select evl_last_slctn_id from usp_api.uspt_slctn_pblanc where evl_last_slctn_id is not null and use_at = true)
+						) sub
+							on sub.pblanc_id = ubpr.pblanc_id
+							and sub.rcept_ordr = ubpr.rcept_ordr
+				where
+					ubp.use_at = true
+					and ubp.pblanc_sttus_code != 'WAIT'
+					<if test='pblancNm != null and pblancNm != ""'>
+						and ubp.pblanc_nm like concat('%', #{pblancNm}, '%')
+					</if>
+				group by ubp.pblanc_id, ubpr.rcept_ordr
+			) sub
+	</select>
+
+	<select id="selectPblancList" resultType="aicluster.pms.common.dto.BsnsPblancListDto">
+		/** UsptBsnsPblancDao.selectPblancList */
+		select
+			ubp.pblanc_id
+			, ubp.pblanc_nm
+			, ubpr.rcept_ordr			as rcept_odr
+			, ub.bsns_year
+			, ub.bsns_nm
+			, case when ubp.ordtm_rcrit_at = true then '상시모집' else '정시모집' end		as ordtm_rcrit
+			, row_number() over (order by ubp.creat_dt desc)	as rn
+		from usp_api.uspt_bsns_pblanc ubp
+				inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+					on ubpr.pblanc_id  = ubp.pblanc_id
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+				inner join (
+						select
+							uep.pblanc_id
+							, uep.rcept_ordr
+							, ues.evl_step_id
+							, null	as evl_last_slctn_id
+						 from usp_api.uspt_evl_plan uep
+						 		inner join usp_api.uspt_evl_step ues
+									on ues.evl_plan_id = uep.evl_plan_id
+									and ues.evl_step_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STEP_03_CODE}'
+						where
+							uep.evl_ty_code = '${@aicluster.pms.common.util.Code@EVL_TYPE_01_CODE}'
+							and evl_step_id not in (select evl_step_id from usp_api.uspt_slctn_pblanc where evl_step_id is not null and use_at = true)
+					union all
+						select
+							uep.pblanc_id
+							, uep.rcept_ordr
+							, null	as evl_step_id
+							, uels.evl_last_slctn_id
+						from usp_api.uspt_evl_plan uep
+								inner join usp_api.uspt_evl_last_slctn uels
+									on uels.evl_plan_id = uep.evl_plan_id
+									and uels.last_slctn_at = true
+						where
+							uep.evl_ty_code = '${@aicluster.pms.common.util.Code@EVL_TYPE_01_CODE}'
+							and evl_last_slctn_id not in (select evl_last_slctn_id from usp_api.uspt_slctn_pblanc where evl_last_slctn_id is not null and use_at = true)
+				) sub
+					on sub.pblanc_id = ubpr.pblanc_id
+					and sub.rcept_ordr = ubpr.rcept_ordr
+		where
+			ubp.use_at = true
+			and ubp.pblanc_sttus_code != 'WAIT'
+			<if test='pblancNm != null and pblancNm != ""'>
+				and ubp.pblanc_nm like concat('%', #{pblancNm}, '%')
+			</if>
+		group by ubp.pblanc_id, ubpr.rcept_ordr, ub.bsns_code
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+	<select id="selectFrontListCount" resultType="Long">
+		/** UsptBsnsPblancDao.selectFrontListCount */
+		select
+			count(*)
+		from 	(
+					select
+						ubp.pblanc_id
+					from usp_api.uspt_bsns_pblanc ubp
+							inner join usp_api.uspt_bsns ub
+								on ub.bsns_code = ubp.bsns_code
+							left outer join usp_api.uspt_bsns_recomend_cl ubrc
+								on ubrc.bsns_code = ub.bsns_code
+								and ubrc.recomend_cl_ty_code = '${@aicluster.pms.common.util.Code@RC_BSR}'
+							left outer join usp_api.uspt_bsns_apply_posbl_mber ubamt
+								on ubamt.bsns_code = ub.bsns_code
+					where
+						ubp.use_at = true
+						and ubp.ntce_at = true
+						and ubp.ordtm_rcrit_at = #{ordtmRcrit}
+					<if test='pblancSttus != null'>
+						and ubp.pblanc_sttus_code in
+						<foreach collection="pblancSttus" item="item" index="index" separator="," open=" (" close=")">
+							#{item}
+						</foreach>
+					</if>
+					<if test='applyMberType != null'>
+						and ubamt.apply_posbl_mber_ty_code in
+						<foreach collection="applyMberType" item="item" index="index" separator="," open=" (" close=")">
+							#{item}
+						</foreach>
+					</if>
+					<if test='recomendCl != null'>
+						and ubrc.recomend_cl_code in
+						<foreach collection="recomendCl" item="item" index="index" separator="," open=" (" close=")">
+							#{item}
+						</foreach>
+					</if>
+					<if test='pblancNm != null and pblancNm !=""'>
+						and ubp.pblanc_nm like concat('%', #{pblancNm}, '%')
+					</if>
+					group by ubp.pblanc_id
+				) sub
+	</select>
+
+	<select id="selectFrontList" resultType="aicluster.pms.common.dto.FrontBsnsPblancListDto">
+		/** UsptBsnsPblancDao.selectFrontList */
+		select	sub.*
+		from (
+				select
+					ubp.pblanc_id
+					, ubp.pblanc_nm
+					, ubp.pblanc_de							as pblanc_day
+					, ubp.pblanc_sumry
+					, ubp.rdcnt
+					, ubp.pblanc_sttus_code					as pblanc_sttus_cd
+					, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@PS_CODE_GROUP}', ubp.pblanc_sttus_code)		as pblanc_sttus
+					, (ubp.rcept_endde::date - to_char(now(), 'yyyymmdd')::date)										as rmndr_day
+					, ubp.rcept_endde
+					, concat(to_char(to_date(ubp.rcept_bgnde,'yyyymmdd'), 'yyyy-mm-dd' )
+								, ' ~ '
+								, to_char(to_date(ubp.rcept_endde,'yyyymmdd'), 'yyyy-mm-dd' )
+								, ' '
+								, ubp.rcept_clos_hm, ':00' )		as rcept_pd
+					, array_to_string(array_agg(distinct fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@RC_CODE_GROUP}', ubrc.recomend_cl_code)), ',')		as recomend_cl
+					, case when cast(to_char(now()  , 'yyyymmddhh24miss') as bigint) - cast(to_char(ubp.creat_dt  , 'yyyymmddhh24miss') as bigint) <![CDATA[<=]]> 240000
+						then 'Y' else 'N' end			as is_new
+					, lag(ubp.pblanc_id, 1) over(
+					<choose>
+						<when test='sortOrder == "pblancDay"'>order by ubp.pblanc_de</when>
+						<when test='sortOrder == "close"'>order by ubp.rcept_endde</when>
+						<when test='sortOrder == "rdcnt"'>order by ubp.rdcnt desc</when>
+						<otherwise>order by ubp.pblanc_de</otherwise>
+					</choose>) as pre_pblanc_id
+					, lag(ubp.pblanc_nm, 1, '이전 공고가 없습니다.') over(
+					<choose>
+						<when test='sortOrder == "pblancDay"'>order by ubp.pblanc_de</when>
+						<when test='sortOrder == "close"'>order by ubp.rcept_endde</when>
+						<when test='sortOrder == "rdcnt"'>order by ubp.rdcnt desc</when>
+						<otherwise>order by ubp.pblanc_de</otherwise>
+					</choose>) as pre_pblanc_nm
+					, lead (ubp.pblanc_id,1) over (
+					<choose>
+						<when test='sortOrder == "pblancDay"'>order by ubp.pblanc_de</when>
+						<when test='sortOrder == "close"'>order by ubp.rcept_endde</when>
+						<when test='sortOrder == "rdcnt"'>order by ubp.rdcnt desc</when>
+						<otherwise>order by ubp.pblanc_de</otherwise>
+					</choose>) as next_pblanc_id
+					, lead (ubp.pblanc_nm,1, '다음 공고가 없습니다.') over (
+					<choose>
+						<when test='sortOrder == "pblancDay"'>order by ubp.pblanc_de</when>
+						<when test='sortOrder == "close"'>order by ubp.rcept_endde</when>
+						<when test='sortOrder == "rdcnt"'>order by ubp.rdcnt desc</when>
+						<otherwise>order by ubp.pblanc_de</otherwise>
+					</choose>) as next_pblanc_nm
+				from usp_api.uspt_bsns_pblanc ubp
+						inner join usp_api.uspt_bsns ub
+							on ub.bsns_code = ubp.bsns_code
+						left outer join usp_api.uspt_bsns_recomend_cl ubrc
+							on ubrc.bsns_code = ub.bsns_code
+							and ubrc.recomend_cl_ty_code = '${@aicluster.pms.common.util.Code@RC_BSR}'
+						left outer join usp_api.uspt_bsns_apply_posbl_mber ubamt
+							on ubamt.bsns_code = ub.bsns_code
+				where
+					ubp.use_at = true
+					and ubp.ntce_at = true
+					and ubp.ordtm_rcrit_at = #{ordtmRcrit}
+				<if test='isCloseing == "Y"'>
+					and (ubp.rcept_endde::date - to_char(now(), 'yyyymmdd')::date) between 0 and 7
+				</if>
+				<if test='pblancSttus != null'>
+					and ubp.pblanc_sttus_code in
+					<foreach collection="pblancSttus" item="item" index="index" separator="," open=" (" close=")">
+						#{item}
+					</foreach>
+				</if>
+				<if test='applyMberType != null'>
+					and ubamt.apply_posbl_mber_ty_code in
+					<foreach collection="applyMberType" item="item" index="index" separator="," open=" (" close=")">
+						#{item}
+					</foreach>
+				</if>
+				<if test='recomendCl != null'>
+					and ubrc.recomend_cl_code in
+					<foreach collection="recomendCl" item="item" index="index" separator="," open=" (" close=")">
+						#{item}
+					</foreach>
+				</if>
+				<if test='pblancNm != null and pblancNm !=""'>
+					and ubp.pblanc_nm like concat('%', #{pblancNm}, '%')
+				</if>
+				group by ubp.pblanc_id
+				<choose>
+					<when test='sortOrder == "pblancDay"'>order by ubp.pblanc_de desc</when>
+					<when test='sortOrder == "close"'>order by ubp.rcept_endde</when>
+					<when test='sortOrder == "rdcnt"'>order by ubp.rdcnt desc</when>
+					<otherwise>order by ubp.pblanc_de desc</otherwise>
+				</choose>
+				<if test='pblancId == null or pblancId == ""'>
+					<if test='isCloseing != "Y"'>
+						offset #{beginRowNum} -1
+						limit #{itemsPerPage}
+					</if>
+				</if>
+			) sub
+		<where>
+			<if test='pblancId != null and pblancId != ""'>
+			and pblanc_id = #{pblancId}
+			</if>
+		</where>
+	</select>
+
+
+	<select id="selectFront" resultType="aicluster.pms.common.dto.FrontBsnsPblancDto">
+		/** UsptBsnsPblancDao.selectFront */
+		select
+			sub.*
+			, ci.mber_id				as member_id
+			, ci.mber_nm				as member_nm
+			, ci.clsf_nm				as position_nm
+			, ci.encpt_email			as enc_email
+			, ci.encpt_mbtlnum			as enc_tel_no
+		from (
+				select
+					ubp.pblanc_id
+					, ubp.pblanc_nm
+					, ubp.pblanc_no
+					, ubp.pblanc_de								as pblanc_day
+					, ubp.pblanc_sumry
+					, ubp.bsns_scale_amount						as bsns_scale
+					, ubp.slctn_scale
+					, ubp.ordtm_rcrit_at						as ordtm_rcrit
+					, ubp.atchmnfl_group_id						as attachment_group_id
+					, ubp.thumb_file_id							as thumbnail_file_id
+					, ubp.pblanc_sttus_code						as pblanc_sttus_cd
+					, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@PS_CODE_GROUP}', ubp.pblanc_sttus_code)		as pblanc_sttus
+					, (ubp.rcept_endde::date - to_char(now(), 'yyyymmdd')::date)		as rmndr_day
+					, ubp.bsns_bgnde
+					, ubp.bsns_endde
+					, concat(to_char(to_date(ubp.bsns_bgnde ,'yyyymmdd'), 'yyyy-mm-dd' )
+								, ' ~ '
+								, to_char(to_date(ubp.bsns_endde ,'yyyymmdd'), 'yyyy-mm-dd' )) as bsns_pd
+					, concat(to_char(to_date(ubp.rcept_bgnde,'yyyymmdd'), 'yyyy-mm-dd' )
+								, ' ~ '
+								, to_char(to_date(ubp.rcept_endde,'yyyymmdd'), 'yyyy-mm-dd' )) as rcept_pd
+					, ubp.rcept_clos_hm							as rcept_closing_hm
+					, ub.chrg_dept_nm
+					, ub.bsns_code								as bsns_cd
+					, (select max(rcept_ordr) from usp_api.uspt_bsns_pblanc_rcept where pblanc_id = ubp.pblanc_id group by pblanc_id )									as rcept_odr
+					, array_to_string(array_agg(distinct fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@RC_CODE_GROUP}', ubrc.recomend_cl_code)), ',')			as recomend_cl
+					, array_to_string(array_agg(distinct fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@MBR_CODE_GROUP}', ubamt.apply_posbl_mber_ty_code)), ',')	as apply_mber_type
+				from usp_api.uspt_bsns_pblanc ubp
+						inner join usp_api.uspt_bsns ub
+							on ub.bsns_code = ubp.bsns_code
+						left outer join usp_api.uspt_bsns_recomend_cl ubrc
+							on ubrc.bsns_code = ub.bsns_code
+							and ubrc.recomend_cl_ty_code = 'BSR'
+						left outer join usp_api.uspt_bsns_apply_posbl_mber ubamt
+							on ubamt.bsns_code = ub.bsns_code
+				where
+					ubp.pblanc_id = #{pblancId}
+				group by ubp.pblanc_id, ub.bsns_code
+			) sub
+				left outer join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = sub.bsns_cd
+					and ubc.reprsnt_charger_at = true
+					and ubc.charger_author_code = 'WRITE'
+				left outer join auth_api.cmmt_emp_info ci
+					on ci.mber_id  = ubc.insider_id
+	</select>
+
+	<select id="selectApplyMberType" resultType="aicluster.pms.common.dto.ApplyMberTypeDto">
+		/** UsptBsnsPblancDao.selectApplyMberType */
+		select
+	 		array_to_string(array_agg(distinct ubamt.apply_posbl_mber_ty_code), ',')									as mber_type_cd
+			, array_to_string(array_agg(distinct fn_cmm_get_code_nm('MEMBER_TYPE', ubamt.apply_posbl_mber_ty_code)), ',')		as mber_type
+		from usp_api.uspt_bsns_pblanc ubp
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+				inner join usp_api.uspt_bsns_apply_posbl_mber ubamt
+					on ubamt.bsns_code = ub.bsns_code
+		where
+			ubp.pblanc_id = #{pblancId}
+		group by ubp.pblanc_id
+	</select>
+
+	<update id="updateRdcnt">
+		/** UsptBsnsPblancDao.updateRdcnt */
+		update usp_api.uspt_bsns_pblanc
+		set
+			rdcnt = (select rdcnt + 1 from usp_api.uspt_bsns_pblanc where pblanc_id = #{pblancId})
+		where
+			pblanc_id = #{pblancId}
+	</update>
+
+	<select id="selectFrontMainPopularList" resultType="aicluster.pms.common.dto.FrontMainListDto">
+		/** UsptBsnsPblancDao.selectFrontMainPopularList */
+		select	sub.*
+				, row_number() over (order by sub.rmndr_day, sub.rdcnt desc, sub.pblanc_day desc) as rn
+		from (
+				select
+					ubp.pblanc_id
+					, ubp.pblanc_nm
+					, ubp.rdcnt
+					, ubp.pblanc_de													as pblanc_day
+					, (ubp.rcept_endde::date - to_char(now(), 'yyyymmdd')::date)	as rmndr_day
+					, concat(to_char(to_date(ubp.rcept_bgnde,'yyyymmdd'), 'yyyy-mm-dd' )
+								, ' ~ '
+								, to_char(to_date(ubp.rcept_endde,'yyyymmdd'), 'yyyy-mm-dd' )
+								, ' '
+								, ubp.rcept_clos_hm, ':00' )						as rcept_pd
+					, array_to_string(array_agg(distinct fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@RC_CODE_GROUP}', ubrc.recomend_cl_code)), ',') as recomend_cl
+				from usp_api.uspt_bsns_pblanc ubp
+						inner join usp_api.uspt_bsns ub
+							on ub.bsns_code = ubp.bsns_code
+						left outer join usp_api.uspt_bsns_recomend_cl ubrc
+							on ubrc.bsns_code = ub.bsns_code
+							and ubrc.recomend_cl_ty_code = '${@aicluster.pms.common.util.Code@RC_BSR}'
+				where
+					ubp.use_at = true
+					and ubp.ntce_at = true
+					and ubp.pblanc_sttus_code = '${@aicluster.pms.common.util.Code@PS_ING_CODE}'
+					and ubp.rcept_endde >= to_char(now(), 'yyyymmdd')
+				group by ubp.pblanc_id
+			) sub
+		order by sub.rmndr_day, sub.rdcnt desc, sub.pblanc_day desc
+		limit 4
+	</select>
+
+
+	<select id="selectFrontMainRecomendList" resultType="aicluster.pms.common.dto.FrontMainListDto">
+		/** UsptBsnsPblancDao.selectFrontMainRecomendList */
+		select	sub.*
+				, row_number() over (order by sub.rmndr_day) as rn
+		from (
+				select
+					ubp.pblanc_id
+					, ubp.pblanc_nm
+					, (ubp.rcept_endde::date - to_char(now(), 'yyyymmdd')::date)	as rmndr_day
+					, concat(to_char(to_date(ubp.rcept_bgnde,'yyyymmdd'), 'yyyy-mm-dd' )
+								, ' ~ '
+								, to_char(to_date(ubp.rcept_endde,'yyyymmdd'), 'yyyy-mm-dd' )
+								, ' '
+								, ubp.rcept_clos_hm, ':00' ) as rcept_pd
+					, array_to_string(array_agg(distinct fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@RC_CODE_GROUP}', ubrc.recomend_cl_code)), ',') as recomend_cl
+				from usp_api.uspt_bsns_pblanc ubp
+						inner join usp_api.uspt_bsns ub
+							on ub.bsns_code = ubp.bsns_code
+						inner join usp_api.uspt_bsns_recomend_cl ubrc
+							on ubrc.bsns_code = ub.bsns_code
+							and ubrc.recomend_cl_ty_code = '${@aicluster.pms.common.util.Code@RC_BSR}'
+						inner join usp_api.uspt_bsns_recomend_cl ubrc1
+							on ubrc1.bsns_code = ub.bsns_code
+							and ubrc1.recomend_cl_ty_code = '${@aicluster.pms.common.util.Code@RC_FNTN}'
+				where
+					ubp.use_at = true
+					and ubp.ntce_at = true
+					and ubp.rcept_endde >= to_char(now(), 'yyyymmdd')
+					and ubp.pblanc_sttus_code in ('${@aicluster.pms.common.util.Code@PS_WAIT_CODE}', '${@aicluster.pms.common.util.Code@PS_ING_CODE}' )
+					<if test='recomendCl != null'>
+						and ubrc.recomend_cl_code in
+							<foreach collection="recomendCl" item="item" index="index" separator="," open=" (" close=")">
+								#{item}
+							</foreach>
+					</if>
+					<if test='fntnRecomendClCd != null and fntnRecomendClCd != ""'>
+					and ubrc1.recomend_cl_code = #{fntnRecomendClCd}
+					</if>
+				group by ubp.pblanc_id
+			) sub
+		order by sub.rmndr_day
+		limit 16
+	</select>
+
+	<select id="selectPblancNoCount" resultType="Integer">
+		/** UsptBsnsPblancDao.selectPblancNoCount */
+		select
+			count(*)
+		from usp_api.uspt_bsns_pblanc
+		where
+			pblanc_no = #{pblancNo}
+	</select>
+
+</mapper>

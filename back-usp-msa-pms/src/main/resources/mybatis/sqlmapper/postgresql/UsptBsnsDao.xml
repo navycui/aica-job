@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsDao">
+
+	<sql id="selectList_where">
+		<where>
+			ub.use_at = true
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and ub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='bsnsYearDetailCd != null and bsnsYearDetailCd != ""'>
+				and ub.bsns_year_detail_code = #{bsnsYearDetailCd}
+			</if>
+			<if test='bsnsNm != null and bsnsNm != ""'>
+				and ub.bsns_nm like concat('%', #{bsnsNm}, '%')
+			</if>
+			<if test='chrgDeptNm != null and chrgDeptNm != ""'>
+				and ub.chrg_dept_nm like concat('%', #{chrgDeptNm}, '%')
+			</if>
+			<if test='chargerNm != null and chargerNm != ""'>
+				and ci.mber_nm like concat('%', #{chargerNm}, '%')
+			</if>
+			<if test='keyword != null and keyword != ""'>
+				<choose>
+					<when test='keywordDiv == "bsnsCd"'> and ub.bsns_code like concat('%', #{keyword}, '%')</when>
+					<when test='keywordDiv == "stdrBsnsCd"'> and usb.stdr_bsns_code like concat('%', #{keyword}, '%')</when>
+					<when test='keywordDiv == "stdrBsnsNm"'> and usb.stdr_bsns_nm like concat('%', #{keyword}, '%')</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectListCount" resultType="Long">
+		/** UsptBsnsDao.selectListCount */
+		select
+			count(ub.bsns_code) as cnt
+		from usp_api.uspt_bsns ub
+				inner join usp_api.uspt_stdr_bsns usb
+					on usb.stdr_bsns_code  = ub.stdr_bsns_code
+				left outer join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.reprsnt_charger_at = true
+				left outer join auth_api.cmmt_emp_info ci
+					on ci.mber_id = ubc.insider_id
+		<include refid="selectList_where" />
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.BsnsListDto">
+		/** UsptBsnsDao.selectList */
+		select
+			ub.bsns_code										as bsns_cd
+			, ub.bsns_nm
+			, ub.stdr_bsns_code									as stdr_bsns_cd
+			, usb.stdr_bsns_nm
+			, ub.bsns_year
+			, ci.mber_nm										as charger_nm
+			, ub.chrg_dept_nm
+			, to_char(ub.creat_dt, 'yyyy-mm-dd')				as reg_dt
+			, ub.task_ty_code									as task_type_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@TASK_CODE_GROUP}', ub.task_ty_code) as task_type_nm
+			, row_number() over (order by ub.creat_dt desc) as rn
+		from usp_api.uspt_bsns ub
+				inner join usp_api.uspt_stdr_bsns usb
+					on usb.stdr_bsns_code  = ub.stdr_bsns_code
+				left outer join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.reprsnt_charger_at = true
+				left outer join auth_api.cmmt_emp_info ci
+					on ci.mber_id = ubc.insider_id
+		<include refid="selectList_where" />
+		<if test="!isExcel">
+			offset #{beginRowNum} -1
+			limit #{itemsPerPage}
+		</if>
+	</select>
+
+
+	<select id="selectListCountForPblanc" resultType="Long">
+		/** UsptBsnsDao.selectListCountForPblanc */
+		select
+			count(distinct ub.bsns_code)
+		from usp_api.uspt_bsns ub
+			inner join usp_api.uspt_bsns_job_step ubjs
+				on ubjs.bsns_code = ub.bsns_code
+			inner join usp_api.uspt_bsns_apply_posbl_mber ubamt
+				on ubamt.bsns_code = ub.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.insider_id = #{insiderId}
+			inner join usp_api.uspt_stdr_bsns usb
+				on usb.stdr_bsns_code = ub.stdr_bsns_code
+			inner join usp_api.uspt_bsns_cl ubc2
+				on ubc2.bsns_cl_id = usb.bsns_cl_id
+		where
+			ub.use_at = true
+			and ub.task_ty_code is not null
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and ub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='bsnsNm != null and bsnsNm != ""'>
+				and ub.bsns_nm like concat('%', #{bsnsNm}, '%')
+			</if>
+	</select>
+
+	<select id="selectListForPblanc" resultType="aicluster.pms.common.dto.BsnsListDto">
+		/** UsptBsnsDao.selectListForPblanc */
+		select
+			ub.bsns_code													as bsns_cd
+			, ub.bsns_nm
+			, ub.bsns_year
+			, ub.task_ty_code												as task_type_cd
+			, fn_cmm_get_code_nm('TASK_TYPE', ub.task_ty_code)				as task_type_nm
+			, row_number() over (order by ub.creat_dt desc)					as rn
+			, coalesce((select bsns_cl_nm || ' > '  from usp_api.uspt_bsns_cl where bsns_cl_id = ubc2.parnts_bsns_cl_id), '') || ubc2.bsns_cl_nm as bsns_cl_nm
+		from usp_api.uspt_bsns ub
+			inner join usp_api.uspt_bsns_job_step ubjs
+				on ubjs.bsns_code = ub.bsns_code
+			inner join usp_api.uspt_bsns_apply_posbl_mber ubamt
+				on ubamt.bsns_code = ub.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.insider_id = #{insiderId}
+			inner join usp_api.uspt_stdr_bsns usb
+				on usb.stdr_bsns_code = ub.stdr_bsns_code
+			inner join usp_api.uspt_bsns_cl ubc2
+				on ubc2.bsns_cl_id = usb.bsns_cl_id
+		where
+			ub.use_at = true
+			and ub.task_ty_code is not null
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and ub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='bsnsNm != null and bsnsNm != ""'>
+				and ub.bsns_nm like concat('%', #{bsnsNm}, '%')
+			</if>
+		group by ub.bsns_code, ubc2.bsns_cl_id
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+
+
+	<insert id="insert">
+		<selectKey keyProperty="bsnsCd" order="BEFORE" resultType="String">
+			select
+				'BS' || lpad(CAST(coalesce(max(CAST(substring(bsns_code, 3) AS INTEGER)), 0) + 1 AS VARCHAR), 8, '0')
+			from usp_api.uspt_bsns
+		</selectKey>
+		/** UsptBsnsDao.insert */
+		insert into usp_api.uspt_bsns
+			(
+				bsns_code
+				, stdr_bsns_code
+				, bsns_nm
+				, bsns_year_ty_code
+				, bsns_year
+				, bsns_year_detail_code
+				, ecshg_instt_nm
+				, ecshg_instt_code
+				, erp_code
+				, tot_bsns_pd
+				, cnsrtm_at
+				, chrg_dept_nm
+				, task_ty_code
+				, use_at
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			)
+			select
+				#{bsnsCd}
+				, #{stdrBsnsCd}
+				, #{bsnsNm}
+				, #{bsnsYearTypeCd}
+				, #{bsnsYear}
+				, #{bsnsYearDetailCd}
+				, #{ecshgInsttNm}
+				, #{ecshgInsttCd}
+				, #{erpCd}
+				, #{totBsnsPd}
+				, #{cnsrtm}
+				, #{chrgDeptNm}
+				, task_ty_code
+				, true
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			from usp_api.uspt_stdr_bsns
+			where
+				stdr_bsns_code = #{stdrBsnsCd}
+	</insert>
+
+	<select id="select" resultType="aicluster.pms.common.dto.BsnsBasicDto">
+		/** UsptBsnsDao.select */
+		select
+			ub.bsns_code							as bsns_cd
+			, ub.bsns_nm
+			, ub.ecshg_instt_nm
+			, ub.ecshg_instt_code					as ecshg_instt_cd
+			, ub.erp_code							as erp_cd
+			, ub.tot_bsns_pd
+			, ub.cnsrtm_at							as cnsrtm
+			, ub.chrg_dept_nm
+			, ub.bsns_year_ty_code					as bsns_year_type_cd
+			, ub.bsns_year
+			, ub.bsns_year_detail_code				as bsns_year_detail_cd
+			, ub.task_ty_code						as task_type_cd
+			, usb.stdr_bsns_code					as stdr_bsns_cd
+			, usb.stdr_bsns_nm
+			, usb.begin_year
+			, usb.bsns_ty_code						as bsns_type_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@BT_CODE_GROUP}', usb.bsns_ty_code) as bsns_type_nm
+			, usb.bsns_sumry
+			, coalesce((select bsns_cl_nm || ' > ' from usp_api.uspt_bsns_cl where bsns_cl_id = ubc.parnts_bsns_cl_id and use_at = true), '') || ubc.bsns_cl_nm as bsns_cl_nm
+		from usp_api.uspt_bsns ub
+				inner join usp_api.uspt_stdr_bsns usb
+					on usb.stdr_bsns_code = ub.stdr_bsns_code
+				inner join usp_api.uspt_bsns_cl ubc
+					on ubc.bsns_cl_id = usb.bsns_cl_id
+		where
+			bsns_code = #{bsnsCd}
+	</select>
+
+	<select id="selectBsnsPblancCount" resultType="Integer">
+		/** UsptBsnsDao.selectBsnsPblancCount */
+		select
+			count(*)
+		from usp_api.uspt_bsns ub
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.bsns_code = ub.bsns_code
+				and ubp.use_at = true
+		where
+			ub.bsns_code = #{bsnsCd}
+	</select>
+
+
+	<update id="update">
+		/** UsptBsnsDao.update */
+		update usp_api.uspt_bsns
+		set
+			bsns_nm					= #{bsnsNm}
+			, ecshg_instt_nm		= #{ecshgInsttNm}
+			, ecshg_instt_code		= #{ecshgInsttCd}
+			, erp_code				= #{erpCd}
+			, tot_bsns_pd			= #{totBsnsPd}
+			, cnsrtm_at				= #{cnsrtm}
+			, chrg_dept_nm			= #{chrgDeptNm}
+			, bsns_year_ty_code		= #{bsnsYearTypeCd}
+			, bsns_year				= #{bsnsYear}
+			, bsns_year_detail_code	= #{bsnsYearDetailCd}
+			, updusr_id				= #{updaterId}
+			, updt_dt				= #{updatedDt}
+		where
+			bsns_code = #{bsnsCd}
+	</update>
+
+
+	<update id="updateTaskType">
+		/** UsptBsnsDao.updateTaskType */
+		update usp_api.uspt_bsns
+		set
+			updusr_id		= #{updaterId}
+			, updt_dt		= #{updatedDt}
+			, task_ty_code	= #{taskTypeCd}
+		where
+			bsns_code = #{bsnsCd}
+	</update>
+
+
+	<update id="updateUnable">
+		/** UsptBsnsDao.updateUnable */
+		update usp_api.uspt_bsns
+		set
+			updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+			, use_at	= false
+		where
+			bsns_code = #{bsnsCd}
+	</update>
+
+
+	<select id="selectBsnsYearList" resultType="String">
+		/** UsptBsnsDao.selectBsnsYearList */
+		select
+			distinct bsns_year
+		from usp_api.uspt_bsns
+		where
+			use_at = true
+		order by bsns_year desc
+	</select>
+
+	<select id="selectBsnsNmList" resultType="aicluster.pms.common.dto.BsnsNmDto">
+		/** UsptBsnsDao.selectBsnsNmList */
+		select
+			bsns_code		as bsns_cd
+			, bsns_nm
+		from usp_api.uspt_bsns
+		where
+			use_at = true
+			<if test='bsnsYear != null and bsnsYear != ""'>
+			and bsns_year = #{bsnsYear}
+			</if>
+		order by bsns_code desc
+	</select>
+
+</mapper>

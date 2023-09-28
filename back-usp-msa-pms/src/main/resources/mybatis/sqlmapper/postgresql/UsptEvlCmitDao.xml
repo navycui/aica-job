@@ -1,0 +1,1356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlCmitDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptEvlCmit">
+		/** UsptEvlCmitDao.selectList */
+		select a.brnh_id as sect_id
+			 , b.evl_step_id
+			 , a.brnh_nm as sect_nm
+			 , b.evl_step_nm
+			 , a.evl_plan_id
+			 , c.online_at as online
+			 , c.evl_cmit_id
+			 , c.evl_cmit_nm
+			 , c.evl_table_id
+			 , d.evl_table_nm
+			 , c.mfcmm_co
+			 , c.evl_prarnde
+			 , c.begin_time as begin_hour
+			 , c.end_time as end_hour
+			 , c.evl_place
+			 , c.orgnzr_id
+			 , usp_api.fn_cmm_get_member_nm(c.orgnzr_id) as orgnzr_nm
+			 , c.evl_charmn_gnrlz_opinion_cn as evl_charmn_opinion_cn
+			 , c.evl_sttus_code as evl_sttus_cd
+			 , c.evl_sttus_dt
+			 , c.slctn_dspth_at as slctn_dspth
+			 , c.slctn_dspth_dt
+			 , c.atchmnfl_group_id as attachment_group_id
+		 from usp_api.uspt_brnh a
+			  inner join usp_api.uspt_evl_step b
+					  on a.evl_plan_id = b.evl_plan_id
+			  left outer join usp_api.uspt_evl_cmit c
+						   on a.brnh_id = c.brnh_id and b.evl_step_id = c.evl_step_id
+			  left outer join usp_api.uspt_evl_table d
+   						   on c.evl_table_id = d.evl_table_id
+	 	where a.evl_plan_id = #{evlPlanId}
+	</select>
+
+	<select id="selectExistList" resultType="aicluster.pms.common.entity.UsptEvlCmit">
+		/** UsptEvlCmitDao.selectExistList */
+		select evl_cmit_id
+			 , brnh_id as sect_id
+			 , evl_step_id
+			 , evl_table_id
+			 , evl_cmit_nm
+			 , mfcmm_co
+			 , evl_prarnde
+			 , begin_time as begin_hour
+			 , end_time as end_hour
+			 , evl_place
+			 , orgnzr_id
+			 , evl_charmn_gnrlz_opinion_cn as evl_charmn_opinion_cn
+			 , evl_sttus_code as evl_sttus_cd
+			 , evl_sttus_dt
+			 , slctn_dspth_at as slctn_dspth
+			 , slctn_dspth_dt
+			 , online_at as online
+			 , atchmnfl_group_id as attachment_group_id
+		 from usp_api.uspt_evl_cmit
+	 	where 1 = 1
+ 		<if test='sectId != null and sectId != ""'>
+		  and brnh_id = #{sectId}
+		</if>
+
+		<if test='evlStepId != null and evlStepId != ""'>
+		  and evl_step_id = #{evlStepId}
+		</if>
+	</select>
+
+	<select id="selectCmitList" resultType="aicluster.pms.common.entity.UsptEvlCmit">
+		/** UsptEvlCmitDao.selectCmitList */
+		select evl_cmit_id
+			 , brnh_id as sect_id
+			 , evl_step_id
+			 , evl_table_id
+			 , evl_cmit_nm
+			 , mfcmm_co
+			 , evl_prarnde
+			 , begin_time as begin_hour
+			 , end_time as end_hour
+			 , evl_place
+			 , orgnzr_id
+			 , evl_charmn_gnrlz_opinion_cn as evl_charmn_opinion_cn
+			 , evl_sttus_code as evl_sttus_cd
+			 , evl_sttus_dt
+			 , slctn_dspth_at as slctn_dspth
+			 , slctn_dspth_dt
+			 , online_at as online
+			 , atchmnfl_group_id as attachment_group_id
+		 from usp_api.uspt_evl_cmit
+	 	where 1 = 1
+ 		<if test='sectId != null and sectId != ""'>
+		  and brnh_id = #{sectId}
+	 	</if>
+	</select>
+
+
+	<!-- <select id="selectRegInfoList" resultType="aicluster.pms.common.entity.UsptEvlCmit">
+		/** UsptEvlCmitDao.selectRegInfoList */
+		select a.brnh_id
+			 , b.evl_step_id
+			 , a.evl_plan_id
+		  from usp_api.uspt_brnh a
+		 inner join usp_api.uspt_evl_step b
+				 on a.evl_plan_id = b.evl_plan_id
+		 where a.evl_plan_id = #{evlPlanId}
+	</select> -->
+
+	<insert id="insert">
+		/** UsptEvlCmitDao.insert */
+		insert into usp_api.uspt_evl_cmit (
+			evl_cmit_id
+			, brnh_id
+			, evl_step_id
+			, evl_table_id
+			, evl_cmit_nm
+			, mfcmm_co
+			, evl_prarnde
+			, begin_time
+			, end_time
+			, evl_place
+			, orgnzr_id
+			, evl_charmn_gnrlz_opinion_cn
+			, evl_sttus_code
+			, evl_sttus_dt
+			, online_at
+			, atchmnfl_group_id
+			, slctn_dspth_at
+			, slctn_dspth_dt
+			, slctn_sndng_mth_code
+			, slctn_sndng_cn
+			, slctn_sms_id
+			, slctn_email_id
+			, ptrmsn_dspth_at
+			, ptrmsn_dspth_dt
+			, ptrmsn_sndng_mth_code
+			, ptrmsn_sndng_cn
+			, ptrmsn_sms_id
+			, ptrmsn_email_id
+			, creatr_id
+			, creat_dt
+			, updusr_id
+			, updt_dt
+		) values (
+			#{evlCmitId}
+			, #{sectId}
+			, #{evlStepId}
+			, #{evlTableId}
+			, #{evlCmitNm}
+			, #{mfcmmCo}
+			, #{evlPrarnde}
+			, #{beginHour}
+			, #{endHour}
+			, #{evlPlace}
+			, #{orgnzrId}
+			, #{evlCharmnOpinionCn}
+			, #{evlSttusCd}
+			, #{evlSttusDt}
+			, #{online}
+			, #{attachmentGroupId}
+			, #{slctnDspth}
+			, #{slctnDspthDt}
+			, #{slctnSndngMth}
+			, #{slctnSndngCn}
+			, #{slctnSmsId}
+			, #{slctnEmailId}
+			, #{ptrmsnDspth}
+			, #{ptrmsnDspthDt}
+			, #{ptrmsnSndngMth}
+			, #{ptrmsnSndngCn}
+			, #{ptrmsnSmsId}
+			, #{ptrmsnEmailId}
+			, #{creatorId}
+			, #{createdDt}
+			, #{updaterId}
+			, #{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** UsptEvlCmitDao.update */
+		update usp_api.uspt_evl_cmit
+		set
+			evl_cmit_nm				= #{evlCmitNm}
+			, mfcmm_co				= #{mfcmmCo}
+			, evl_table_id          = #{evlTableId}
+			, evl_prarnde			= #{evlPrarnde}
+			, begin_time			= #{beginHour}
+			, end_time				= #{endHour}
+			, evl_place				= #{evlPlace}
+			, orgnzr_id				= #{orgnzrId}
+			, evl_charmn_gnrlz_opinion_cn	= #{evlCharmnOpinionCn}
+			, evl_sttus_code			= #{evlSttusCd}
+			, evl_sttus_dt			= #{evlSttusDt}
+			, online_at				= #{online}
+			, atchmnfl_group_id	= #{attachmentGroupId}
+			, updusr_id			= #{updaterId}
+			, updt_dt			= #{updatedDt}
+		where
+			evl_cmit_id = #{evlCmitId}
+	</update>
+
+	<delete id="delete">
+		/** UsptEvlCmitDao.delete */
+		delete
+		  from usp_api.uspt_evl_cmit
+		 where brnh_id in (
+		 				   select brnh_id
+		                     from usp_api.uspt_brnh
+		                    where evl_plan_id = #{evlPlanId}
+		                  )
+	</delete>
+
+	<delete id="deleteByCmitId">
+		/** UsptEvlCmitDao.deleteByCmitId */
+		delete
+		  from usp_api.uspt_evl_cmit
+		 where evl_cmit_id = #{evlCmitId}
+	</delete>
+
+	<select id="selectCmitDtaList" resultType="aicluster.pms.common.entity.UsptEvlCmitDta">
+		/** UsptEvlCmitDao.selectCmitDtaList */
+		select b.rcept_no as receipt_no
+		     , usp_api.fn_cmm_get_member_nm(b.mber_id) as member_nm
+		     , a.atchmnfl_group_id as attachment_group_id
+		  from usp_api.uspt_evl_trget a
+		 	   inner join usp_api.uspt_bsns_pblanc_applcnt b
+		       		   on a.apply_id = b.apply_id
+		where a.evl_step_id =  #{evlStepId}
+		  and a.atchmnfl_group_id is not null
+	</select>
+
+
+	<update id="updateCmitAttachInfo">
+		/** UsptEvlCmitDao.updateCmitAttachInfo */
+		update usp_api.uspt_evl_cmit
+		   set atchmnfl_group_id       = #{attachmentGroupId}
+			 , updusr_id                = #{updaterId}
+			 , updt_dt                = #{updatedDt}
+		where evl_cmit_id = #{evlCmitId}
+	</update>
+
+
+	<update id="updateEvlSttus">
+		/** UsptEvlCmitDao.updateEvlSttus */
+		update usp_api.uspt_evl_cmit
+		set
+			evl_sttus_code	= #{evlSttusCd}
+			, evl_sttus_dt	= #{evlSttusDt}
+			, updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+		where
+			evl_cmit_id = #{evlCmitId}
+	</update>
+
+
+	<select id="selectCmitDtaInfo" resultType="String">
+		/** UsptEvlCmitDao.selectCmitDtaInfo */
+		select atchmnfl_group_id as attachment_group_id
+		 from usp_api.uspt_evl_cmit
+		where evl_cmit_id = #{evlCmitId}
+	</select>
+
+
+	<select id="selectEvlCmitExtrcTargetList" resultType="aicluster.pms.common.entity.UsptEvlCmitExtrcTarget">
+		/** UsptEvlCmitDao.selectEvlCmitExtrcTargetList */
+		select c.bsns_year			/*사업년도*/
+			 , b.pblanc_nm 			/*공고명*/
+			 , a.rcept_ordr || '차' as rcept_odr 		/*접수차수*/
+			 , b.ordtm_rcrit_at		/*상시모집여부*/
+			 , case when b.ordtm_rcrit_at = true then '상시모집'
+			 	    else '정시모집'
+			   end as ordtm_rcrit_nm
+			 , a.evl_ty_code as evl_type_cd
+			 , usp_api.fn_cmm_get_code_nm('EVL_TYPE', a.evl_ty_code) as evl_type_nm
+			 , d.brnh_id as sect_id
+			 , e.evl_step_id
+			 , d.brnh_nm  as sect_nm		/*분과명*/
+			 , e.evl_step_nm		/*평가단계명*/
+			 , d.evl_plan_id
+			 , f.online_at as online
+			 , f.evl_cmit_id		/*평가위원회ID*/
+			 , f.evl_cmit_nm		/*위원회명*/
+			 , f.evl_table_id
+			 , f.mfcmm_co			/*위원수*/
+			 , f.evl_prarnde		/*평가예정일*/
+			 , f.begin_time as begin_hour
+			 , f.end_time as end_hour
+			 , f.evl_place			/*평가장소*/
+			 , f.orgnzr_id
+			 , usp_api.fn_cmm_get_member(f.orgnzr_id) as orgnzr_nm	/*간사명*/
+			 , f.evl_charmn_gnrlz_opinion_cn as evl_charmn_opinion_cn
+			 , f.evl_sttus_code as evl_sttus_cd
+			 , usp_api.fn_cmm_get_code_nm('EVL_STTUS', f.evl_sttus_code) as evl_sttus_nm
+			 , f.evl_sttus_dt
+			 , f.slctn_dspth_at as slctn_dspth
+			 , case when f.slctn_dspth_at = true then '완료'
+			 	    else '대기중'
+			   end as dspth_nm
+			 , f.slctn_dspth_dt
+			 , f.atchmnfl_group_id as attachment_group_id
+			 , case when g.mfcmm_extrc_id != '' then '추출완료'
+				    else '대기중'
+			   end as process_sttus_nm	/*처리상태명*/
+			 , (select max(ordr_no) from usp_api.uspt_evl_mfcmm_extrc where evl_cmit_id = f.evl_cmit_id) max_odr_no
+		     , row_number() over (order by f.creat_dt desc) as rn
+		  from usp_api.uspt_evl_plan a										/*평가계획*/
+			   inner join usp_api.uspt_bsns_pblanc b 						/*사업공고*/
+					   on a.pblanc_id = b.pblanc_id
+			   inner join usp_api.uspt_bsns c								/*사업*/
+					   on b.bsns_code = c.bsns_code
+			   inner join usp_api.uspt_brnh d 								/*분과정보*/
+					   on a.evl_plan_id  = d.evl_plan_id
+			   inner join usp_api.uspt_evl_step e							/*평가단계*/
+			  		   on a.evl_plan_id = e.evl_plan_id
+			   inner join usp_api.uspt_evl_cmit f 							/*평가위원회*/
+				  	   on d.brnh_id = f.brnh_id and e.evl_step_id = f.evl_step_id
+			   left outer join usp_api.uspt_evl_mfcmm_extrc g 				/*평가위원추출*/
+							on f.evl_cmit_id = g.evl_cmit_id
+						   and g.ordr_no = 1
+		where 1 = 1
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and c.bsns_year = #{bsnsYear}
+			</if>
+
+			<if test='pblancNm != null and pblancNm != ""'>
+				and b.pblanc_nm like '%' || #{pblancNm} || '%'
+			</if>
+
+			<if test='evlCmitNm != null and evlCmitNm != ""'>
+				and f.evl_cmit_nm like '%' || #{evlCmitNm} || '%'
+			</if>
+
+			<if test='sectNm != null and sectNm != ""'>
+				and d.brnh_nm like '%' || #{sectNm} || '%'
+			</if>
+
+			<if test='evlStepNm != null and evlStepNm != ""'>
+				and e.evl_step_nm like '%' || #{evlStepNm} || '%'
+			</if>
+
+			<if test='orgnzrNm != null and orgnzrNm != ""'>
+				and usp_api.fn_cmm_get_member(f.orgnzr_id) like '%' || #{orgnzrNm} || '%'
+			</if>
+
+			<if test='evlSttusCd != null and evlSttusCd != ""'>
+				and f.evl_sttus_code like '%' || #{evlSttusCd} || '%'
+			</if>
+
+			<if test='evlTypeCd != null and evlTypeCd != ""'>
+				and a.evl_ty_code = #{evlTypeCd}
+			</if>
+
+			<if test='dspth != null'>
+				and coalesce(f.slctn_dspth_at, false) = #{dspth}
+				and coalesce(f.ptrmsn_dspth_at, false) = #{dspth}
+			</if>
+
+			<if test='online != null'>
+				and coalesce(f.online_at, false) = #{online}
+			</if>
+
+			<if test="!isExcel">
+				offset #{beginRowNum} -1
+				limit #{itemsPerPage}
+			</if>
+	</select>
+
+	<select id="selectEvlCmitExtrcTarget" resultType="aicluster.pms.common.entity.UsptEvlCmitExtrcTarget">
+		/** UsptEvlCmitDao.selectEvlCmitExtrcTarget */
+		select c.bsns_year			/*사업년도*/
+			 , b.pblanc_nm 			/*공고명*/
+			 , a.rcept_ordr || '차' as rcept_odr 		/*접수차수*/
+			 , b.ordtm_rcrit_at		/*상시모집여부*/
+			 , case when b.ordtm_rcrit_at = true then '상시모집'
+			 	    else '정시모집'
+			   end as ordtm_rcrit_nm
+			 , c.bsns_nm
+			 , a.evl_ty_code as evl_type_cd
+			 , usp_api.fn_cmm_get_code_nm('EVL_TYPE', a.evl_ty_code) as evl_type_nm
+			 , d.brnh_id as sect_id
+			 , e.evl_step_id
+			 , d.brnh_nm as sect_nm 			/*분과명*/
+			 , e.evl_step_nm		/*평가단계명*/
+			 , d.evl_plan_id
+			 , f.evl_cmit_id		/*평가위원회ID*/
+			 , f.evl_cmit_nm		/*위원회명*/
+			 , f.evl_table_id
+			 , f.mfcmm_co			/*위원수*/
+			 , f.evl_prarnde		/*평가예정일*/
+			 , f.begin_time as begin_hour
+			 , f.end_time as end_hour
+			 , f.evl_place			/*평가장소*/
+			 , f.orgnzr_id
+			 , usp_api.fn_cmm_get_member(f.orgnzr_id) as orgnzr_nm	/*간사명*/
+			 , f.evl_charmn_gnrlz_opinion_cn as evl_charmn_opinion_cn
+			 , f.evl_sttus_code as evl_sttus_cd
+			 , f.evl_sttus_dt
+			 , f.slctn_dspth_at as slctn_dspth
+			 , f.slctn_dspth_dt
+			 , f.online_at as online
+			 , f.atchmnfl_group_id as attachment_group_id
+			 , case when g.mfcmm_extrc_id != '' then '추출완료'
+				    else '대기중'
+			   end as process_sttus_nm	/*처리상태명*/
+			 , h.evl_mth_code as evl_mthd_cd
+			 , (select max(ordr_no) from usp_api.uspt_evl_mfcmm_extrc where evl_cmit_id = f.evl_cmit_id) max_odr_no
+		     , row_number() over (order by f.creat_dt desc) as rn
+		  from usp_api.uspt_evl_plan a										/*평가계획*/
+			   inner join usp_api.uspt_bsns_pblanc b 						/*사업공고*/
+					   on a.pblanc_id = b.pblanc_id
+			   inner join usp_api.uspt_bsns c								/*사업*/
+					   on b.bsns_code = c.bsns_code
+			   inner join usp_api.uspt_brnh d 								/*분과정보*/
+					   on a.evl_plan_id  = d.evl_plan_id
+			   inner join usp_api.uspt_evl_step e							/*평가단계*/
+			  		   on a.evl_plan_id = e.evl_plan_id
+			   inner join usp_api.uspt_evl_cmit f 							/*평가위원회*/
+				  	   on d.brnh_id = f.brnh_id and e.evl_step_id = f.evl_step_id
+			   left outer join usp_api.uspt_evl_mfcmm_extrc g 				/*평가위원추출*/
+							on f.evl_cmit_id = g.evl_cmit_id
+						   and g.ordr_no = 1
+		 	   inner join usp_api.uspt_evl_table h
+			      	   on f.evl_table_id = h.evl_table_id
+		where 1 = 1
+		  and f.evl_cmit_id = #{evlCmitId}
+	</select>
+
+
+	<select id="selectEvlCmitExtrcTargetCount" resultType="aicluster.pms.common.entity.UsptEvlCmitExtrcTarget">
+		/*UsptEvlCmitDao.selectEvlCmitExtrcTargetCount*/
+		select (
+				select count(b.extrc_mfcmm_id)
+				  from usp_api.uspt_evl_mfcmm_extrc a
+					   inner join usp_api.uspt_extrc_mfcmm b on a.mfcmm_extrc_id  = b.mfcmm_extrc_id
+				 where a.evl_cmit_id = #{evlCmitId}
+				   <!-- and a.odr_no = #{odrNo} -->
+				   and b.lsn_result_code = 'LIRE01'	/*대기*/
+				) as wait_co
+			  ,(
+				select count(b.extrc_mfcmm_id)
+				  from usp_api.uspt_evl_mfcmm_extrc a
+					   inner join usp_api.uspt_extrc_mfcmm b on a.mfcmm_extrc_id  = b.mfcmm_extrc_id
+				 where a.evl_cmit_id = #{evlCmitId}
+				   <!-- and a.odr_no = #{odrNo} -->
+				   and b.lsn_result_code = 'LIRE02' /*부재*/
+				) as absnce_co
+			  ,(
+				select count(b.extrc_mfcmm_id)
+				  from usp_api.uspt_evl_mfcmm_extrc a
+					   inner join usp_api.uspt_extrc_mfcmm b on a.mfcmm_extrc_id  = b.mfcmm_extrc_id
+				 where a.evl_cmit_id = #{evlCmitId}
+				   <!-- and a.odr_no = #{odrNo} -->
+				   and b.lsn_result_code = 'LIRE03' /*거부*/
+			   ) as reject_co
+			  ,(
+				select count(b.extrc_mfcmm_id)
+				  from usp_api.uspt_evl_mfcmm_extrc a
+					   inner join usp_api.uspt_extrc_mfcmm b on a.mfcmm_extrc_id  = b.mfcmm_extrc_id
+				 where a.evl_cmit_id = #{evlCmitId}
+				   <!-- and a.odr_no = #{odrNo} -->
+				   and b.lsn_result_code = 'LIRE04' /*승낙*/
+			   ) as confm_co
+			  <!-- ,(
+				select count(b.extrc_mfcmm_id)
+				  from usp_api.uspt_evl_mfcmm_extrc a
+					   inner join usp_api.uspt_extrc_mfcmm b on a.mfcmm_extrc_id  = b.mfcmm_extrc_id
+				 where a.evl_cmit_id = #{evlCmitId}
+				   and a.odr_no = #{odrNo}
+				   and b.lsn_result_code = 'LIRE04' /*회피*/
+			   ) as evas_co -->
+	</select>
+
+
+	<select id="selectEvlCmitExtrcTargetListCount" resultType="Long">
+		/** UsptEvlCmitDao.selectEvlCmitExtrcTargetListCount */
+		select count(a.evl_plan_id) as cnt
+		  from usp_api.uspt_evl_plan a										/*평가계획*/
+			   inner join usp_api.uspt_bsns_pblanc b 						/*사업공고*/
+					   on a.pblanc_id = b.pblanc_id
+			   inner join usp_api.uspt_bsns c								/*사업*/
+					   on b.bsns_code = c.bsns_code
+			   inner join usp_api.uspt_brnh d 								/*분과정보*/
+					   on a.evl_plan_id  = d.evl_plan_id
+			   inner join usp_api.uspt_evl_step e							/*평가단계*/
+			  		   on a.evl_plan_id = e.evl_plan_id
+			   inner join usp_api.uspt_evl_cmit f 							/*평가위원회*/
+				  	   on d.brnh_id = f.brnh_id and e.evl_step_id = f.evl_step_id
+			   left outer join usp_api.uspt_evl_mfcmm_extrc g 				/*평가위원추출*/
+							on f.evl_cmit_id = g.evl_cmit_id
+						   and g.ordr_no = 1
+		 where 1 = 1
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and c.bsns_year = #{bsnsYear}
+			</if>
+
+			<if test='pblancNm != null and pblancNm != ""'>
+				and b.pblanc_nm like '%' || #{pblancNm} || '%'
+			</if>
+
+			<if test='evlCmitNm != null and evlCmitNm != ""'>
+				and f.evl_cmit_nm like '%' || #{evlCmitNm} || '%'
+			</if>
+
+			<if test='sectNm != null and sectNm != ""'>
+				and d.brnh_nm like '%' || #{sectNm} || '%'
+			</if>
+
+			<if test='evlStepNm != null and evlStepNm != ""'>
+				and e.evl_step_nm like '%' || #{evlStepNm} || '%'
+			</if>
+
+			<if test='orgnzrNm != null and orgnzrNm != ""'>
+				and usp_api.fn_cmm_get_member(f.orgnzr_id) like '%' || #{orgnzrNm} || '%'
+			</if>
+
+			<if test='evlSttusCd != null and evlSttusCd != ""'>
+				and f.evl_sttus_code like '%' || #{evlSttusCd} || '%'
+			</if>
+
+			<if test='evlTypeCd != null and evlTypeCd != ""'>
+				and a.evl_ty_code = #{evlTypeCd}
+			</if>
+
+			<if test='dspth != null'>
+				and coalesce(f.slctn_dspth_at, false) = #{dspth}
+			</if>
+
+			<if test='online != null'>
+				and coalesce(f.online_at, false) = #{online}
+			</if>
+	</select>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptEvlCmit">
+		/** UsptEvlCmitDao.select */
+		select
+			evl_cmit_id
+			, brnh_id as sect_id
+			, evl_step_id
+			, evl_table_id
+			, evl_cmit_nm
+			, mfcmm_co
+			, evl_prarnde
+			, begin_time as begin_hour
+			, end_time as end_hour
+			, evl_place
+			, orgnzr_id
+			, evl_charmn_gnrlz_opinion_cn as evl_charmn_opinion_cn
+			, evl_sttus_code as evl_sttus_cd
+			, evl_sttus_dt
+			, slctn_dspth_at as slctn_dspth
+			, slctn_dspth_dt
+			, online_at as online
+			, atchmnfl_group_id as attachment_group_id
+			, slctn_sndng_mth_code as slctn_sndng_mth
+			, slctn_sndng_cn
+			, slctn_sms_id
+			, slctn_email_id
+			, ptrmsn_dspth_at as ptrmsn_dspth
+			, ptrmsn_dspth_dt
+			, ptrmsn_sndng_mth_code as ptrmsn_sndng_mth
+			, ptrmsn_sndng_cn
+			, ptrmsn_sms_id
+			, ptrmsn_email_id
+			, creatr_id as creator_id
+			, creat_dt as created_dt
+			, updusr_id as updater_id
+			, updt_dt as updated_dt
+		from usp_api.uspt_evl_cmit
+		where
+			evl_cmit_id = #{evlCmitId}
+	</select>
+
+
+	<update id="updateCharmOpinion">
+		/** UsptEvlCmitDao.updateCharmOpinion */
+		update usp_api.uspt_evl_cmit
+		   set evl_charmn_gnrlz_opinion_cn     = #{evlCharmnOpinionCn}
+			 , updusr_id                = #{updaterId}
+			 , updt_dt                = #{updatedDt}
+		where evl_cmit_id = #{evlCmitId}
+	</update>
+
+
+
+	<select id="selectLoginCmitList" resultType="aicluster.pms.common.dto.EvlLoginCmitListDto">
+		/** UsptEvlCmitDao.selectLoginCmitList */
+		select evl_cmit_nm
+			 , evl_cmit_id
+		  from usp_api.uspt_evl_cmit
+		 where evl_prarnde = to_char(current_date,'yyyymmdd')
+		   and online_at is true
+	</select>
+
+
+	<sql id="selectEvlTargetList_where">
+		<where>
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and ub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='evlSttusCd != null and evlSttusCd != ""'>
+				and uec.evl_sttus_code = #{evlSttusCd}
+			</if>
+			<if test='evlTypeCd != null and evlTypeCd != ""'>
+				and uep.evl_ty_code = #{evlTypeCd}
+			</if>
+			<if test='evlMth != null and evlMth != ""'>
+				<choose>
+					<when test='evlMth == "ON"'> and uec.online_at = true </when>
+					<otherwise> and uec.online_at = false </otherwise>
+				</choose>
+			</if>
+			<if test='keyword != null and keyword != ""'>
+				<choose>
+					<when test='keywordDiv == "pblancNm"'>	and ubp.pblanc_nm like concat('%', #{keyword}, '%') </when>
+					<when test='keywordDiv == "evlCmitNm"'>	and uec.evl_cmit_nm like concat('%', #{keyword}, '%') </when>
+					<when test='keywordDiv == "evlStepNm"'>	and ues.evl_step_nm like concat('%', #{keyword}, '%') </when>
+					<when test='keywordDiv == "sectNm"'>	and us.brnh_nm like concat('%', #{keyword}, '%') </when>
+					<when test='keywordDiv == "orgnzrNm"'>	and ci.mber_nm like concat('%', #{keyword}, '%') </when>
+				</choose>
+			</if>
+			<if test='evlCmitId != null and evlCmitId != ""'>
+				and uec.evl_cmit_id = #{evlCmitId}
+			</if>
+		</where>
+	</sql>
+
+
+	<select id="selectEvlTargetListCount" resultType="Long">
+		/** UsptEvlCmitDao.selectEvlTargetListCount */
+		select
+			count(sub.evl_cmit_id)
+		from
+			(
+				select
+					uec.evl_cmit_id
+					, case when uec.slctn_dspth_at = true and uec.ptrmsn_dspth_at = true then 'COMPT' else 'ING' end as dspth_sttus
+				from usp_api.uspt_evl_cmit uec
+					inner join usp_api.uspt_evl_step ues
+						on ues.evl_step_id = uec.evl_step_id
+					inner join usp_api.uspt_brnh us
+						on us.brnh_id = uec.brnh_id
+					inner join usp_api.uspt_evl_plan uep
+						on uep.evl_plan_id = ues.evl_plan_id
+						and uep.evl_plan_id = us.evl_plan_id
+					inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+						on ubpr.pblanc_id = uep.pblanc_id
+						and ubpr.rcept_ordr = uep.rcept_ordr
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpr.pblanc_id
+					inner join usp_api.uspt_bsns ub
+						on ub.bsns_code = ubp.bsns_code
+					inner join usp_api.uspt_bsns_job_step ubjs
+						on ubjs.bsns_code = ub.bsns_code
+						and ubjs.job_step_code = '${@aicluster.pms.common.util.Code@JOBSTEP_EVL}'
+					inner join usp_api.uspt_bsns_charger ubc
+						on ubc.bsns_code = ub.bsns_code
+						and ubc.insider_id = #{insiderId}
+					inner join auth_api.cmmt_emp_info ci
+						on ci.mber_id = uec.orgnzr_id
+				<include refid="selectEvlTargetList_where"/>
+			) sub
+		<where>
+			<if test='dspthSttus != null and dspthSttus != ""'>
+				sub.dspth_sttus = #{dspthSttus}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectEvlTargetList" resultType="aicluster.pms.common.dto.EvlTargetListDto">
+		/** UsptEvlCmitDao.selectEvlTargetList */
+		select
+			sub.*
+			, row_number() over (order by sub.creat_dt desc) as rn
+		from
+			(
+				select
+					uec.evl_cmit_id
+					, uec.evl_cmit_nm
+					, uec.evl_sttus_code as evl_sttus_cd
+					, uec.evl_sttus_dt
+					, uec.creat_dt
+					, case when uec.online_at = true then 'ON' else 'OFF' end as evl_mth
+					, usp_api.fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@EVL_STTUS_CODE_GROUP}', uec.evl_sttus_code)	as evl_sttus_nm
+					, uec.orgnzr_id
+					, uec.evl_prarnde
+					, uec.orgnzr_id
+					, ci.mber_nm		as orgnzr_nm
+					, ub.bsns_year
+					, ubp.pblanc_nm
+					, uep.evl_ty_code as evl_ty_code
+					, usp_api.fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@EVL_TYPE_CODE_GROUP}', uep.evl_ty_code)		as evl_type_nm
+					, ues.evl_step_id
+					, ues.evl_step_nm
+					, ues.slctn_trget_co
+					, us.brnh_nm as sect_nm
+					, case when ubp.ordtm_rcrit_at = true then '상시모집' else '정시모집' end									as ordtm_rcrit_nm
+					, case when ubp.ordtm_rcrit_at = true then concat(ubpr.rcept_ordr, '차') else '' end						as rcept_odr
+					, case when uec.slctn_dspth_at = true and uec.ptrmsn_dspth_at = true then 'COMPT' else 'ING' end			as dspth_sttus
+					, uet.evl_mth_code as evl_mthd_cd
+					, ubc.charger_author_code as charger_author_cd
+					, ub.bsns_nm
+					, ub.chrg_dept_nm
+					, uec.evl_place
+				from usp_api.uspt_evl_cmit uec
+					inner join usp_api.uspt_evl_table uet
+						on uet.evl_table_id = uec.evl_table_id
+						and uet.use_at = true
+					inner join usp_api.uspt_evl_step ues
+						on ues.evl_step_id = uec.evl_step_id
+					inner join usp_api.uspt_brnh us
+						on us.brnh_id = uec.brnh_id
+					inner join usp_api.uspt_evl_plan uep
+						on uep.evl_plan_id = ues.evl_plan_id
+						and uep.evl_plan_id = us.evl_plan_id
+					inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+						on ubpr.pblanc_id = uep.pblanc_id
+						and ubpr.rcept_ordr = uep.rcept_ordr
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpr.pblanc_id
+					inner join usp_api.uspt_bsns ub
+						on ub.bsns_code = ubp.bsns_code
+					inner join usp_api.uspt_bsns_job_step ubjs
+						on ubjs.bsns_code = ub.bsns_code
+						and ubjs.job_step_code = '${@aicluster.pms.common.util.Code@JOBSTEP_EVL}'
+					inner join usp_api.uspt_bsns_charger ubc
+						on ubc.bsns_code = ub.bsns_code
+						and ubc.insider_id = #{insiderId}
+					left outer join auth_api.cmmt_emp_info ci
+						on ci.mber_id = uec.orgnzr_id
+				<include refid="selectEvlTargetList_where"/>
+			) sub
+		<where>
+			<if test='dspthSttus != null and dspthSttus != ""'>
+				sub.dspth_sttus = #{dspthSttus}
+			</if>
+		</where>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+	<resultMap id="EvlSttusMap" type="aicluster.pms.common.dto.EvlSttusListDto">
+		<collection property="evlSttusMfcmmList" column="evlCmitId = evl_cmit_id evlTrgetId = evl_trget_id"
+					ofType="aicluster.pms.common.dto.EvlSttusMfcmmListDto"
+					select="selectEvlSttusMfcmmList"></collection>
+	</resultMap>
+
+	<select id="selectEvlSttusList" resultMap="EvlSttusMap">
+		/** UsptEvlCmitDao.selectEvlSttusList */
+		select
+			uec.evl_cmit_id
+			, uet.evl_trget_id
+			, ubpa.rcept_no as receipt_no
+			, uet2.evl_mth_code as evl_mthd_cd
+			, usp_api.fn_cmm_get_member_nm(ubpa.mber_id) as member_nm
+			, sum(case when uein.evl_div_code = '${@aicluster.pms.common.util.Code@evlDivAdd}' then ueira.evl_score else 0 end) as add_score
+			, sum(case when uein.evl_div_code = '${@aicluster.pms.common.util.Code@evlDivMinus}' then ueira.evl_score else 0 end) as sub_score
+			, max(case when uein.evl_div_code = '${@aicluster.pms.common.util.Code@evlDivAdd}' then ueira.evl_cn else '' end) as add_cn
+			, max(case when uein.evl_div_code = '${@aicluster.pms.common.util.Code@evlDivMinus}' then ueira.evl_cn else '' end) as sub_cn
+			, row_number() over (order by ubpa.rcept_no) as rn
+		from usp_api.uspt_evl_cmit uec
+			inner join usp_api.uspt_evl_step ues
+				on ues.evl_step_id = uec.evl_step_id
+			inner join usp_api.uspt_brnh us
+				on us.brnh_id = uec.brnh_id
+			inner join usp_api.uspt_evl_trget uet
+				on uet.brnh_id = us.brnh_id
+				and uet.evl_step_id = ues.evl_step_id
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.apply_id = uet.apply_id
+			inner join usp_api.uspt_evl_table uet2
+				on uet2.evl_table_id = uec.evl_table_id
+				and uet2.use_at = true
+			left outer join usp_api.uspt_evl_iem_nm uein
+				on uein.evl_table_id = uet2.evl_table_id
+				and uein.evl_div_code in ('${@aicluster.pms.common.util.Code@evlDivAdd}', '${@aicluster.pms.common.util.Code@evlDivMinus}')
+			left outer join usp_api.uspt_evl_iem_result_adsbtr ueira
+				on ueira.evl_cmit_id = uec.evl_cmit_id
+				and ueira.evl_iem_id = uein.evl_iem_id
+				and ueira.evl_trget_id = uet.evl_trget_id
+		where uec.evl_cmit_id = #{evlCmitId}
+		group by uec.evl_cmit_id, uet.evl_trget_id, ubpa.mber_id, ubpa.rcept_no, uet2.evl_mth_code
+	</select>
+
+
+	<select id="selectEvlSttusMfcmmList" resultType="aicluster.pms.common.dto.EvlSttusMfcmmListDto">
+		/** UsptEvlCmitDao.selectEvlSttusMfcmmList */
+		select
+			uem.evl_mfcmm_id
+			, ue.expert_nm										as evl_mfcmm_nm
+			, coalesce(ueir.mfcmm_evl_sttus_code, 'MFEV01')		as mfcmm_evl_sttus_cd
+			, sum(case when uet.evl_mth_code = 'EVMT02' then round(coalesce(ueir.evl_score, 0)/ueir.iem_cnt, 0) else coalesce(ueir.evl_score, 0) end)	as evl_score
+			, coalesce(usp_api.fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@MES_CODE_GROUP}', ueir.mfcmm_evl_sttus_code), '평가대기')				as mfcmm_evl_sttus_nm
+		from usp_api.uspt_evl_cmit uec
+			inner join usp_api.uspt_evl_table uet
+				on uet.evl_table_id = uec.evl_table_id
+			inner join usp_api.uspt_evl_mfcmm uem
+				on uem.evl_cmit_id = uec.evl_cmit_id
+			inner join usp_api.uspt_extrc_mfcmm uem2
+				on uem2.extrc_mfcmm_id = uem.extrc_mfcmm_id
+			inner join usp_api.uspt_expert ue
+				on ue.expert_id = uem2.expert_id
+			left outer join (
+				select
+					uem.evl_mfcmm_id
+					, uemr.mfcmm_evl_sttus_code
+					, sum(coalesce(ueir.evl_score,0))		as evl_score
+					, case when count(ueir.evl_iem_id) = 0 then 1 else count(ueir.evl_iem_id) end	as iem_cnt
+				from usp_api.uspt_evl_mfcmm uem
+					left outer join usp_api.uspt_evl_mfcmm_result uemr
+						on uemr.evl_mfcmm_id = uem.evl_mfcmm_id
+						and uemr.evl_trget_id = #{evlTrgetId}
+					left outer join usp_api.uspt_evl_iem_result ueir
+						on ueir.evl_result_id = uemr.evl_result_id
+				where
+					uem.evl_cmit_id = #{evlCmitId}
+				group by uem.evl_mfcmm_id, uemr.mfcmm_evl_sttus_code
+			) ueir
+				on ueir.evl_mfcmm_id = uem.evl_mfcmm_id
+		where
+			uec.evl_cmit_id = #{evlCmitId}
+		group by uem.evl_mfcmm_id, ue.expert_nm, ueir.mfcmm_evl_sttus_code
+		order by ue.expert_nm, uem.evl_mfcmm_id, ueir.mfcmm_evl_sttus_code
+	</select>
+
+	<resultMap id="EvlResultMap" type="aicluster.pms.common.dto.EvlResultListDto">
+		<collection property="evlSttusMfcmmList" column="evlCmitId = evl_cmit_id evlTrgetId = evl_trget_id"
+					ofType="aicluster.pms.common.dto.EvlSttusMfcmmListDto"
+					select="selectEvlSttusMfcmmList"></collection>
+	</resultMap>
+
+	<select id="selectEvlResultList" resultMap="EvlResultMap">
+		/** UsptEvlCmitDao.selectEvlResultList */
+		select
+			sub.evl_cmit_id
+			, sub.evl_trget_id
+			, sub.receipt_no
+			, sub.evl_mthd_cd
+			, sub.slctn
+			, sub.member_nm
+			, sub.add_score
+			, sub.sub_score
+			, sub.max_evl_score
+			, sub.min_evl_score
+			, case when 3 > sub.evl_mfcmm_cnt
+				then sub.sum_evl_score
+				else (case when top_lwet_excl_at then sub.sum_evl_score - sub.max_evl_score - sub.min_evl_score else sub.sum_evl_score end)
+			end												as sum_evl_score
+			, case when 3 > sub.evl_mfcmm_cnt
+				then round(sub.sum_evl_score / sub.evl_mfcmm_cnt, 2)
+				else round((case when top_lwet_excl_at then (sub.sum_evl_score - sub.max_evl_score - sub.min_evl_score) / (sub.evl_mfcmm_cnt-2) else (sub.sum_evl_score / sub.evl_mfcmm_cnt) end), 2)
+			end												as avg_evl_score
+			, (case when 3 > sub.evl_mfcmm_cnt
+				then round(sub.sum_evl_score / sub.evl_mfcmm_cnt, 2)
+				else round((case when top_lwet_excl_at then (sub.sum_evl_score - sub.max_evl_score - sub.min_evl_score) / (sub.evl_mfcmm_cnt-2) else (sub.sum_evl_score / sub.evl_mfcmm_cnt) end), 2)
+			end) + sub.add_score - sub_score			as  tot_evl_score
+			, row_number() over (order by ((case when 3 > sub.evl_mfcmm_cnt
+												then round(sub.sum_evl_score / sub.evl_mfcmm_cnt, 2)
+												else round((case when top_lwet_excl_at then (sub.sum_evl_score - sub.max_evl_score - sub.min_evl_score) / (sub.evl_mfcmm_cnt-2) else (sub.sum_evl_score / sub.evl_mfcmm_cnt) end), 2)
+											end) + sub.add_score - sub_score) desc ) as rn
+			, rank() over (order by ((case when 3 > sub.evl_mfcmm_cnt
+				then round(sub.sum_evl_score / sub.evl_mfcmm_cnt, 2)
+				else round((case when top_lwet_excl_at then (sub.sum_evl_score - sub.max_evl_score - sub.min_evl_score) / (sub.evl_mfcmm_cnt-2) else (sub.sum_evl_score / sub.evl_mfcmm_cnt) end), 2)
+			end) + sub.add_score - sub_score) desc ) as rank_rn
+		from	(
+					select
+						uec.evl_cmit_id
+						, uet.evl_trget_id
+						, ubpa.rcept_no										as receipt_no
+						, uet2.evl_mth_code									as evl_mthd_cd
+						, uet.slctn_at										as slctn
+						, ues.top_lwet_excl_at
+						, usp_api.fn_cmm_get_member_nm(ubpa.mber_id)		as member_nm
+						, count(distinct uem.evl_mfcmm_id)																											as evl_mfcmm_cnt
+						, max(case when uet2.evl_mth_code = 'EVMT02' then round(coalesce(ueir.evl_score, 0)/ueir.iem_cnt, 0) else coalesce(ueir.evl_score, 0) end)	as max_evl_score
+						, min(case when uet2.evl_mth_code = 'EVMT02' then round(coalesce(ueir.evl_score, 0)/ueir.iem_cnt, 0) else coalesce(ueir.evl_score, 0) end)	as min_evl_score
+						, sum(case when uet2.evl_mth_code = 'EVMT02' then round(coalesce(ueir.evl_score, 0)/ueir.iem_cnt, 0) else coalesce(ueir.evl_score, 0) end)	as sum_evl_score
+						, sum(coalesce(
+							(
+								select ueira.evl_score
+								from usp_api.uspt_evl_iem_result_adsbtr ueira
+									inner join usp_api.uspt_evl_iem_nm uein
+										on uein.evl_iem_id = ueira.evl_iem_id
+										and uein.evl_div_code = '${@aicluster.pms.common.util.Code@evlDivAdd}'
+								where
+									ueira.evl_trget_id = uet.evl_trget_id
+									and ueira.evl_cmit_id = uec.evl_cmit_id
+							), 0)) as add_score
+						, sum(coalesce(
+							(
+								select ueira.evl_score
+								from usp_api.uspt_evl_iem_result_adsbtr ueira
+									inner join usp_api.uspt_evl_iem_nm uein
+										on uein.evl_iem_id = ueira.evl_iem_id
+										and uein.evl_div_code = '${@aicluster.pms.common.util.Code@evlDivMinus}'
+								where
+									ueira.evl_trget_id = uet.evl_trget_id
+									and ueira.evl_cmit_id = uec.evl_cmit_id
+							), 0)) as sub_score
+					from usp_api.uspt_evl_cmit uec
+						inner join usp_api.uspt_evl_step ues
+							on ues.evl_step_id = uec.evl_step_id
+						inner join usp_api.uspt_brnh us
+							on us.brnh_id = uec.brnh_id
+						inner join usp_api.uspt_evl_trget uet
+							on uet.brnh_id = us.brnh_id
+							and uet.evl_step_id = ues.evl_step_id
+						inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+							on ubpa.apply_id = uet.apply_id
+						inner join usp_api.uspt_evl_table uet2
+							on uet2.evl_table_id = uec.evl_table_id
+							and uet2.use_at = true
+						inner join usp_api.uspt_evl_mfcmm uem
+							on uem.evl_cmit_id = uec.evl_cmit_id
+							and uem.atend_sttus_code = '${@aicluster.pms.common.util.Code@ATEND_STTUS_03_CODE}'
+						left outer join (
+							select
+								uem.evl_mfcmm_id
+								, uemr.evl_trget_id
+								, sum(coalesce(ueir.evl_score,0))		as evl_score
+								, case when count(ueir.evl_iem_id) = 0 then 1 else count(ueir.evl_iem_id) end	as iem_cnt
+							from usp_api.uspt_evl_mfcmm uem
+								left outer join usp_api.uspt_evl_mfcmm_result uemr
+									on uemr.evl_mfcmm_id = uem.evl_mfcmm_id
+								left outer join usp_api.uspt_evl_iem_result ueir
+									on ueir.evl_result_id = uemr.evl_result_id
+							where
+								uem.evl_cmit_id = #{evlCmitId}
+							group by uem.evl_mfcmm_id, uemr.evl_trget_id
+						) ueir
+							on ueir.evl_mfcmm_id = uem.evl_mfcmm_id
+							and ueir.evl_trget_id = uet.evl_trget_id
+					where uec.evl_cmit_id = #{evlCmitId}
+					group by uec.evl_cmit_id, ues.evl_step_id,  uet.evl_trget_id, ubpa.mber_id, ubpa.rcept_no, uet2.evl_mth_code
+				) sub
+		<where>
+			<if test='selectOnlySlctn == "Y"'>
+				sub.slctn = true
+			</if>
+		</where>
+		order by tot_evl_score desc
+	</select>
+
+
+	<select id="selectEvlPointList" resultType="aicluster.pms.common.dto.EvlPointListDto">
+		/** UsptEvlCmitDao.selectEvlPointList */
+		select
+			uet.evl_mth_code as evl_mthd_cd
+			, uein.evl_iem_id
+			, uein.evl_iem_nm
+			, uein.evl_iem_cn
+			, uein.allot_score
+			, ueira.evl_iem_result_adsbtr_id
+			, ueira.evl_score
+			, ueira.adsbtr_resn_cn
+			, ueira.evl_cn
+		from usp_api.uspt_evl_cmit uec
+			inner join usp_api.uspt_evl_table uet
+				on uet.evl_table_id = uec.evl_table_id
+			inner join usp_api.uspt_evl_iem_nm uein
+				on uein.evl_table_id = uet.evl_table_id
+				and uein.evl_div_code = #{evlDivCd}
+			left outer join usp_api.uspt_evl_iem_result_adsbtr ueira
+				on ueira.evl_iem_id = uein.evl_iem_id
+				and ueira.evl_cmit_id = uec.evl_cmit_id
+				and ueira.evl_trget_id = #{evlTrgetId}
+		where uec.evl_cmit_id = #{evlCmitId}
+	</select>
+
+
+	<select id="selectEvlTableList" resultType="aicluster.pms.common.dto.EvlTableListDto">
+		/** UsptEvlCmitDao.selectEvlTableList */
+		select
+			uet.evl_mth_code as evl_mthd_cd
+			, uein.evl_iem_nm
+			, uein.evl_iem_cn
+			, uein.allot_score
+			, coalesce(ueir.evl_score, 0) as evl_score
+			, coalesce(ueir.evl_cn, '') as evl_cn
+			, uemr.evl_opinion
+			, ueir.evl_iem_result_id
+		from usp_api.uspt_evl_cmit uec
+			inner join usp_api.uspt_evl_table uet
+				on uet.evl_table_id = uec.evl_table_id
+			inner join usp_api.uspt_evl_iem_nm uein
+				on uein.evl_table_id = uet.evl_table_id
+				and uein.evl_div_code = '${@aicluster.pms.common.util.Code@evlDivGnrl}'
+			inner join usp_api.uspt_evl_mfcmm uem
+				on uem.evl_cmit_id = uec.evl_cmit_id
+			left outer join usp_api.uspt_evl_mfcmm_result uemr
+				on uemr.evl_mfcmm_id = uem.evl_mfcmm_id
+				and uemr.evl_trget_id = #{evlTrgetId}
+			left outer join usp_api.uspt_evl_trget uet2
+				on uet2.evl_trget_id = uemr.evl_trget_id
+				and uet2.evl_trget_id = #{evlTrgetId}
+			left outer join usp_api.uspt_evl_iem_result ueir
+				on ueir.evl_result_id = uemr.evl_result_id
+				and ueir.evl_iem_id = uein.evl_iem_id
+		where uec.evl_cmit_id = #{evlCmitId}
+		and uem.evl_mfcmm_id = #{evlMfcmmId}
+		order by uein.sort_ordr
+	</select>
+
+
+	<update id="updateDspth">
+		/** UsptEvlCmitDao.updateDspth */
+		update usp_api.uspt_evl_cmit
+		set
+			updusr_id			= #{updaterId}
+			, updt_dt		= #{updatedDt}
+		<if test='ptrmsnDspth == null'>
+			, slctn_dspth_at		= #{slctnDspth}
+			, slctn_dspth_dt	= #{slctnDspthDt}
+			, slctn_sndng_mth_code	= #{slctnSndngMth}
+			, slctn_sndng_cn	= #{slctnSndngCn}
+			<if test='slctnSmsId != null and slctnSmsId != ""'>
+				, slctn_sms_id		= #{slctnSmsId}
+			</if>
+			<if test='slctnEmailId != null and slctnEmailId != ""'>
+				, slctn_email_id	= #{slctnEmailId}
+			</if>
+		</if>
+		<if test='slctnDspth == null'>
+			, ptrmsn_dspth_at		= #{ptrmsnDspth}
+			, ptrmsn_dspth_dt	= #{ptrmsnDspthDt}
+			, ptrmsn_sndng_mth_code	= #{ptrmsnSndngMth}
+			, ptrmsn_sndng_cn	= #{ptrmsnSndngCn}
+			<if test='ptrmsnSmsId != null and ptrmsnSmsId != ""'>
+				, ptrmsn_sms_id		= #{ptrmsnSmsId}
+			</if>
+			<if test='ptrmsnEmailId != null and ptrmsnEmailId != ""'>
+				, ptrmsn_email_id	= #{ptrmsnEmailId}
+			</if>
+		</if>
+		where
+			evl_cmit_id = #{evlCmitId}
+	</update>
+
+
+	<resultMap id="GnrlzEvlMap" type="aicluster.pms.common.dto.GnrlzEvlIemListDto">
+		<collection property="evlCnList" column="{evlCmitId = evl_cmit_id, evlIemId = evl_iem_id, evlTrgetId = evl_trget_id}"
+					ofType="aicluster.pms.common.dto.GnrlzEvlOpinionListDto"
+					select="selectGnrlzEvlCnList"></collection>
+	</resultMap>
+
+	<select id="selectGnrlzEvlIemList" resultMap="GnrlzEvlMap">
+		/** UsptEvlCmitDao.selectGnrlzEvlIemList */
+		select
+			uec.evl_cmit_id
+			, uein.evl_iem_id
+			, uein.evl_iem_nm
+			, #{evlTrgetId}			as evl_trget_id
+		from usp_api.uspt_evl_cmit uec
+			inner join usp_api.uspt_evl_table uet
+				on uet.evl_table_id = uec.evl_table_id
+				and uet.use_at = true
+			inner join usp_api.uspt_evl_iem_nm uein
+				on uein.evl_table_id = uet.evl_table_id
+				and uein.evl_div_code = '${@aicluster.pms.common.util.Code@evlDivGnrl}'
+		where uec.evl_cmit_id = #{evlCmitId}
+	</select>
+
+
+	<select id="selectGnrlzEvlCnList" resultType="aicluster.pms.common.dto.GnrlzEvlOpinionListDto">
+		/** UsptEvlCmitDao.selectGnrlzEvlCnList */
+		select
+			ue.expert_nm		as evl_mfcmm_nm
+			, ueir.evl_cn
+		from usp_api.uspt_evl_cmit uec
+			inner join usp_api.uspt_evl_mfcmm uem
+				on uem.evl_cmit_id = uec.evl_cmit_id
+				and uem.atend_sttus_code = '${@aicluster.pms.common.util.Code@ATEND_STTUS_03_CODE}'
+			inner join usp_api.uspt_expert ue
+				on ue.expert_id = uem.expert_id
+			left outer join usp_api.uspt_evl_mfcmm_result uemr
+				on uemr.evl_mfcmm_id = uem.evl_mfcmm_id
+				and uemr.evl_trget_id = #{evlTrgetId}
+			left outer join usp_api.uspt_evl_iem_result ueir
+				on ueir.evl_result_id = uemr.evl_result_id
+				and ueir.evl_iem_id = #{evlIemId}
+		where uec.evl_cmit_id = #{evlCmitId}
+	</select>
+
+
+
+	<select id="selectGnrlzEvlOpinionList" resultType="aicluster.pms.common.dto.GnrlzEvlOpinionListDto">
+		/** UsptEvlCmitDao.selectGnrlzEvlOpinionList */
+		select
+			ue.expert_nm		as evl_mfcmm_nm
+			, uemr.evl_opinion 	as evl_cn
+		from usp_api.uspt_evl_cmit uec
+			inner join usp_api.uspt_evl_mfcmm uem
+				on uem.evl_cmit_id = uec.evl_cmit_id
+				and uem.atend_sttus_code = '${@aicluster.pms.common.util.Code@ATEND_STTUS_03_CODE}'
+			inner join usp_api.uspt_expert ue
+				on ue.expert_id = uem.expert_id
+			left outer join usp_api.uspt_evl_mfcmm_result uemr
+				on uemr.evl_mfcmm_id = uem.evl_mfcmm_id
+				and uemr.evl_trget_id = #{evlTrgetId}
+		where uec.evl_cmit_id = #{evlCmitId}
+	</select>
+
+	<!-- 평가 시스템  aica 온라인 평가 출석체크 평가정보 조회-->
+	<select id="selectEvlBaseInfo" resultType="aicluster.pms.common.dto.EvlSystemDto">
+		/** UsptEvlCmitDao.selectEvlBaseInfo */
+			select
+				     ubp.pblanc_nm			/*공고명*/
+				     , ues.evl_step_nm		/*평가단계*/
+				     , uec.evl_cmit_nm		/*평가위원회a*/
+				     ,uem.charmn_at		as charmn		/**위원장여부*/
+				      ,uem.chklst_chk_at		/**체크리스트여부*/
+				     ,uem.atend_sttus_code as atend_sttus_cd		/** 출석상태코드(G:ATEND_STTUS) */
+				     ,uem.atend_dt			/** 출석일시 */
+				     ,uem.evas_agre_at		/** 회피동의여부 */
+				     ,uem.evas_resn_cn		/** 회피사유내용 */
+				     ,uem.evl_mfcmm_id		/**평가위원ID*/
+				    , uem.evl_cmit_id			/**평가위원회ID*/
+			from	 usp_api.uspt_evl_cmit uec		/*평가위원회*/
+   	   inner join usp_api.uspt_evl_step ues		/*평가단계*/
+				on  ues.evl_step_id = uec.evl_step_id
+		inner join usp_api.uspt_brnh us				/*분과정보*/
+				on us.brnh_id = uec.brnh_id
+	  inner join usp_api.uspt_evl_plan uep 		 /*평가계획*/
+				on uep.evl_plan_id = ues.evl_plan_id
+			  and uep.evl_plan_id = us.evl_plan_id
+	  inner join usp_api.uspt_bsns_pblanc_rcept ubpr	/*사업공고접수*/
+				on ubpr.pblanc_id = uep.pblanc_id
+			   and ubpr.rcept_ordr = uep.rcept_ordr
+	   inner join usp_api.uspt_bsns_pblanc ubp		/*사업공고*/
+				on ubp.pblanc_id = ubpr.pblanc_id
+	   inner join usp_api.uspt_bsns ub					/*사업*/
+				on ub.bsns_code = ubp.bsns_code
+       	inner join usp_api.uspt_evl_mfcmm uem 	/*평가위원*/
+       			on uec.evl_cmit_id  = uem.evl_cmit_id
+         		and uem.evl_mfcmm_id =#{evlMfcmmId}
+	</select>
+
+	<!-- 평가 시스템  aica 온라인 평가대상 완료건 조회-->
+	<select id="selectEvlSystemTargetMFEV03" resultType="int">
+		/** UsptEvlCmitDao.selectEvlSystemTargetMFEV03 */
+			select count(1)
+		   from(
+						select   uec.evl_cmit_id	/*평가위원회ID*/
+							     , uet.evl_trget_id 	/*평가대상ID*/
+							     , ubpa.rcept_no	/*접수번호*/
+							     , ubpa.mber_id
+							      ,uemr.mfcmm_evl_sttus_code
+							     , uet.atchmnfl_group_id
+							     , uem.evl_mfcmm_id
+							     , uemr.evl_result_id
+							     , sum(coalesce(ueir.evl_score, 0)) as sum_evl_score
+						  from usp_api.uspt_evl_cmit uec  			/*평가위원*/
+				    inner join usp_api.uspt_evl_step ues /*평가단계*/
+						     on ues.evl_step_id = uec.evl_step_id
+				    inner join usp_api.uspt_brnh us 			/*분과정보*/
+						      on us.brnh_id = uec.brnh_id
+					inner join usp_api.uspt_evl_trget uet /*평가대상*/
+						      on uet.brnh_id = us.brnh_id
+						     and uet.evl_step_id = ues.evl_step_id
+					inner join usp_api.uspt_bsns_pblanc_applcnt ubpa 	/*사업공고신청자*/
+						      on ubpa.apply_id = uet.apply_id
+					inner join usp_api.uspt_evl_mfcmm uem 		/*평가위원*/
+						      on uem.evl_cmit_id = uec.evl_cmit_id
+					left outer join usp_api.uspt_evl_mfcmm_result uemr 	/*평가결과*/
+						      on uemr.evl_mfcmm_id = uem.evl_mfcmm_id
+						     and uemr.evl_trget_id = uet.evl_trget_id
+					left outer join usp_api.uspt_evl_iem_result ueir 	/*평가항목결과*/
+						      on ueir.evl_result_id = uemr.evl_result_id
+						where uec.evl_cmit_id   	 = #{evlCmitId}		/** 평가위원회ID */
+						   and uem.evl_mfcmm_id  = #{evlMfcmmId}	/**평가대상ID*/
+						   and uemr.mfcmm_evl_sttus_code = 'MFEV03'  /*완료*/
+					group by uec.evl_cmit_id  ,uet.evl_trget_id ,ubpa.rcept_no  ,ubpa.mber_id ,uemr.mfcmm_evl_sttus_code ,uet.atchmnfl_group_id  ,uem.evl_mfcmm_id ,uemr.evl_result_id
+			) a
+	</select>
+
+	<!-- 평가 시스템  aica 온라인 평가대상 목록 조회-->
+	<select id="selectEvlSystemTargetList" resultType="aicluster.pms.common.dto.EvlSystemTargetDto">
+		/** UsptEvlCmitDao.selectEvlSystemTargetList */
+			select a.evl_cmit_id			/*평가위원회ID*/
+					, a.evl_trget_id			/*평가대상ID*/
+					, a.rcept_no as receipt_no			/*접수번호*/
+					, usp_api.fn_cmm_get_member_nm(a.mber_id) as member_nm	/*사업자(이름)*/
+					, a.sum_evl_score			/*총점*/
+					, case when a.mfcmm_evl_sttus_code is null then 'MFEV01'
+					          else a.mfcmm_evl_sttus_code
+					          end  					as mfcmm_evl_sttus_cd					/*위원평가상태코드(G:MFCMM_EVL_STTUS)*/
+   					, case when a.mfcmm_evl_sttus_code is null then '평가대기'
+					         else usp_api.fn_cmm_get_code_nm('MFCMM_EVL_STTUS', a.mfcmm_evl_sttus_code)
+					         end  					as mfcmm_evl_sttus_nm				/*위원평가상태코드명*/
+					, a.atchmnfl_group_id as attachment_group_id	/*평가자료*/
+					, a.evl_mfcmm_id
+		   from(
+						select   uec.evl_cmit_id	/*평가위원회ID*/
+							     , uet.evl_trget_id 	/*평가대상ID*/
+							     , ubpa.rcept_no	/*접수번호*/
+							     , ubpa.mber_id
+							      ,uemr.mfcmm_evl_sttus_code
+							     , uet.atchmnfl_group_id
+							     , uem.evl_mfcmm_id
+							     , uemr.evl_result_id
+							     , sum(coalesce(ueir.evl_score, 0)) as sum_evl_score
+						  from usp_api.uspt_evl_cmit uec  			/*평가위원*/
+				    inner join usp_api.uspt_evl_step ues /*평가단계*/
+						     on ues.evl_step_id = uec.evl_step_id
+				    inner join usp_api.uspt_brnh us 			/*분과정보*/
+						      on us.brnh_id = uec.brnh_id
+					inner join usp_api.uspt_evl_trget uet /*평가대상*/
+						      on uet.brnh_id = us.brnh_id
+						     and uet.evl_step_id = ues.evl_step_id
+					inner join usp_api.uspt_bsns_pblanc_applcnt ubpa 	/*사업공고신청자*/
+						      on ubpa.apply_id = uet.apply_id
+					inner join usp_api.uspt_evl_mfcmm uem 		/*평가위원*/
+						      on uem.evl_cmit_id = uec.evl_cmit_id
+					left outer join usp_api.uspt_evl_mfcmm_result uemr 	/*평가결과*/
+						      on uemr.evl_mfcmm_id = uem.evl_mfcmm_id
+						     and uemr.evl_trget_id = uet.evl_trget_id
+					left outer join usp_api.uspt_evl_iem_result ueir 	/*평가항목결과*/
+						      on ueir.evl_result_id = uemr.evl_result_id
+						where uec.evl_cmit_id   	 = #{evlCmitId}		/** 평가위원회ID */
+							<if test='evlMfcmmId != null and evlMfcmmId != "" '>
+						   and uem.evl_mfcmm_id  = #{evlMfcmmId}	/**평가대상ID*/
+						   </if>
+					group by uec.evl_cmit_id  ,uet.evl_trget_id ,ubpa.rcept_no  ,ubpa.mber_id ,uemr.mfcmm_evl_sttus_code ,uet.atchmnfl_group_id  ,uem.evl_mfcmm_id ,uemr.evl_result_id
+			) a
+			where 1=1
+			order by a.rcept_no ,usp_api.fn_cmm_get_member_nm(a.mber_id), a.mfcmm_evl_sttus_code
+	</select>
+
+
+	<!-- 평가 시스템 위원장 제회 목록 조회-->
+	<select id="selectEvlMfcmmCompleteYn" resultType="aicluster.pms.common.dto.EvlSystemTargetDto">
+		/** UsptEvlCmitDao.selectEvlMfcmmCompleteYn */
+			select a.evl_cmit_id			/*평가위원회ID*/
+					, a.evl_trget_id			/*평가대상ID*/
+					, a.rcept_no as receipt_no			/*접수번호*/
+					, usp_api.fn_cmm_get_member_nm(a.mber_id) as member_nm	/*사업자(이름)*/
+					, a.sum_evl_score			/*총점*/
+					, case when a.mfcmm_evl_sttus_code is null then 'MFEV01'
+					          else a.mfcmm_evl_sttus_code
+					          end  					as mfcmm_evl_sttus_cd					/*위원평가상태코드(G:MFCMM_EVL_STTUS)*/
+   					, case when a.mfcmm_evl_sttus_code is null then '평가대기'
+					         else usp_api.fn_cmm_get_code_nm('MFCMM_EVL_STTUS', a.mfcmm_evl_sttus_code)
+					         end  					as mfcmm_evl_sttus_nm				/*위원평가상태코드명*/
+					, a.atchmnfl_group_id as attachment_group_id	/*평가자료*/
+					, a.evl_mfcmm_id
+		   from(
+						select   uec.evl_cmit_id	/*평가위원회ID*/
+							     , uet.evl_trget_id 	/*평가대상ID*/
+							     , ubpa.rcept_no	/*접수번호*/
+							     , ubpa.mber_id
+							      ,uemr.mfcmm_evl_sttus_code
+							     , uet.atchmnfl_group_id
+							     , uem.evl_mfcmm_id
+							     , uemr.evl_result_id
+							     , sum(coalesce(ueir.evl_score, 0)) as sum_evl_score
+						  from usp_api.uspt_evl_cmit uec  			/*평가위원*/
+				    inner join usp_api.uspt_evl_step ues /*평가단계*/
+						     on ues.evl_step_id = uec.evl_step_id
+				    inner join usp_api.uspt_brnh us 			/*분과정보*/
+						      on us.brnh_id = uec.brnh_id
+					inner join usp_api.uspt_evl_trget uet /*평가대상*/
+						      on uet.brnh_id = us.brnh_id
+						     and uet.evl_step_id = ues.evl_step_id
+					inner join usp_api.uspt_bsns_pblanc_applcnt ubpa 	/*사업공고신청자*/
+						      on ubpa.apply_id = uet.apply_id
+					inner join usp_api.uspt_evl_mfcmm uem 		/*평가위원*/
+						      on uem.evl_cmit_id = uec.evl_cmit_id
+					left outer join usp_api.uspt_evl_mfcmm_result uemr 	/*평가결과*/
+						      on uemr.evl_mfcmm_id = uem.evl_mfcmm_id
+						     and uemr.evl_trget_id = uet.evl_trget_id
+					left outer join usp_api.uspt_evl_iem_result ueir 	/*평가항목결과*/
+						      on ueir.evl_result_id = uemr.evl_result_id
+						where uem.evl_cmit_id   = #{evlCmitId}		/** 평가위원회ID */
+						   and (uem.charmn_at	= false or uem.charmn_at is null)		/*위원장여부*/
+					group by uec.evl_cmit_id  ,uet.evl_trget_id ,ubpa.rcept_no  ,ubpa.mber_id ,uemr.mfcmm_evl_sttus_code ,uet.atchmnfl_group_id  ,uem.evl_mfcmm_id ,uemr.evl_result_id
+			) a
+			where 1=1
+			order by a.rcept_no ,usp_api.fn_cmm_get_member_nm(a.mber_id), a.mfcmm_evl_sttus_code
+	</select>
+
+	<!-- 평가 시스템  aica 온라인 평가표 조회-->
+	<select id="selectEvlSystemTableList" resultType="aicluster.pms.common.dto.EvlTableListDto">
+		/** UsptEvlCmitDao.selectEvlSystemTableList */
+				select
+						 uet.evl_mth_code as evl_mthd_cd			/** 평가방법코드 (G: EVL_MTHD) */
+						, uein.evl_iem_nm			/** 평가항목명 */
+						, uein.evl_iem_cn			/** 평가항목내용 */
+						, uein.allot_score			/** 배점점수 */
+						, coalesce(ueir.evl_score, 0) as evl_score	/** 평가점수 */
+						, coalesce(ueir.evl_cn, '') as evl_cn			/** 평가내용 */
+						, uemr.evl_opinion			/*평가의견*/
+						, ueir.evl_iem_result_id		/*평가항목결과ID*/
+						, ueir.evl_result_id				/*평가결과ID*/
+						, uein.evl_iem_id 				/*평가항목ID*/
+				from usp_api.uspt_evl_cmit uec
+				inner join usp_api.uspt_evl_table uet
+					on uet.evl_table_id = uec.evl_table_id
+				inner join usp_api.uspt_evl_iem_nm uein
+					on uein.evl_table_id = uet.evl_table_id
+				   and uein.evl_div_code = '${@aicluster.pms.common.util.Code@evlDivGnrl}'
+				inner join usp_api.uspt_evl_mfcmm uem
+					on uem.evl_cmit_id = uec.evl_cmit_id
+				left outer join usp_api.uspt_evl_mfcmm_result uemr
+					on uemr.evl_mfcmm_id = uem.evl_mfcmm_id
+			       and uemr.evl_trget_id = #{evlTrgetId}
+				left outer join usp_api.uspt_evl_iem_result ueir
+					on ueir.evl_result_id = uemr.evl_result_id
+				  and ueir.evl_iem_id = uein.evl_iem_id
+			  where uec.evl_cmit_id = #{evlCmitId}
+				 and uem.evl_mfcmm_id = #{evlMfcmmId}
+			  order by uein.sort_ordr
+	</select>
+
+	<!-- 평가 시스템  aica 온라인 위원장 종합의견 등록-->
+	<update id="updateCharmnOpinion">
+			/** UsptEvlCmitDao.updateCharmnOpinion */
+			update usp_api.uspt_evl_cmit
+			set  evl_charmn_gnrlz_opinion_cn	= #{evlCharmnOpinionCn}
+				, evl_sttus_dt			= #{evlSttusDt}
+				, updusr_id			= #{updaterId}
+				, updt_dt			= #{updatedDt}
+			where
+				evl_cmit_id = #{evlCmitId}
+	</update>
+
+	<!-- 평가시스템 login 평가위원회ID 조회 -->
+	<select id="selectEvlCmitIdByExpertId" resultType="aicluster.pms.common.dto.EvlSystemLogInDto">
+		/** UsptEvlCmitDao.selectEvlCmitIdByExpertId */
+			select		uec.evl_cmit_id
+						,uec.evl_cmit_nm
+			  from usp_api.uspt_evl_cmit uec
+		inner join usp_api.uspt_evl_mfcmm uem
+		  	     on uem.evl_cmit_id  = uec.evl_cmit_id
+			where  uem.expert_id = #{expertId}
+			   and  uec.online_at  = true		/*온라인만*/
+			group by uec.evl_cmit_id, uec.evl_cmit_nm
+			order by uec.creat_dt desc
+	</select>
+
+
+	<select id="selectEvlCmitCountByNotEvlCompStep" resultType="Integer">
+		/** UsptEvlCmitDao.selectEvlCmitCountByNotEvlCompStep */
+		select
+			count(uec.evl_cmit_id)
+		from usp_api.uspt_evl_cmit uec
+			inner join usp_api.uspt_evl_cmit uec2
+				on uec2.evl_cmit_id = #{evlCmitId}
+				and uec2.evl_step_id = uec.evl_step_id
+				and uec2.brnh_id != uec.brnh_id
+		where
+			uec.evl_sttus_code != '${@aicluster.pms.common.util.Code@EVL_STTUS_03_CODE}'
+	</select>
+
+</mapper>

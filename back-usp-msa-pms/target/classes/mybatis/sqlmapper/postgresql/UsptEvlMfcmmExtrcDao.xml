@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlMfcmmExtrcDao">
+
+	<insert id="insert">
+		/** UsptEvlMfcmmExtrcDao.insert */
+		insert into usp_api.uspt_evl_mfcmm_extrc (
+			   mfcmm_extrc_id
+			 , evl_cmit_id
+			 , ordr_no
+			 , extrc_multiple
+			 , adit_excl_cnd_code
+			 , partcptn_lmtt_cnd_code
+			 , expert_cl_id
+			 , creatr_id
+			 , creat_dt
+		) values (
+			   #{mfcmmExtrcId}
+			 , #{evlCmitId}
+			 , (select COALESCE(max(ordr_no),0)+1
+			      from usp_api.uspt_evl_mfcmm_extrc
+				  where evl_cmit_id = #{evlCmitId}
+			   )
+			 , #{extrcMultiple}
+			 , #{aditExclCndCd}
+			 , #{partcptnLmttCndCd}
+			 , #{expertClId}
+			 , #{creatorId}
+			 , #{createdDt}
+		)
+	</insert>
+
+	<select id="selectMaxOdrNo" resultType="Integer">
+		select max(ordr_no)
+		  from usp_api.uspt_evl_mfcmm_extrc
+		 where mfcmm_extrc_id = #{mfcmmExtrcId}
+	</select>
+
+
+	<select id="selectEvlCmitExtrcResult" resultType="aicluster.pms.common.dto.EvlCmitExtrcResultDto">
+		/** UsptEvlMfcmmExtrcDao.selectEvlCmitExtrcResult */
+		select (select coalesce(max(ordr_no),0)
+				  from usp_api.uspt_evl_mfcmm_extrc
+				 where evl_cmit_id = #{evlCmitId}
+			   ) as total_odr 			/*총 차수*/
+		 	 , a.mfcmm_extrc_id
+			 , a.evl_cmit_id 				/*위원회ID*/
+			 , a.ordr_no as odr_no
+			 , a.ordr_no || '차' as odr_nm
+			 , a.extrc_multiple
+			 , a.extrc_multiple || '배' as extrc_multiple_nm
+			 , array_to_string(a.adit_excl_cnd_code, ',') as adit_excl_cnd_cd
+			 , array_to_string(a.partcptn_lmtt_cnd_code, ',') as partcptn_lmtt_cnd_cd
+			 , a.expert_cl_id
+			 , (select array_to_string(array_agg(expert_cl_nm),' ,')
+			  	  from usp_api.uspt_expert_cl
+				 where expert_cl_id in (select unnest(a.expert_cl_id))
+			   )  as expert_cl_nm
+			 /*, (SELECT COUNT(arrayColumn) FROM UNNEST(a.expert_cl_id) arrayColumn) */
+			 /*, array_to_string(a.expert_cl_id, ',')*/
+			 , (select array_to_string(array_agg(a1.partcptn_lmtt_cnd_cd),'\n')
+				  from (
+					 	select usp_api.fn_cmm_get_code_nm('PARTCPTN_LMTT_CND',unnest(partcptn_lmtt_cnd_code)) as partcptn_lmtt_cnd_cd
+						  from usp_api.uspt_evl_mfcmm_extrc
+						 where evl_cmit_id =  #{evlCmitId}
+						   and ordr_no = #{odrNo}
+					   ) a1
+				) as partcptn_lmtt_cnd_nm
+			 , (select array_to_string(array_agg(a2.adit_excl_cnd_cd),'\n')
+				  from (
+					 	select usp_api.fn_cmm_get_code_nm('ADIT_EXCL_CND',unnest(adit_excl_cnd_code)) as adit_excl_cnd_cd
+						  from usp_api.uspt_evl_mfcmm_extrc
+						 where evl_cmit_id = #{evlCmitId}
+						   and ordr_no = #{odrNo}
+					   ) a2
+				) as adit_excl_cnd_nm
+		  from usp_api.uspt_evl_mfcmm_extrc a
+		 where 1 = 1
+	 	  and a.evl_cmit_id = #{evlCmitId}
+	 	  and a.ordr_no = #{odrNo}
+	</select>
+
+	<select id="selectEvlCmitExtrcExcelResult" resultType="aicluster.pms.common.dto.EvlCmitExtrcExcelResultDto">
+		/** UsptEvlMfcmmExtrcDao.selectEvlCmitExtrcExcelResult */
+		select (select coalesce(max(ordr_no),0)
+				  from usp_api.uspt_evl_mfcmm_extrc
+				 where evl_cmit_id = #{evlCmitId}
+			   ) as total_odr 			/*총 차수*/
+		 	 , a.mfcmm_extrc_id
+			 , a.evl_cmit_id 				/*위원회ID*/
+			 , a.ordr_no as odr_no
+			 , a.ordr_no || '차' as odr_nm
+			 , a.extrc_multiple
+			 , a.extrc_multiple || '배' as extrc_multiple_nm
+			 , array_to_string(a.adit_excl_cnd_code, ',') as adit_excl_cnd_cd
+			 , array_to_string(a.partcptn_lmtt_cnd_code, ',') as partcptn_lmtt_cnd_cd
+			 , a.expert_cl_id
+			 , a.expert_cl_id as expert_cl_nm /*추후쿼리 작성*/
+			 /*, (SELECT COUNT(arrayColumn) FROM UNNEST(a.expert_cl_id) arrayColumn) */
+			 /*, array_to_string(a.expert_cl_id, ',')*/
+			 , (select array_to_string(array_agg(a1.partcptn_lmtt_cnd_cd),'\n')
+				  from (
+					 	select usp_api.fn_cmm_get_code_nm('PARTCPTN_LMTT_CND',unnest(partcptn_lmtt_cnd_code)) as partcptn_lmtt_cnd_cd
+						  from usp_api.uspt_evl_mfcmm_extrc
+						 where evl_cmit_id =  #{evlCmitId}
+						   and ordr_no = #{odrNo}
+					   ) a1
+				) as partcptn_lmtt_cnd_nm
+			 , (select array_to_string(array_agg(a2.adit_excl_cnd_cd),'\n')
+				  from (
+					 	select usp_api.fn_cmm_get_code_nm('ADIT_EXCL_CND',unnest(adit_excl_cnd_code)) as adit_excl_cnd_cd
+						  from usp_api.uspt_evl_mfcmm_extrc
+						 where evl_cmit_id = #{evlCmitId}
+						   and ordr_no = #{odrNo}
+					   ) a2
+				) as adit_excl_cnd_nm
+		  from usp_api.uspt_evl_mfcmm_extrc a
+		 where 1 = 1
+	 	  and a.evl_cmit_id = #{evlCmitId}
+	 	  and a.ordr_no = #{odrNo}
+	</select>
+
+	<delete id="deleteByCmitId">
+		/** UsptEvlMfcmmExtrcDao.deleteByCmitId */
+		delete
+		  from usp_api.uspt_evl_mfcmm_extrc
+		 where evl_cmit_id = #{evlCmitId}
+	</delete>
+
+</mapper>

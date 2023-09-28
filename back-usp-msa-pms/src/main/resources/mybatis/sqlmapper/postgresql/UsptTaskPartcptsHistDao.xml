@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptTaskPartcptsHistDao">
+
+	<!-- ******************************************************************* 과제참여자변경이력 ********************************************************************** -->
+	<insert id="insert">
+		/** UsptTaskPartcptsHistDao.insert */
+		insert into usp_api.uspt_task_partcpts_change_hist (
+						 task_partcpts_change_hist_id
+						,cnvn_change_reqst_id
+						,confm_task_partcpts_change_hist_id
+						,partcpts_nm
+						,chrg_realm_nm
+						,encpt_mbtlnum
+						,encpt_brthdy
+						,partcptn_rate
+						,mber_id
+						,creatr_id
+						,creat_dt
+					) values (
+						 #{taskPartcptsHistId}
+						,#{cnvnChangeReqId}
+						,#{confmTaskPartcptsHistId}
+						,#{partcptsNm}
+						,#{chrgRealmNm}
+						,#{encMbtlnum}
+						,#{encBrthdy}
+						,#{partcptnRate}
+						,#{memberId}
+						,#{creatorId}
+						,#{createdDt}
+					)
+	</insert>
+
+	<!-- 과제참여자변경이력 최근이력 조회-->
+	<select id="selectMaxHistList" resultType="aicluster.pms.common.entity.UsptTaskPartcptsHist">
+		/** UsptTaskPartcptsHistDao.selectList */
+				select	 task_partcpts_change_hist_id
+						,cnvn_change_reqst_id 						as cnvn_change_req_id
+						,confm_task_partcpts_change_hist_id 	as confm_task_partcpts_hist_id
+						,partcpts_nm
+						,chrg_realm_nm
+						,encpt_mbtlnum 	as enc_mbtlnum
+						,encpt_brthdy 		as enc_brthdy
+						,partcptn_rate
+						,mber_id 			as member_id
+						,(select cm.mber_nm from auth_api.cmmt_mber_info cm where cm.mber_id  = utph.mber_id  )	as member_nm	/*업체명*/
+				from usp_api.uspt_task_partcpts_change_hist utph
+		  	  where cnvn_change_reqst_id  = #{cnvnChangeReqId}
+		  	    and creat_dt       = ( select max(creat_dt)
+		  	                               from usp_api.uspt_task_partcpts_change_hist sutph
+		  	                              where cnvn_change_reqst_id=  #{cnvnChangeReqId}
+		  	                                 and (confm_task_partcpts_change_hist_id is null or confm_task_partcpts_change_hist_id = ''))
+	</select>
+
+	<!--  과제참여자변경이력 변경날자 목록-->
+	<select id="selectUsptTaskPartcptsHistChangeDe" resultType="aicluster.pms.common.entity.UsptCnvnChangeReqHistDt">
+		/** UsptTaskPartcptsHistDao.selectUsptTaskPartcptsHistChangeDe */
+			select	  cnvn_change_reqst_id 						as cnvn_change_req_id
+					, to_char(creat_dt ,'yyyymmdd') 				as change_de
+					, to_char(creat_dt ,'yyyymmddhh24miss') 	as change_dt
+		 	 from usp_api.uspt_task_partcpts_change_hist
+			where cnvn_change_reqst_id = #{cnvnChangeReqId}
+			and ( confm_task_partcpts_change_hist_id is null or confm_task_partcpts_change_hist_id ='')	/*변경전정보는 제외*/
+			group by cnvn_change_reqst_id ,  creat_dt
+			order by creat_dt  desc
+	</select>
+
+	<!--  과제참여자변경이력 날자별 내역조회  -->
+	<select id="selectUsptTaskPartcptsHistByDt" resultType="aicluster.pms.common.entity.UsptTaskPartcptsHist">
+		/** UsptTaskPartcptsHistDao.selectUsptTaskPartcptsHistByDt */
+				  select  'before' 					as change_be_af
+				            ,task_partcpts_change_hist_id
+							,cnvn_change_reqst_id as cnvn_change_req_id
+							,confm_task_partcpts_change_hist_id	as confm_task_partcpts_hist_id
+							,partcpts_nm
+							,chrg_realm_nm
+							,encpt_mbtlnum 	as enc_mbtlnum
+							,encpt_brthdy 		as enc_brthdy
+							,partcptn_rate
+							,mber_id 			as member_id
+							,(select cm.mber_nm from auth_api.cmmt_mber_info cm where cm.mber_id = utph.mber_id  )	as member_nm	/*업체명*/
+						     ,to_char(creat_dt ,'yyyy-mm-dd') as change_de
+				 	 from usp_api.uspt_task_partcpts_change_hist utph
+					where cnvn_change_reqst_id  = #{cnvnChangeReqId}
+					   and confm_task_partcpts_change_hist_id is not null
+					   and confm_task_partcpts_change_hist_id !=''
+			union all
+				select   'after' 					as change_be_af
+				           ,task_partcpts_change_hist_id
+							,cnvn_change_reqst_id as cnvn_change_req_id
+							,confm_task_partcpts_change_hist_id as confm_task_partcpts_hist_id
+							,partcpts_nm
+							,chrg_realm_nm
+							,encpt_mbtlnum as enc_mbtlnum
+							,encpt_brthdy as enc_brthdy
+							,partcptn_rate
+							,mber_id as member_id
+							,(select cm.mber_nm from auth_api.cmmt_mber_info cm where cm.mber_id = utph.mber_id  )	as member_nm	/*업체명*/
+						     ,to_char(creat_dt  ,'yyyy-mm-dd') as change_de
+					from usp_api.uspt_task_partcpts_change_hist utph
+					where cnvn_change_reqst_id   = #{cnvnChangeReqId}
+					  and ( confm_task_partcpts_change_hist_id is null or confm_task_partcpts_change_hist_id = '')
+					  and to_char(creat_dt  ,'yyyymmddhh24miss') = #{changeDt}
+	</select>
+
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptWctTaxitmDao">
+
+	<insert id="insert">
+		/** UsptWctTaxitmDao.insert */
+		insert into usp_api.uspt_wct_taxitm
+			(
+				wct_taxitm_id
+				, wct_ioe_id
+				, wct_taxitm_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{wctTaxitmId}
+				, #{wctIoeId}
+				, #{wctTaxitmNm}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptWctTaxitmDao.update */
+		update usp_api.uspt_wct_taxitm
+		set
+			wct_taxitm_nm = #{wctTaxitmNm}
+			, updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+		where
+			wct_taxitm_id = #{wctTaxitmId}
+			and wct_ioe_id = #{wctIoeId}
+	</update>
+
+	<delete id="delete">
+		/** UsptWctTaxitmDao.delete */
+		delete from usp_api.uspt_wct_taxitm
+		where
+			wct_taxitm_id = #{wctTaxitmId}
+			and wct_ioe_id = #{wctIoeId}
+	</delete>
+
+	<delete id="deleteAll">
+		/** UsptWctTaxitmDao.deleteAll */
+		delete from usp_api.uspt_wct_taxitm
+		where
+			wct_ioe_id = #{wctIoeId}
+	</delete>
+
+	<select id="checkIsUse" resultType="Integer">
+		/** UsptWctTaxitmDao.checkIsUse */
+		select
+			count(distinct ubts.bsns_code) + count(distinct usts.stdr_bsns_code)
+		from usp_api.uspt_wct_taxitm uwt
+			left outer join usp_api.uspt_bsns_taxitm_setup ubts
+				on ubts.wct_taxitm_id = uwt.wct_taxitm_id
+			left outer join usp_api.uspt_stdr_bsns_taxitm_setup usts
+				on usts.wct_taxitm_id = uwt.wct_taxitm_id
+		where
+			uwt.wct_taxitm_id = #{wctTaxitmId}
+	</select>
+
+</mapper>

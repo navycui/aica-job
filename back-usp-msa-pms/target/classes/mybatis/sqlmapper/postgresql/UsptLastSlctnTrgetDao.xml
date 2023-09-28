@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptLastSlctnTrgetDao">
+
+	<insert id="insert">
+		/** UsptLastSlctnTrgetDao.insert */
+		insert into usp_api.uspt_last_slctn_trget
+			(
+				last_slctn_trget_id
+				, evl_last_slctn_id
+				, apply_id
+				, slctn_at
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{lastSlctnTrgetId}
+				, #{evlLastSlctnId}
+				, #{applyId}
+				, #{slctn}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+</mapper>

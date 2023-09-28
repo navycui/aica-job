@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.DashboardDao">
+
+	<select id="selectBsnsApply" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectBsnsApply */
+		select
+			sum(case when rcept_sttus_code = 'REQST' then 1 else 0 end)		as apply_reqst_co
+			, sum(case when rcept_sttus_code = 'MAKEUP' then 1 else 0 end)	as apply_sr_co
+		from usp_api.uspt_bsns_pblanc_applcnt ubpa
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpa.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.insider_id = #{insiderId}
+		where rcept_sttus_code in ('REQST', 'MAKEUP')
+	</select>
+
+
+	<select id="selectSlctnWait" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectSlctnWait */
+		select
+			count(uels.evl_last_slctn_id)			as slctn_wait_co
+		from usp_api.uspt_evl_last_slctn uels
+			inner join usp_api.uspt_evl_plan uep
+				on uep.evl_plan_id = uels.evl_plan_id
+			inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+				on ubpr.pblanc_id = uep.pblanc_id
+				and ubpr.rcept_ordr = uep.rcept_ordr
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpr.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.insider_id = #{insiderId}
+		where
+			last_slctn_at != true
+	</select>
+
+
+	<select id="selectObjcReqst" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectObjcReqst */
+		select
+			sum(apply_co)		as objc_reqst_apply_co
+			, sum(compt_co)		as objc_reqst_compt_co
+		from
+			(
+				select
+					 sum(case when uesor.last_slctn_objc_process_sttus_code = 'LSLC01' then 1 else 0 end)		as apply_co
+					 , sum(case when uesor.last_slctn_objc_process_sttus_code = 'LSLC04' then 1 else 0 end)		as compt_co
+				from usp_api.uspt_evl_slctn_objc_reqst uesor
+					inner join usp_api.uspt_evl_trget uet
+						on uet.evl_trget_id = uesor.evl_trget_id
+					inner join usp_api.uspt_bsns_pblanc_applcnt ubpa2
+						on ubpa2.apply_id = uet.apply_id
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpa2.pblanc_id
+					inner join usp_api.uspt_bsns ub
+						on ub.bsns_code = ubp.bsns_code
+					inner join usp_api.uspt_bsns_charger ubc
+						on ubc.bsns_code = ub.bsns_code
+						and ubc.insider_id = #{insiderId}
+				where
+					uesor.last_slctn_objc_process_sttus_code in ('LSLC01', 'LSLC04')
+				union all
+				select
+					sum(case when ulsor.last_slctn_objc_process_sttus_code = 'LSLC01' then 1 else 0 end)		as apply_co
+					 , sum(case when ulsor.last_slctn_objc_process_sttus_code = 'LSLC04' then 1 else 0 end)		as compt_co
+				from usp_api.uspt_last_slctn_objc_reqst ulsor
+					inner join usp_api.uspt_last_slctn_trget ulst
+						on ulst.last_slctn_trget_id = ulsor.last_slctn_trget_id
+					inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+						on ubpa.apply_id = ulst.apply_id
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpa.pblanc_id
+					inner join usp_api.uspt_bsns ub
+						on ub.bsns_code = ubp.bsns_code
+					inner join usp_api.uspt_bsns_charger ubc
+						on ubc.bsns_code = ub.bsns_code
+						and ubc.insider_id = #{insiderId}
+				where
+					ulsor.last_slctn_objc_process_sttus_code in ('LSLC01', 'LSLC04')
+			) sub
+	</select>
+
+
+	<select id="selectReprt" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectReprt */
+		select
+			sum(case when ur.reprt_ty_code = 'I' and ur.reprt_sttus_code = 'PS' then 1 else 0 end)		as interim_reprt_ps_co
+			, sum(case when ur.reprt_ty_code = 'I' and ur.reprt_sttus_code = 'SR' then 1 else 0 end)	as interim_reprt_sr_co
+			, sum(case when ur.reprt_ty_code = 'R' and ur.reprt_sttus_code = 'PS' then 1 else 0 end)	as result_reprt_ps_co
+			, sum(case when ur.reprt_ty_code = 'R' and ur.reprt_sttus_code = 'SR' then 1 else 0 end)	as result_reprt_sr_co
+		from usp_api.uspt_reprt ur
+			inner join usp_api.uspt_last_slctn_trget ulst
+				on ulst.last_slctn_trget_id = ur.last_slctn_trget_id
+				and ulst.slctn_at = true
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.apply_id = ulst.apply_id
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpa.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.insider_id = #{insiderId}
+		where
+			ur.reprt_sttus_code in ('PS', 'SR')
+	</select>
+
+
+	<select id="selectPfmc" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectPfmc */
+		select
+			sum(case when ur.pfmc_sttus_code  = 'PS' then 1 else 0 end)		as pfmc_ps_co
+			, sum(case when ur.pfmc_sttus_code = 'SR' then 1 else 0 end)	as pfmc_sr_co
+		from usp_api.uspt_pfmc ur
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.apply_id = ur.apply_id
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ubp.pblanc_id = ubpa.pblanc_id
+			inner join usp_api.uspt_bsns ub
+				on ub.bsns_code = ubp.bsns_code
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.insider_id = #{insiderId}
+		where
+			ur.pfmc_sttus_code in ('PS', 'SR')
+	</select>
+
+
+	<select id="selectEduWait" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectEduWait */
+		select
+			sum(wait_co) as edu_wait_co
+		from
+			(
+				select
+					ubpa.apply_id
+					, ulst.last_slctn_trget_id
+					, case when count(usm.last_slctn_trget_id) = 0 then 1 else 0 end as wait_co
+				from usp_api.uspt_bsns_pblanc_applcnt ubpa
+					inner join usp_api.uspt_last_slctn_trget ulst
+						on ulst.apply_id = ubpa.apply_id
+						and ulst.slctn_at = true
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpa.pblanc_id
+					inner join usp_api.uspt_bsns ub
+						on ub.bsns_code = ubp.bsns_code
+					inner join usp_api.uspt_bsns_charger ubc
+						on ubc.bsns_code = ub.bsns_code
+						and ubc.insider_id = #{insiderId}
+					inner join usp_api.uspt_stdr_bsns usb
+						on usb.stdr_bsns_code = ub.stdr_bsns_code
+						and usb.bsns_ty_code = 'EDC'
+					left outer join usp_api.uspt_stdnt_mapng usm
+						on usm.last_slctn_trget_id = ulst.last_slctn_trget_id
+				group by ubpa.apply_id , ulst.last_slctn_trget_id
+			) sub
+	</select>
+
+
+	<select id="selectEvl" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectEvl */
+		select
+			sum(case when uet.presentn_dta_process_div_code = 'PRPR01' then 1 else 0 end)		as evl_reqst_co
+			, sum(case when uet.presentn_dta_process_div_code = 'PRPR03' then 1 else 0 end)	as evl_sr_co
+		from usp_api.uspt_bsns ub
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ub.bsns_code = ubp.bsns_code
+				and ubp.use_at = true
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubp.pblanc_id = ubpa.pblanc_id
+			inner join usp_api.uspt_evl_trget uet
+				on ubpa.apply_id = uet.apply_id
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ubp.bsns_code
+				and ubc.insider_id = #{insiderId}
+		where
+			uet.presentn_dta_process_div_code in ('PRPR01', 'PRPR03')
+	</select>
+
+
+	<select id="selectBsnsWtpln" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectBsnsWtpln */
+		select
+			sum(case when ubpd.bsns_plan_presentn_sttus_code = 'PLPR02' then 1 else 0 end)		as bsns_wtpln_ps_co
+			, sum(case when ubpd.bsns_plan_presentn_sttus_code = 'PLPR03' then 1 else 0 end)	as bsns_wtpln_sr_co
+		from usp_api.uspt_bsns ub
+			inner join  usp_api.uspt_bsns_pblanc ubp
+				on ub.bsns_code = ubp.bsns_code
+				and ubp.use_at = true
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubp.pblanc_id = ubpa.pblanc_id
+			inner join usp_api.uspt_last_slctn_trget ulst
+				on ubpa.apply_id = ulst.apply_id
+				and ulst.slctn_at = true
+			inner join usp_api.uspt_bsns_slctn_trget ubs
+				on ulst.last_slctn_trget_id = ubs.last_slctn_trget_id
+			inner join usp_api.uspt_bsns_wtpln ubpd
+				on ubpd.bsns_slctn_trget_id = ubs.bsns_slctn_trget_id
+			inner join usp_api.uspt_bsns_charger ubc
+				on ubc.bsns_code = ub.bsns_code
+				and ubc.insider_id = #{insiderId}
+		where
+			ubpd.bsns_plan_presentn_sttus_code in ('PLPR02', 'PLPR03')
+	</select>
+
+
+	<select id="selectBsnsCnvnSign" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectBsnsCnvnSign */
+		select
+			count(1)				as bsns_cnvn_sign_co
+		from usp_api.uspt_bsns ub
+			inner join usp_api.uspt_bsns_pblanc ubp
+				on ub.bsns_code  = ubp.bsns_code
+				and ubp.use_at = true
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubp.pblanc_id = ubpa.pblanc_id
+			inner join usp_api.uspt_bsns_cnvn ubc
+				on  ubpa.apply_id = ubc.apply_id
+			inner join usp_api.uspt_bsns_charger ubch
+				on ubch.bsns_code = ub.bsns_code
+				and ubch.insider_id = #{insiderId}
+		where
+			ubc.cnvn_sttus_code = 'CNST04'
+	</select>
+
+	<select id="selectBsnsCnvnChg" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectBsnsCnvnChg */
+		select  count(1)					 as bsns_cnvn_chg_co
+		from usp_api.uspt_bsns ub
+			inner join  usp_api.uspt_bsns_pblanc ubp
+				on ub.bsns_code  = ubp.bsns_code
+				and ubp.use_at = true
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubp.pblanc_id = ubpa.pblanc_id
+			inner join usp_api.uspt_bsns_cnvn ubc
+				on ubpa.apply_id = ubc.apply_id
+			inner join usp_api.uspt_cnvn_change_reqst uccr
+				on ubc.bsns_cnvn_id = uccr.bsns_cnvn_id
+			inner join usp_api.uspt_bsns_charger ubch
+				on ubch.bsns_code = ub.bsns_code
+				and ubch.insider_id = #{insiderId}
+		where
+			uccr.cnvn_change_sttus_code	='CCHS01'
+	</select>
+
+
+	<select id="selectExpert" resultType="aicluster.pms.common.dto.DashboardDto">
+		/** DashboardDao.selectExpert */
+		select
+			count(ue.expert_id)		as expert_reqst_co
+		from usp_api.uspt_expert ue
+		where
+			ue.expert_reqst_process_sttus_code = 'ERPS01'
+	</select>
+
+</mapper>

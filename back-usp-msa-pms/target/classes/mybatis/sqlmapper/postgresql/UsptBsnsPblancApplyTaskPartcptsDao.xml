@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancApplyTaskPartcptsDao">
+
+	<insert id="insert">
+		/** UsptBsnsPblancApplyTaskPartcptsDao.insert */
+		insert into usp_api.uspt_bsns_pblanc_apply_task_partcpts
+			(
+				apply_id
+				, partcpts_id
+				, partcpts_nm
+				, chrg_realm_nm
+				, encpt_mbtlnum
+				, encpt_brthdy
+				, partcptn_rate
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{applyId}
+				, #{partcptsId}
+				, #{partcptsNm}
+				, #{chrgRealmNm}
+				, #{encMbtlnum}
+				, #{encBrthdy}
+				, #{partcptnRate}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsPblancApplyTaskPartcptsDao.insertList */
+		insert into usp_api.uspt_bsns_pblanc_apply_task_partcpts
+			(
+				apply_id
+				, partcpts_id
+				, partcpts_nm
+				, chrg_realm_nm
+				, encpt_mbtlnum
+				, encpt_brthdy
+				, partcptn_rate
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.applyId}
+				, #{item.partcptsId}
+				, #{item.partcptsNm}
+				, #{item.chrgRealmNm}
+				, #{item.encMbtlnum}
+				, #{item.encBrthdy}
+				, #{item.partcptnRate}
+				, #{item.creatorId}
+				, #{item.createdDt}
+				, #{item.updaterId}
+				, #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsPblancApplyTaskPartcptsDao.update */
+		update usp_api.uspt_bsns_pblanc_apply_task_partcpts
+		set
+			partcpts_nm		= #{partcptsNm}
+			, chrg_realm_nm	= #{chrgRealmNm}
+			, encpt_mbtlnum	= #{encMbtlnum}
+			, encpt_brthdy	= #{encBrthdy}
+			, partcptn_rate	= #{partcptnRate}
+			, updusr_id		= #{updaterId}
+			, updt_dt		= #{updatedDt}
+		where
+			apply_id = #{applyId}
+			and partcpts_id = #{partcptsId}
+	</update>
+
+	<delete id="delete">
+		/** UsptBsnsPblancApplyTaskPartcptsDao.delete */
+		delete from usp_api.uspt_bsns_pblanc_apply_task_partcpts
+		where
+			apply_id = #{applyId}
+			and partcpts_id = #{partcptsId}
+	</delete>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptBsnsPblancApplyTaskPartcpts">
+		/** UsptBsnsPblancApplyTaskPartcptsDao.select */
+		select
+			apply_id
+			, partcpts_id
+			, partcpts_nm
+			, chrg_realm_nm
+			, encpt_mbtlnum		as enc_mbtlnum
+			, encpt_brthdy		as enc_brthdy
+			, partcptn_rate
+			, creatr_id			as creator_id
+			, creat_dt			as created_dt
+			, updusr_id			as updater_id
+			, updt_dt			as updated_dt
+		from usp_api.uspt_bsns_pblanc_apply_task_partcpts
+		where
+			apply_id = #{applyId}
+			and partcpts_id = #{partcptsId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsPblancApplyTaskPartcpts">
+		/** UsptBsnsPblancApplyTaskPartcptsDao.selectList */
+		select
+			apply_id
+			, partcpts_id
+			, partcpts_nm
+			, chrg_realm_nm
+			, encpt_mbtlnum		as enc_mbtlnum
+			, encpt_brthdy		as enc_brthdy
+			, partcptn_rate
+		from usp_api.uspt_bsns_pblanc_apply_task_partcpts
+		where
+			apply_id = #{applyId}
+	</select>
+</mapper>

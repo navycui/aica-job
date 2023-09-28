@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+  <context id="aiclusters" defaultModelType="hierarchical" targetRuntime="MyBatis3Simple">
+
+		<jdbcConnection driverClass="${jdbcDriverClass}" connectionURL="${jdbcUrl}"
+			userId="${jdbcUsername}" password="${jdbcPassword}"/>
+
+		<javaModelGenerator targetPackage="${javaModelPkg}" targetProject="${javaSrcPath}">
+            <property name="enableSubPackages" value="false"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+		<sqlMapGenerator targetPackage="${sqlMapperPkg}" targetProject="${resourcePath}">
+            <property name="enableSubPackages" value="false"/>
+		</sqlMapGenerator>
+
+		<javaClientGenerator type="XMLMAPPER" targetPackage="${javaMapperPkg}" targetProject="${javaSrcPath}">
+            <property name="enableSubPackages" value="false"/>
+		</javaClientGenerator>
+
+		<table tableName="cmmt_acbg"				domainObjectName="CmmtAcbg"				mapperName="CmmtAcbgDao" ></table>
+<!-- 		<table tableName="cmmt_approval"			domainObjectName="CmmtApproval"			mapperName="CmmtApprovalDao" ></table> -->
+<!-- 		<table tableName="cmmt_approval_dispatch"	domainObjectName="CmmtApprovalDispatch"	mapperName="CmmtApprovalDispatchDao" ></table> -->
+<!-- 		<table tableName="cmmt_approval_noti"		domainObjectName="CmmtApprovalNoti"		mapperName="CmmtApprovalNotiDao" ></table> -->
+<!-- 		<table tableName="cmmt_approver"			domainObjectName="CmmtApprover"			mapperName="CmmtApproverDao" ></table> -->
+<!-- 		<table tableName="cmmt_attachment"			domainObjectName="CmmtAtchmnfl"		mapperName="CmmtAtchmnflDao" ></table> -->
+<!-- 		<table tableName="cmmt_attachment_group"	domainObjectName="CmmtAtchmnflGroup"	mapperName="CmmtAtchmnflGroupDao" ></table> -->
+<!-- 		<table tableName="cmmt_authority"			domainObjectName="CmmtAuthority"		mapperName="CmmtAuthorityDao" ></table> -->
+<!-- 		<table tableName="cmmt_authority_role"		domainObjectName="CmmtAuthorityRole"	mapperName="CmmtAuthorityRoleDao" ></table> -->
+<!-- 		<table tableName="cmmt_banner"				domainObjectName="CmmtBanner"			mapperName="CmmtBannerDao" ></table> -->
+<!-- 		<table tableName="cmmt_black_list_ri"		domainObjectName="CmmtBlackListRi"		mapperName="CmmtBlackListRiDao" ></table> -->
+<!-- 		<table tableName="cmmt_board"				domainObjectName="CmmtBoard"			mapperName="CmmtBoardDao" ></table> -->
+<!-- 		<table tableName="cmmt_board_article"		domainObjectName="CmmtBoardArticle"		mapperName="CmmtBoardArticleDao" ></table> -->
+<!-- 		<table tableName="cmmt_board_authority"		domainObjectName="CmmtBoardAuthority"	mapperName="CmmtBoardAuthorityDao" ></table> -->
+<!-- 		<table tableName="cmmt_board_cmmnt"			domainObjectName="CmmtBoardCmmnt"		mapperName="CmmtBoardCmmntDao" ></table> -->
+<!-- 		<table tableName="cmmt_code"				domainObjectName="CmmtCode"				mapperName="CmmtCodeDao" ></table> -->
+<!-- 		<table tableName="cmmt_code_group"			domainObjectName="CmmtCodeGroup"		mapperName="CmmtCodeGroupDao" ></table> -->
+<!-- 		<table tableName="cmmt_crqfc"				domainObjectName="CmmtCrqfc"			mapperName="CmmtCrqfcDao" ></table> -->
+<!-- 		<table tableName="cmmt_dept"				domainObjectName="CmmtDept"				mapperName="CmmtDeptDao" ></table> -->
+<!-- 		<table tableName="cmmt_email"				domainObjectName="CmmtEmail"			mapperName="CmmtEmailDao" ></table> -->
+<!-- 		<table tableName="cmmt_email_recipient"		domainObjectName="CmmtEmailRecipient"	mapperName="CmmtEmailRecipientDao" ></table> -->
+<!-- 		<table tableName="cmmt_ent"					domainObjectName="CmmtEnt"				mapperName="CmmtEntDao" ></table> -->
+<!-- 		<table tableName="cmmt_evaluator_login"		domainObjectName="CmmtEvaluatorLogin"	mapperName="CmmtEvaluatorLoginDao" ></table> -->
+<!-- 		<table tableName="cmmt_external_act"		domainObjectName="CmmtExternalAct"		mapperName="CmmtExternalActDao" ></table> -->
+<!-- 		<table tableName="cmmt_external_edc"		domainObjectName="CmmtExternalEdc"		mapperName="CmmtExternalEdcDao" ></table> -->
+<!-- 		<table tableName="cmmt_insider"				domainObjectName="CmmtInsider"			mapperName="CmmtInsiderDao" ></table> -->
+<!-- 		<table tableName="cmmt_insider_hist"		domainObjectName="CmmtInsiderHist"		mapperName="CmmtInsiderHistDao" ></table> -->
+<!-- 		<table tableName="cmmt_job_career"			domainObjectName="CmmtJobCareer"		mapperName="CmmtJobCareerDao" ></table> -->
+<!-- 		<table tableName="cmmt_member"				domainObjectName="CmmtMember"			mapperName="CmmtMemberDao" ></table> -->
+<!-- 		<table tableName="cmmt_member_hist"			domainObjectName="CmmtMemberHist"		mapperName="CmmtMemberHistDao" ></table> -->
+<!-- 		<table tableName="cmmt_menu"				domainObjectName="CmmtMenu"				mapperName="CmmtMenuDao" ></table> -->
+<!-- 		<table tableName="cmmt_menu_role"			domainObjectName="CmmtMenuRole"			mapperName="CmmtMenuRoleDao" ></table> -->
+<!-- 		<table tableName="cmmt_msvc"				domainObjectName="CmmtMsvc"				mapperName="CmmtMsvcDao" ></table> -->
+<!-- 		<table tableName="cmmt_popup"				domainObjectName="CmmtPopup"			mapperName="CmmtPopupDao" ></table> -->
+<!-- 		<table tableName="cmmt_program"				domainObjectName="CmmtProgram"			mapperName="CmmtProgramDao" ></table> -->
+<!-- 		<table tableName="cmmt_program_role"		domainObjectName="CmmtProgramRole"		mapperName="CmmtProgramRoleDao" ></table> -->
+<!-- 		<table tableName="cmmt_project_career"		domainObjectName="CmmtProjectCareer"	mapperName="CmmtProjectCareerDao" ></table> -->
+<!-- 		<table tableName="cmmt_qna"					domainObjectName="CmmtQna"				mapperName="CmmtQnaDao" ></table> -->
+<!-- 		<table tableName="cmmt_qna_answerer"		domainObjectName="CmmtQnaAnswerer"		mapperName="CmmtQnaAnswererDao" ></table> -->
+<!-- 		<table tableName="cmmt_qna_quest"			domainObjectName="CmmtQnaQuest"			mapperName="CmmtQnaQuestDao" ></table> -->
+<!-- 		<table tableName="cmmt_recommend_site"		domainObjectName="CmmtRecommendSite"	mapperName="CmmtRecommendSiteDao" ></table> -->
+<!-- 		<table tableName="cmmt_role"				domainObjectName="CmmtRole"				mapperName="CmmtRoleDao" ></table> -->
+<!-- 		<table tableName="cmmt_sms"					domainObjectName="CmmtSms"				mapperName="CmmtSmsDao" ></table> -->
+<!-- 		<table tableName="cmmt_sms_recipient"		domainObjectName="CmmtSmsRecipient"		mapperName="CmmtSmsRecipientDao" ></table> -->
+<!-- 		<table tableName="cmmt_survey"				domainObjectName="CmmtSurvey"			mapperName="CmmtSurveyDao" ></table> -->
+<!-- 		<table tableName="cmmt_survey_answer"		domainObjectName="CmmtSurveyAnswer"		mapperName="CmmtSurveyAnswerDao" ></table> -->
+<!-- 		<table tableName="cmmt_survey_member_ans"	domainObjectName="CmmtSurveyMemberAns"	mapperName="CmmtSurveyMemberAnsDao" ></table> -->
+<!-- 		<table tableName="cmmt_survey_question"		domainObjectName="CmmtSurveyQuestion"	mapperName="CmmtSurveyQuestionDao" ></table> -->
+<!-- 		<table tableName="cmmt_terms"				domainObjectName="CmmtTerms"			mapperName="CmmtTermsDao" ></table> -->
+
+  </context>
+</generatorConfiguration>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancApplyAttachDao">
+
+	<insert id="insert">
+		/** UsptBsnsPblancApplyAttachDao.insert */
+		insert into usp_api.uspt_bsns_pblanc_apply_atchmnfl
+			(
+				apply_id
+				, atchmnfl_setup_id
+				, atchmnfl_id
+				, samenss_rate
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values(
+				#{applyId}
+				, #{atchmnflSetupId}
+				, #{attachmentId}
+				, #{samenssRate}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsPblancApplyAttachDao.insertList */
+		insert into usp_api.uspt_bsns_pblanc_apply_atchmnfl
+			(
+				apply_id
+				, atchmnfl_setup_id
+				, atchmnfl_id
+				, samenss_rate
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.applyId}
+				, #{item.atchmnflSetupId}
+				, #{item.attachmentId}
+				, #{item.samenssRate}
+				, #{item.creatorId}
+				, #{item.createdDt}
+				, #{item.updaterId}
+				, #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsPblancApplyAttachDao.update */
+		update usp_api.uspt_bsns_pblanc_apply_atchmnfl
+		set
+			atchmnfl_id		= #{attachmentId}
+			, samenss_rate	= #{samenssRate}
+			, updusr_id		= #{updaterId}
+			, updt_dt		= #{updatedDt}
+		where
+			apply_id = #{applyId}
+			and atchmnfl_setup_id = #{atchmnflSetupId}
+	</update>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptBsnsPblancApplyAttach">
+		/** UsptBsnsPblancApplyAttachDao.select */
+		select
+			apply_id
+			, atchmnfl_setup_id
+			, atchmnfl_id			as attachment_id
+			, samenss_rate
+			, creatr_id				as creator_id
+			, creat_dt				as created_dt
+			, updusr_id				as updater_id
+			, updt_dt				as updated_dt
+		from usp_api.uspt_bsns_pblanc_apply_atchmnfl
+		where
+			apply_id = #{applyId}
+			and atchmnfl_setup_id = #{atchmnflSetupId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.ApplyAttachDto">
+		/** UsptBsnsPblancApplyAttachDao.selectList */
+		select
+			ubas.atchmnfl_setup_id			as atchmnfl_setup_id
+			, ubas.bsns_code				as bsns_cd
+			, ubas.file_knd_nm				as file_knd_nm
+			, ubas.essntl_at				as essntl
+			, ubas.format_atchmnfl_id		as format_attachment_id
+			, (	select
+					file_nm
+				from com_api.cmmt_atchmnfl
+				where
+					atchmnfl_id = ubas.format_atchmnfl_id
+					and atchmnfl_group_id = '${@aicluster.pms.common.util.Code@SINGLE_FILE_GROUP_ID}'
+					and file_delete_at = false
+			) as format_attachment_nm
+			, ubpaa.atchmnfl_id			as attachment_id
+			, ca.file_nm				as attachment_nm
+			, ca.file_size				as attachment_size
+			, coalesce(ubpaa.samenss_rate, 0)	as samenss_rate
+		from usp_api.uspt_bsns_atchmnfl_setup ubas
+			left outer join usp_api.uspt_bsns_pblanc_apply_atchmnfl ubpaa
+				on ubpaa.atchmnfl_setup_id = ubas.atchmnfl_setup_id
+				and ubpaa.apply_id = #{applyId}
+			left outer join com_api.cmmt_atchmnfl ca
+				on ca.atchmnfl_id = ubpaa.atchmnfl_id
+				and ca.atchmnfl_group_id = '${@aicluster.pms.common.util.Code@SINGLE_FILE_GROUP_ID}'
+				and ca.file_delete_at = false
+		where
+			ubas.bsns_code = #{bsnsCd}
+	</select>
+
+</mapper>

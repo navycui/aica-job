@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptTaskPrtcmpnyInfoHistDao">
+
+	<!-- ******************************************************************* 과제참여기업정보변경이력 ********************************************************************** -->
+	<insert id="insert">
+		/** UsptTaskPrtcmpnyInfoHistDao.insert */
+			insert into usp_api.uspt_task_prtcmpny_info_change_hist (
+				 task_prtcmpny_info_change_hist_id
+				,cnvn_change_reqst_id
+				,confm_task_prtcmpny_info_change_hist_id
+				,prtcmpny_co
+				,smlpz_co
+				,eoms_co
+				,etc_co
+				,creatr_id
+				,creat_dt
+			) values (
+				 #{taskPrtcmpnyInfoHistId}
+				,#{cnvnChangeReqId}
+				,#{confmTaskPrtcmpnyInfoHistId}
+				,#{partcptnCompanyCnt}
+				,#{smlpzCnt}
+				,#{mspzCnt}
+				,#{etcCnt}
+				,#{creatorId}
+				,#{createdDt}
+			)
+	</insert>
+
+	<!-- 과제참여기업정보변경이력 조회-->
+	<select id="selectMaxHist" resultType="aicluster.pms.common.entity.UsptTaskPrtcmpnyInfoHist">
+		/** UsptTaskPrtcmpnyInfoHistDao.selectMaxHist */
+	  	  	select a.*
+			from (
+						select	 task_prtcmpny_info_change_hist_id 			as task_prtcmpny_info_hist_id
+								, cnvn_change_reqst_id 								as cnvn_change_req_id
+								, confm_task_prtcmpny_info_change_hist_id 	as confm_task_prtcmpny_info_hist_id
+								, prtcmpny_co 	as partcptn_company_cnt
+								, smlpz_co		as smlpz_cnt
+								, eoms_co 		as mspz_cnt
+								, etc_co 			as etc_cnt
+								 ,row_number() over (order by creat_dt   desc) as rn
+						from usp_api.uspt_task_prtcmpny_info_change_hist
+				  	  where cnvn_change_reqst_id   = #{cnvnChangeReqId}
+				  	   and( confm_task_prtcmpny_info_change_hist_id   is null  or confm_task_prtcmpny_info_change_hist_id   = '')
+				) a
+			  where a.rn = 1
+	</select>
+
+	<!--  과제참여기업정보변경이력 변경날자 목록-->
+	<select id="selectUsptTaskPrtcmpnyInfoHistChangeDe" resultType="aicluster.pms.common.entity.UsptCnvnChangeReqHistDt">
+		/** UsptTaskPrtcmpnyInfoHistDao.selectUsptTaskPrtcmpnyInfoHistChangeDe */
+			select	  cnvn_change_reqst_id as cnvn_change_req_id
+					, to_char(creat_dt  ,'yyyymmdd') as change_de
+					, to_char(creat_dt  ,'yyyymmddhh24miss') as change_dt
+		 	 from usp_api.uspt_task_prtcmpny_info_change_hist
+			where cnvn_change_reqst_id   = #{cnvnChangeReqId}
+			 and ( confm_task_prtcmpny_info_change_hist_id   is null or confm_task_prtcmpny_info_change_hist_id   ='')	/*변경전정보는 제외*/
+			order by creat_dt   desc
+	</select>
+
+	<!--  과제참여기업정보변경이력 날자별 내역조회  -->
+	<select id="selectUsptTaskPrtcmpnyInfoHistByDt" resultType="aicluster.pms.common.entity.UsptTaskPrtcmpnyInfoHist">
+		/** UsptTaskPrtcmpnyInfoHistDao.selectUsptTaskPrtcmpnyInfoHistByDt */
+				  select  'before' 											as change_be_af
+				            , task_prtcmpny_info_change_hist_id 	as task_prtcmpny_info_hist_id
+							, cnvn_change_reqst_id 						as cnvn_change_req_id
+							, confm_task_prtcmpny_info_change_hist_id as confm_task_prtcmpny_info_hist_id
+							, prtcmpny_co as partcptn_company_cnt
+							, smlpz_co 		as smlpz_cnt
+							, eoms_co 		as mspz_cnt
+							, etc_co 			as etc_cnt
+					        ,to_char(creat_dt  ,'yyyy-mm-dd') as change_de
+				 	 from usp_api.uspt_task_prtcmpny_info_change_hist
+					where cnvn_change_reqst_id   = #{cnvnChangeReqId}
+					   and confm_task_prtcmpny_info_change_hist_id   is not null
+					   and confm_task_prtcmpny_info_change_hist_id   !=''
+			union all
+				select   'after' 							as change_be_af
+				            , task_prtcmpny_info_change_hist_id as task_prtcmpny_info_hist_id
+							, cnvn_change_reqst_id as cnvn_change_req_id
+							, confm_task_prtcmpny_info_change_hist_id as confm_task_prtcmpny_info_hist_id
+							, prtcmpny_co as partcptn_company_cnt
+							, smlpz_co as smlpz_cnt
+							, eoms_co as mspz_cnt
+							, etc_co as etc_cnt
+					        ,to_char(creat_dt  ,'yyyy-mm-dd') as change_de
+					from usp_api.uspt_task_prtcmpny_info_change_hist
+					where cnvn_change_reqst_id   = #{cnvnChangeReqId}
+					  and ( confm_task_prtcmpny_info_change_hist_id   is null or confm_task_prtcmpny_info_change_hist_id   = '')
+					  and to_char(creat_dt  ,'yyyymmddhh24miss') = #{changeDt}
+	</select>
+
+
+</mapper>

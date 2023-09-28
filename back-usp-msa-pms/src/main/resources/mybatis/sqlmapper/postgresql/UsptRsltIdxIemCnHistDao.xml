@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptRsltIdxIemCnHistDao">
+
+	<insert id="insert">
+		/** UsptRsltIdxIemCnHistDao.insert */
+		insert into usp_api.uspt_pfmc_idx_iem_cn_hist
+			(
+				pfmc_hist_id
+				, pfmc_idx_iem_id
+				, pfmc_idx_iem_cn_id
+				, pfmc_idx_iem_cn
+				, sort_ordr
+				, creatr_id
+				, creat_dt
+			) values (
+				#{rsltHistId}
+				, #{rsltIdxIemId}
+				, #{rsltIdxIemCnId}
+				, #{rsltIdxIemCn}
+				, #{sortOrder}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.RsltIdxIemCnHistDto">
+		/** UsptRsltIdxIemCnHistDao.selectList */
+		select
+			uriich.pfmc_hist_id													as rslt_hist_id
+			, uriich.pfmc_idx_iem_cn_id											as rslt_idx_iem_cn_id
+			, uriic.pfmc_idx_detail_iem_id										as rslt_idx_detail_iem_id
+			, ubridi.detail_iem_nm
+			, uriic.pfmc_idx_stdr_iem_id										as rslt_idx_std_iem_id
+			, ubrisi.stdr_iem_nm												as std_iem_nm
+			, uriich.pfmc_idx_iem_cn											as rslt_idx_iem_cn
+			, uriich.sort_ordr													as sort_order
+			, case when ubrisi.pfmc_idx_stdr_iem_id is null then ubridi.iem_unit_code  else ubrisi.iem_unit_code end	as iem_unit_cd
+		from usp_api.uspt_pfmc_idx_iem_cn_hist uriich
+			inner join usp_api.uspt_pfmc_idx_iem_cn uriic
+				on uriic.pfmc_idx_iem_cn_id = uriich.pfmc_idx_iem_cn_id
+			inner join usp_api.uspt_bsns_pfmc_idx_detail_iem ubridi
+					on ubridi.pfmc_idx_detail_iem_id = uriic.pfmc_idx_detail_iem_id
+			left outer join usp_api.uspt_bsns_pfmc_idx_stdr_iem ubrisi
+				on ubrisi.pfmc_idx_stdr_iem_id = uriic.pfmc_idx_stdr_iem_id
+		where
+			uriich.pfmc_hist_id = #{rsltHistId}
+			and uriich.pfmc_idx_iem_id = #{rsltIdxIemId}
+		order by uriic.pfmc_idx_detail_iem_id, uriic.pfmc_idx_stdr_iem_id
+	</select>
+
+</mapper>

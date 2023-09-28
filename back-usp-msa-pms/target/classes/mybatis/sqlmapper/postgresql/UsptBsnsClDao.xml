@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsClDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsCl">
+		/** BsnsClDao.selectList */
+		select
+			bsns_cl_id
+			, parnts_bsns_cl_id
+			, bsns_cl_nm
+			, sort_ordr
+			, use_at as enabled
+			, creatr_id
+			, creat_dt
+			, updusr_id
+			, updt_dt
+		from usp_api.uspt_bsns_cl
+		<where>
+			<if test='enabled != null and enabled != ""'>
+				and use_at = true
+			</if>
+			<choose>
+				<when test='parentBsnsClId != null and parentBsnsClId != ""'>
+					and parnts_bsns_cl_id = #{parentBsnsClId}
+				</when>
+				<otherwise>
+					and parnts_bsns_cl_id is null
+				</otherwise>
+			</choose>
+		</where>
+		order by sort_ordr
+	</select>
+
+
+	<insert id="insert">
+		insert into usp_api.uspt_bsns_cl
+			(
+				bsns_cl_id
+				, parnts_bsns_cl_id
+				, bsns_cl_nm
+				, sort_ordr
+				, use_at
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{bsnsClId}
+				, #{parentBsnsClId}
+				, #{bsnsClNm}
+				, #{sortOrder}
+				, #{enabled}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+
+	<update id="update">
+		/** BsnsClDao.update */
+		update usp_api.uspt_bsns_cl
+		set
+			bsns_cl_nm	= #{bsnsClNm}
+			, sort_ordr	= #{sortOrder}
+			, use_at	= #{enabled}
+			, updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+		where
+			bsns_cl_id = #{bsnsClId}
+	</update>
+
+
+	<delete id="delete">
+		/** BsnsClDao.delete */
+		delete from usp_api.uspt_bsns_cl
+		where
+			bsns_cl_id = #{bsnsClId}
+	</delete>
+
+
+	<delete id="deleteAllForChild">
+		/** BsnsClDao.deleteAllForChild */
+		delete from usp_api.uspt_bsns_cl
+		where
+			parnts_bsns_cl_id = #{bsnsClId}
+	</delete>
+
+
+	<select id="selectUseCnt" resultType="Integer">
+		/** BsnsClDao.selectUseCnt */
+		select
+			count(*)
+		from usp_api.uspt_stdr_bsns
+		where
+			bsns_cl_id in (
+				select
+					bsns_cl_id
+				from usp_api.uspt_bsns_cl ubc
+				where
+					bsns_cl_id = #{bsnsClId}
+					or parnts_bsns_cl_id = #{bsnsClId}
+			)
+	</select>
+
+
+	<select id="selectBsnsClNm" resultType="String">
+		/** BsnsClDao.selectBsnsClNm */
+		select
+			coalesce((select bsns_cl_nm || ' > '  from usp_api.uspt_bsns_cl where bsns_cl_id = ubc.parnts_bsns_cl_id), '') || ubc.bsns_cl_nm
+		from usp_api.uspt_bsns_cl ubc
+		where
+			ubc.bsns_cl_id = #{bsnsClId}
+	</select>
+
+</mapper>

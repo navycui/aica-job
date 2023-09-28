@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptCnsltHistDao">
+
+	<insert id="insert">
+		/** UsptCnsltHistDao.insert */
+		insert into usp_api.uspt_cnslt_hist (
+			   hist_id
+			 , extrc_mfcmm_id
+			 , talk_dt
+			 , lsn_result_code
+			 , cnslt_cn
+			 , creatr_id
+			 , creat_dt
+		) values (
+			   #{histId}
+			 , #{extrcMfcmmId}
+			 , #{talkDt}
+			 , #{lsnResultCd}
+			 , #{cnsltCn}
+			 , #{creatorId}
+			 , #{createdDt}
+		)
+	</insert>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptCnsltHist">
+		/** UsptCnsltHistDao.select */
+		select hist_id
+			 , extrc_mfcmm_id
+			 , talk_dt
+			 , lsn_result_code as lsn_result_cd
+			 , cnslt_cn
+			 , creatr_id as creator_id
+			 , creat_dt as created_dt
+		from usp_api.uspt_cnslt_hist
+		where hist_id = #{histId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptCnsltHist">
+		/** UsptCnsltHistDao.selectList */
+		select hist_id
+			 , extrc_mfcmm_id
+			 , talk_dt
+			 , to_char(talk_dt, 'YYYY-MM-DD HH24:MI' ) as talk_dt_nm
+			 , lsn_result_code as lsn_result_cd
+			 , fn_cmm_get_code_nm('LSN_RESULT',lsn_result_code) as lsn_result_nm
+			 , cnslt_cn
+			 , fn_cmm_get_member(creatr_id) as register_nm
+			 , creatr_id as creator_id
+			 , creat_dt as created_dt
+ 			 , to_char(creat_dt, 'YYYY-MM-DD HH24:MI:SS' ) as regist_dt
+ 			 , row_number() over (order by creat_dt asc) as rn
+		 from usp_api.uspt_cnslt_hist
+		where extrc_mfcmm_id = #{extrcMfcmmId}
+	</select>
+
+	<delete id="delete">
+		/** UsptCnsltHistDao.delete */
+		delete
+		  from usp_api.uspt_cnslt_hist
+		 where hist_id = #{histId}
+	</delete>
+
+
+	<delete id="deleteByCmitId">
+	/** UsptCnsltHistDao.deleteByCmitId */
+		delete
+		  from usp_api.uspt_cnslt_hist
+		 where hist_id in (
+		 				   select c.hist_id
+		 					 from usp_api.uspt_evl_mfcmm_extrc a
+								  inner join usp_api.uspt_extrc_mfcmm b
+								 		  on a.mfcmm_extrc_id  = b.mfcmm_extrc_id
+								  inner join usp_api.uspt_cnslt_hist c
+										  on c.extrc_mfcmm_id = b.extrc_mfcmm_id
+						    where a.evl_cmit_id = #{evlCmitId}
+						  )
+	</delete>
+
+
+
+</mapper>

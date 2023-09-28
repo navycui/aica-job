@@ -1,0 +1,9 @@
+[role="dialog"] {
+  [role="cell"]:nth-child(1) > .MuiButtonBase-root {
+    color: #ee1a1a;
+  }
+
+  [role="cell"]:nth-child(7) > .MuiButtonBase-root {
+    color: #4063EC;
+  }
+}

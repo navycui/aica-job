@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancApplyChklstDao">
+
+	<insert id="insert">
+		/** UsptBsnsPblancApplyChklstDao.insert */
+		insert into usp_api.uspt_bsns_pblanc_apply_chklst
+			(
+				apply_id
+				, chklst_id
+				, ceck_result_div_code
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{applyId}
+				, #{chklstId}
+				, #{ceckResultDivCd}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsPblancApplyChklstDao.insertList */
+		insert into usp_api.uspt_bsns_pblanc_apply_chklst
+			(
+				apply_id
+				, chklst_id
+				, ceck_result_div_code
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.applyId}
+				, #{item.chklstId}
+				, #{item.ceckResultDivCd}
+				, #{item.creatorId}
+				, #{item.createdDt}
+				, #{item.updaterId}
+				, #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsPblancApplyChklstDao.update */
+		update usp_api.uspt_bsns_pblanc_apply_chklst
+		set
+			ceck_result_div_code	= #{ceckResultDivCd}
+			, updusr_id		= #{updaterId}
+			, updt_dt		= #{updatedDt}
+		where
+			apply_id = #{applyId}
+			and chklst_id = #{chklstId}
+	</update>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptBsnsPblancApplyChklst">
+		/** UsptBsnsPblancApplyChklstDao.select */
+		select
+			apply_id
+			, chklst_id
+			, ceck_result_div_code	as ceck_result_div_cd
+			, creatr_id				as creator_id
+			, creat_dt				as created_dt
+			, updusr_id				as updater_id
+			, updt_dt				as updated_dt
+		from usp_api.uspt_bsns_pblanc_apply_chklst
+		where
+			apply_id = #{applyId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsPblancApplyChklst">
+		/** UsptBsnsPblancApplyChklstDao.selectList */
+		select
+			ubpac.chklst_id
+			, ubc.chklst_cn
+			, ubpac.ceck_result_div_code			as ceck_result_div_cd
+		from usp_api.uspt_bsns_pblanc_apply_chklst ubpac
+			inner join usp_api.uspt_bsns_chklst ubc
+				on ubc.chklst_id = ubpac.chklst_id
+		where
+			ubpac.apply_id = #{applyId}
+	</select>
+
+</mapper>

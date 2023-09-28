@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptRsltIdxIemCnDao">
+	<insert id="insert">
+		/** UsptRsltIdxIemCnDao.insert */
+		insert into usp_api.uspt_pfmc_idx_iem_cn
+			(
+				pfmc_idx_iem_cn_id
+				, pfmc_idx_iem_id
+				, pfmc_idx_detail_iem_id
+				, pfmc_idx_stdr_iem_id
+				, pfmc_idx_iem_cn
+				, sort_ordr
+				, delete_at
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{rsltIdxIemCnId}
+				, #{rsltIdxIemId}
+				, #{rsltIdxDetailIemId}
+				, #{rsltIdxStdIemId}
+				, #{rsltIdxIemCn}
+				, #{sortOrder}
+				, #{deleteAt}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptRsltIdxIemCnDao.update */
+		update usp_api.uspt_pfmc_idx_iem_cn
+		set
+			pfmc_idx_iem_cn = #{rsltIdxIemCn}
+			, updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+		where
+			pfmc_idx_iem_cn_id = #{rsltIdxIemCnId}
+	</update>
+
+
+	<update id="updateDeleteAt">
+		/** UsptRsltIdxIemCnDao.delete */
+		update usp_api.uspt_pfmc_idx_iem_cn
+		set
+			delete_at = #{deleteAt}
+			, updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+		where
+			pfmc_idx_iem_cn_id = #{rsltIdxIemCnId}
+	</update>
+
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptRsltIdxIemCn">
+		/** UsptRsltIdxIemCnDao.select */
+		select
+			pfmc_idx_iem_cn_id				as rslt_idx_iem_cn_id
+			, pfmc_idx_iem_id				as rslt_idx_iem_id
+			, pfmc_idx_detail_iem_id		as rslt_idx_detail_iem_id
+			, pfmc_idx_stdr_iem_id			as rslt_idx_std_iem_id
+			, pfmc_idx_iem_cn				as rslt_idx_iem_cn
+			, sort_ordr						as sort_order
+			, delete_at						as delete_at
+			, creatr_id						as creator_id
+			, creat_dt						as created_dt
+			, updusr_id						as updater_id
+			, updt_dt						as updated_dt
+		from usp_api.uspt_pfmc_idx_iem_cn
+		where
+			pfmc_idx_iem_cn_id = #{rsltIdxIemCnId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptRsltIdxIemCn">
+		/** UsptRsltIdxIemCnDao.selectList */
+		select
+			sub.*
+			, case when sub.iem_unit_cd = 'DSCRP' or sub.iem_unit_cd = 'TEXT' then ''
+				else fn_cmm_get_code_nm('IEM_UNIT', sub.iem_unit_cd)
+				end as iem_unit_nm
+		from	(
+					select
+						uriic.pfmc_idx_iem_cn_id								as rslt_idx_iem_cn_id
+						, uriic.pfmc_idx_detail_iem_id							as rslt_idx_detail_iem_id
+						, ubridi.detail_iem_nm
+						, uriic.pfmc_idx_stdr_iem_id							as rslt_idx_std_iem_id
+						, ubrisi.stdr_iem_nm									as std_iem_nm
+						, uriic.pfmc_idx_iem_cn									as rslt_idx_iem_cn
+						, uriic.sort_ordr										as sort_order
+						, case when ubrisi.pfmc_idx_stdr_iem_id is null then ubridi.iem_unit_code  else ubrisi.iem_unit_code end	as iem_unit_cd
+					from usp_api.uspt_pfmc_idx_iem_cn uriic
+						inner join usp_api.uspt_bsns_pfmc_idx_detail_iem ubridi
+							on ubridi.pfmc_idx_detail_iem_id = uriic.pfmc_idx_detail_iem_id
+						left outer join usp_api.uspt_bsns_pfmc_idx_stdr_iem ubrisi
+							on ubrisi.pfmc_idx_stdr_iem_id = uriic.pfmc_idx_stdr_iem_id
+					where
+						uriic.pfmc_idx_iem_id = #{rsltIdxIemId}
+						and uriic.delete_at = false
+				) sub
+		order by sub.rslt_idx_detail_iem_id, sub.sort_order
+	</select>
+</mapper>

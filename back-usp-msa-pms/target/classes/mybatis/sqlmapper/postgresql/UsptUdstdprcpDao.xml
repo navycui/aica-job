@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptUdstdprcpDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptUdstdprcp">
+		/** UsptUdstdprcpDao.selectList */
+		select intprts_id as udstdprcp_id
+			 , evl_plan_id
+			 , intprts_nm as nm
+			 , sexdstn_code as gender_cd
+			 , usp_api.fn_cmm_get_code_nm('GENDER', sexdstn_code) as gender_nm
+			 , instt_nm
+			 , last_schul_nm as last_schul
+			 , schsbj as subjct
+			 , encpt_brthdy as enc_brthdy
+			 , encpt_mbtlnum as enc_mbtlnum
+			 , bizrno
+			 , creatr_id as creator_id
+			 , creat_dt as created_dt
+			 , updusr_id as updater_id
+			 , updt_dt as updated_dt
+		 from usp_api.uspt_intprts
+		where 1 = 1
+		  and evl_plan_id = #{evlPlanId}
+			<if test='udstdprcpId != null and udstdprcpId != ""'>
+				and intprts_id = #{udstdprcpId}
+			</if>
+	</select>
+
+	<insert id="insertList">
+		/** UsptUdstdprcpDao.insertList */
+		insert into usp_api.uspt_intprts (
+			   intprts_id
+			 , evl_plan_id
+			 , intprts_nm
+			 , sexdstn_code
+			 , instt_nm
+			 , last_schul_nm
+			 , schsbj
+			 , encpt_brthdy
+			 , encpt_mbtlnum
+			 , bizrno
+			 , creatr_id
+			 , creat_dt
+			 , updusr_id
+			 , updt_dt
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+			(
+			   #{item.udstdprcpId}
+			 , #{item.evlPlanId}
+			 , #{item.nm}
+			 , #{item.genderCd}
+			 , #{item.insttNm}
+			 , #{item.lastSchul}
+			 , #{item.subjct}
+			 , #{item.encBrthdy}
+			 , #{item.encMbtlnum}
+			 , #{item.bizrno}
+			 , #{item.creatorId}
+			 , #{item.createdDt}
+			 , #{item.updaterId}
+			 , #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+	<delete id="deleteByPlanId">
+		/** UsptUdstdprcpDao.deleteByPlanId */
+		delete from usp_api.uspt_intprts
+		 where evl_plan_id = #{evlPlanId}
+	</delete>
+
+	<delete id="delete">
+		/** UsptUdstdprcpDao.delete */
+		delete from usp_api.uspt_intprts
+		 where intprts_id = #{udstdprcpId}
+	</delete>
+
+</mapper>

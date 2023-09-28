@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptMsvcDao">
+
+	<update id="save">
+		/** UsptMsvcDao.save */
+		insert into usp_api.uspt_msvc
+			(
+				mber_id
+				, msvc_ty_code
+				, msvc_bgnde
+				, msvc_endde
+				, msvc_exempt_resn
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{memberId}
+				, #{msvcTypeCd}
+				, #{msvcBgnde}
+				, #{msvcEndde}
+				, #{msvcExemptReason}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			) on conflict (mber_id)
+			do update
+			set msvc_ty_code	= #{msvcTypeCd}
+				, msvc_bgnde	= #{msvcBgnde}
+				, msvc_endde	= #{msvcEndde}
+				, msvc_exempt_resn	= #{msvcExemptReason}
+				, updusr_id			= #{updaterId}
+				, updt_dt			= #{updatedDt}
+	</update>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptMsvc">
+		/** UsptMsvcDao.select */
+		select
+			mber_id												as member_id
+			, msvc_ty_code										as msvc_type_cd
+			, fn_cmm_get_code_nm('MSVC_TYPE', msvc_ty_code)		as msvc_type
+			, msvc_bgnde
+			, msvc_endde
+			, msvc_exempt_resn									as msvc_exempt_reason
+			, creatr_id      									as creator_id
+			, creat_dt 											as created_dt
+			, updusr_id											as updater_id
+			, updt_dt  											as updated_dt
+		from usp_api.uspt_msvc
+		where
+			mber_id = #{memberId}
+	</select>
+
+</mapper>

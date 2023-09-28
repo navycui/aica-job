@@ -1,0 +1,95 @@
+{
+  "name": "tsp",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "/tsp-admin",
+  "dependencies": {
+    "@emotion/react": "^11.8.2",
+    "@emotion/styled": "^11.8.1",
+    "@material-ui/icons": "^4.11.3",
+    "@mui/icons-material": "^5.6.1",
+    "@mui/lab": "^5.0.0-alpha.75",
+    "@mui/material": "^5.5.2",
+    "@mui/styles": "^5.5.3",
+    "@mui/x-data-grid": "^5.8.0",
+    "@mui/x-data-grid-pro": "latest",
+    "@mui/x-date-pickers-pro": "^5.0.0-alpha.5",
+    "@mui/x-license-pro": "^5.10.0",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^12.0.0",
+    "@testing-library/user-event": "^13.2.1",
+    "@types/date-fns": "^2.6.0",
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.7.13",
+    "@types/ramda": "^0.28.7",
+    "@types/react": "^17.0.20",
+    "@types/react-dom": "^17.0.9",
+    "async": "^3.2.3",
+    "axios": "^0.26.1",
+    "chart.js": "^3.7.1",
+    "clsx": "^1.1.1",
+    "dayjs": "^1.11.0",
+    "i": "^0.3.7",
+    "js-cookie": "^3.0.1",
+    "polished": "^4.1.4",
+    "ramda": "^0.28.0",
+    "react": "^17.0.2",
+    "react-cookie": "^4.1.1",
+    "react-device-detect": "^2.1.2",
+    "react-dom": "^17.0.2",
+    "react-google-login": "^5.2.2",
+    "react-kakao-login": "^2.1.0",
+    "react-naver-login": "^0.1.4",
+    "react-query": "^3.38.0",
+    "react-router-dom": "^6.2.2",
+    "react-scripts": "5.0.0",
+    "react-transition-group": "^4.4.2",
+    "sass": "^1.49.9",
+    "swiper": "6.8.4",
+    "swr": "^1.2.2",
+    "typescript": "^4.4.2",
+    "zustand": "^4.0.0-rc.1"
+  },
+  "scripts": {
+    "start:dev": "cp ./.env.dev ./.env && craco start",
+    "start:prd": "cp ./.env.prd ./.env && craco start",
+    "build:dev": "cp ./.env.dev ./.env && craco build",
+    "build:prd": "cp ./.env.prd ./.env && craco build",
+    "build": "cp ./.env.dev ./.env && craco build",
+    "winStart:dev": "copy .env.dev .env && craco start",
+    "winStart:prd": "copy .env.prd .env && craco start"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "rules": {
+      "import/no-anonymous-default-export": "off",
+      "react-hooks/exhaustive-deps": "off"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@craco/craco": "^6.4.3",
+    "@date-io/date-fns": "^2.13.1",
+    "@emotion/babel-plugin": "^11.7.2",
+    "@emotion/babel-preset-css-prop": "^11.2.0",
+    "@types/js-cookie": "^3.0.1",
+    "@types/async": "^3.2.12",
+    "@types/webpack-env": "^1.16.3",
+    "craco-alias": "^3.0.1",
+    "webpack-env": "^0.8.0"
+  }
+}

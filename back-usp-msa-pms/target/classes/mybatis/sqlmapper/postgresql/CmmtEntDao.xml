@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.CmmtEntDao">
+
+
+	<select id="select" resultType="aicluster.pms.common.entity.CmmtEnt">
+		/** CmmtEntDao.select */
+		select
+			mber_id														as member_id
+			, entrprs_ty_code											as cmpny_type_cd
+			, fn_cmm_get_code_nm('CMPNY_TYPE', entrprs_ty_code)			as cmpny_type_nm
+			, indust_realm_code											as indust_realm_cd
+			, fn_cmm_get_code_nm('INDUST_REALM', indust_realm_code)		as indust_realm_nm
+			, fond_de													as fond_day
+			, entrps_emp_nmpr											as emply_cnt
+			, resdng_nmpr												as resdng_nmpr
+			, empmn_prearnge_nmpr										as empmn_prearnge_nmpr
+			, induty_nm													as induty
+			, main_induty_nm											as main_induty
+			, main_tchnlgy_product_nm									as main_tchnlgy_product
+			, zip														as zip
+			, adres														as adres
+			, encpt_fxnum												as enc_fxnum
+			, encpt_reprsnt_telno										as enc_reprsnt_telno
+			, encpt_ceo_telno											as enc_ceo_telno
+			, encpt_ceo_email											as enc_ceo_email
+			, new_fntn_plan_code										as new_fntn_plan_cd
+			, fn_cmm_get_code_nm('NEW_FNTN_PLAN', new_fntn_plan_code)	as new_fntn_plan_nm
+			, fond_plan_code											as fond_plan_cd
+			, fn_cmm_get_code_nm('FOND_PLAN', fond_plan_code)			as fond_plan_nm
+			, prvyy_salamt
+			, creatr_id													as creator_id
+			, creat_dt 													as created_dt
+			, updusr_id													as updater_id
+			, updt_dt  													as updated_dt
+		from auth_api.cmmt_entrprs_info
+		where
+			mber_id = #{memeberId}
+	</select>
+</mapper>

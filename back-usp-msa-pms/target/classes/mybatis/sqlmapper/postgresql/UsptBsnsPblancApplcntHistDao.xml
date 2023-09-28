@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancApplcntHistDao">
+
+	<insert id="insert">
+		/** UsptBsnsPblancApplcntHistDao.insert */
+		insert into usp_api.uspt_bsns_pblanc_applcnt_hist
+			(
+				hist_id
+				, apply_id
+				, opetr_id
+				, rcept_sttus_code
+				, process_cn
+				, creatr_id
+				, creat_dt
+			) values (
+				#{histId}
+				, #{applyId}
+				, #{opetrId}
+				, #{rceptSttusCd}
+				, #{processCn}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsPblancApplcntHistDao.insertList */
+		insert into usp_api.uspt_bsns_pblanc_applcnt_hist
+			(
+				hist_id
+				, apply_id
+				, opetr_id
+				, rcept_sttus_code
+				, process_cn
+				, creatr_id
+				, creat_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.histId}
+				, #{item.applyId}
+				, #{item.opetrId}
+				, #{item.rceptSttusCd}
+				, #{item.processCn}
+				, #{item.creatorId}
+				, #{item.createdDt}
+			)
+		</foreach>
+	</insert>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsPblancApplcntHist">
+		/** UsptBsnsPblancApplcntHistDao.selectList */
+		select
+			ubpah.hist_id
+			, ubpah.apply_id
+			, ubpah.opetr_id
+			, ubpah.rcept_sttus_code			as rcept_sttus_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@RS_CODE_GROUP}', rcept_sttus_code) as rcept_sttus
+			, ubpah.process_cn
+			, ubpah.creatr_id					as creator_id
+			, ubpah.creat_dt					as created_dt
+			, ci.mber_nm						as opetr_nm
+			, ci.login_id
+			, row_number() over (order by ubpah.creat_dt desc) as rn
+		from usp_api.uspt_bsns_pblanc_applcnt_hist ubpah
+			left outer join auth_api.cmmt_emp_info ci
+				on ci.mber_id = ubpah.opetr_id
+		where
+			ubpah.apply_id = #{applyId}
+	</select>
+</mapper>

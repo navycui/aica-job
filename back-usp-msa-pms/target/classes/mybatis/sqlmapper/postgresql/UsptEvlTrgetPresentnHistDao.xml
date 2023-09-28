@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlTrgetPresentnHistDao">
+
+	<insert id="insert">
+		/** UsptEvlTrgetPresentnHistDao.insert */
+		insert into usp_api.uspt_evl_trget_presentn_hist
+			(
+				presentn_hist_id
+				, evl_trget_id
+				, presentn_dta_process_div_code
+				, process_dt
+				, resn_cn
+				, creatr_id
+				, creat_dt
+			) values (
+				#{presentnHistId}
+				, #{evlTrgetId}
+				, #{presnatnProcessDivCd}
+				, clock_timestamp()
+				, #{resnCn}
+				, #{creatorId}
+				, clock_timestamp()
+			)
+	</insert>
+
+	<select id ="selectHistList" resultType="aicluster.pms.common.entity.UsptEvlTrgetPresentnHist">
+		/** UsptEvlTrgetPresentnHistDao.selectHistList */
+		select
+			presentn_hist_id
+			, evl_trget_id
+			, presentn_dta_process_div_code																			as presnatn_process_div_cd
+			, coalesce(fn_cmm_get_code_nm('PRESNATN_PROCESS_DIV', presentn_dta_process_div_code), '미진행')	as presnatn_process_div_nm
+			, to_char(process_dt,'yyyy-mm-dd hh24:mi')			as st_process_dt
+			, resn_cn
+			, fn_cmm_get_member_nm(creatr_id)				as opetr_nm
+			, fn_cmm_get_loginid(creatr_id)					as opetr_id
+			, creatr_id										as creator_id
+			, creat_dt										as created_dt
+			, row_number() over (order by creat_dt desc)	as rn
+		from usp_api.uspt_evl_trget_presentn_hist
+		where
+			evl_trget_id = #{evlTrgetId}
+	</select>
+
+	<select id ="select" resultType="aicluster.pms.common.entity.UsptEvlTrgetPresentnHist">
+		/** UsptEvlTrgetPresentnHistDao.selectHistList */
+		select
+			process_dt
+			, resn_cn
+		from usp_api.uspt_evl_trget_presentn_hist a
+			inner join usp_api.uspt_evl_trget b
+				on b.evl_trget_id = a.evl_trget_id
+			inner join usp_api.uspt_bsns_pblanc_applcnt c
+				on c.apply_id = b.apply_id
+		where
+			presentn_hist_id = #{presentnHistId}
+			<if test='memberId != null and memberId != ""'>
+				and c.mber_id = #{memberId}
+			</if>
+	</select>
+
+	<!--발표자료 제출 보완요청 사유 조회  -->
+	<select id ="selectReason" resultType="aicluster.pms.common.entity.UsptEvlTrgetPresentnHist">
+		/** UsptEvlTrgetPresentnHistDao.selectReason */
+		select
+			b.*
+		from
+			(
+				select
+					to_char(process_dt,'yyyy-mm-dd hh24:mi')		as st_process_dt
+					, resn_cn
+					, row_number() over (order by creat_dt desc)	as rn
+				from usp_api.uspt_evl_trget_presentn_hist a
+				where
+					a.evl_trget_id = #{evlTrgetId}
+					and a.presentn_dta_process_div_code = 'PRPR03'
+			) b
+		where
+			b.rn = 1
+	</select>
+
+</mapper>

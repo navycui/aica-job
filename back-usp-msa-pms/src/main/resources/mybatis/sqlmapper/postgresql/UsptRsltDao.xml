@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptRsltDao">
+
+	<insert id="insert">
+		/** UsptRsltDao.insert */
+		insert into usp_api.uspt_pfmc
+			(
+				pfmc_id
+				, apply_id
+				, pfmc_sttus_code
+				, presentn_dt
+				, splemnt_reqst_dt
+				, splemnt_reqst_cn
+				, splemnt_atchmnfl_group_id
+				, atchmnfl_group_id
+				, sndng_mth_code
+				, sndng_cn
+				, recent_sndng_dt
+				, pfmc_ym
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{rsltId}
+				, #{applyId}
+				, #{rsltSttusCd}
+				, #{presentnDt}
+				, #{makeupReqDe}
+				, #{makeupReqCn}
+				, #{makeupAttachmentGroupId}
+				, #{attachmentGroupId}
+				, #{sndngMth}
+				, #{sndngCn}
+				, #{recentSendDate}
+				, #{rsltYm}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptRsltDao.update */
+		update usp_api.uspt_pfmc
+		set
+			pfmc_sttus_code			= #{rsltSttusCd}
+			, presentn_dt			= #{presentnDt}
+			, atchmnfl_group_id		= #{attachmentGroupId}
+			, updusr_id				= #{updaterId}
+			, updt_dt				= #{updatedDt}
+			, splemnt_reqst_dt		= #{makeupReqDe}
+			, splemnt_reqst_cn		= #{makeupReqCn}
+			, splemnt_atchmnfl_group_id = #{makeupAttachmentGroupId}
+		where
+			pfmc_id = #{rsltId}
+	</update>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptRslt">
+		/** UsptRsltDao.select */
+		select
+			pfmc_id									as rslt_id
+			, apply_id
+			, pfmc_sttus_code						as rslt_sttus_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@RSLT_CODE_GROUP}', pfmc_sttus_code)	as rslt_sttus
+			, presentn_dt
+			, splemnt_reqst_dt						as makeup_req_de
+			, splemnt_reqst_cn						as makeup_req_cn
+			, splemnt_atchmnfl_group_id				as makeup_attachment_group_id
+			, atchmnfl_group_id						as attachment_group_id
+			, sndng_mth_code						as sndng_mth
+			, sndng_cn								as sndng_cn
+			, recent_sndng_dt						as recent_send_date
+			, pfmc_ym								as rslt_ym
+			, creatr_id								as creator_id
+			, creat_dt								as created_dt
+			, updusr_id								as updater_id
+			, updt_dt								as updated_dt
+		from usp_api.uspt_pfmc
+		where
+			pfmc_id = #{rsltId}
+	</select>
+
+
+	<select id="selectByApplyId" resultType="aicluster.pms.common.entity.UsptRslt">
+		/** UsptRsltDao.select */
+		select
+			pfmc_id									as rslt_id
+			, apply_id
+			, pfmc_sttus_code						as rslt_sttus_cd
+			, presentn_dt
+			, splemnt_reqst_dt						as makeup_req_de
+			, splemnt_reqst_cn						as makeup_req_cn
+			, splemnt_atchmnfl_group_id				as makeup_attachment_group_id
+			, atchmnfl_group_id						as attachment_group_id
+			, sndng_mth_code						as sndng_mth
+			, sndng_cn								as sndng_cn
+			, recent_sndng_dt						as recent_send_date
+			, pfmc_ym								as rslt_ym
+			, creatr_id								as creator_id
+			, creat_dt								as created_dt
+			, updusr_id								as updater_id
+			, updt_dt								as updated_dt
+		from usp_api.uspt_pfmc
+		where
+			apply_id = #{applyId}
+			and pfmc_ym is null
+	</select>
+
+	<select id="selectByMvnApplyId" resultType="aicluster.pms.common.entity.UsptRslt">
+		/** UsptRsltDao.select */
+		select
+			pfmc_id									as rslt_id
+			, apply_id
+			, pfmc_sttus_code						as rslt_sttus_cd
+			, presentn_dt
+			, splemnt_reqst_dt						as makeup_req_de
+			, splemnt_reqst_cn						as makeup_req_cn
+			, splemnt_atchmnfl_group_id				as makeup_attachment_group_id
+			, atchmnfl_group_id						as attachment_group_id
+			, sndng_mth_code						as sndng_mth
+			, sndng_cn								as sndng_cn
+			, recent_sndng_dt						as recent_send_date
+			, pfmc_ym								as rslt_ym
+			, creatr_id								as creator_id
+			, creat_dt								as created_dt
+			, updusr_id								as updater_id
+			, updt_dt								as updated_dt
+		from usp_api.uspt_pfmc
+		where
+			apply_id = #{applyId}
+			and pfmc_ym = #{rsltYm}
+	</select>
+
+
+	<sql id="selectList_where">
+		<where>
+			ulst.slctn_at = true
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and ub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='rsltSttusCd != null and rsltSttusCd != ""'>
+				and ur.pfmc_sttus_code = #{rsltSttusCd}
+			</if>
+			<if test='keyword != null and keyword != ""'>
+				<choose>
+					<when test='keywordDiv == "receiptNo"'>
+						and ubpa.rcept_no like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "taskNm"'>
+						and ubpat.task_korean_nm like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "bsnsNm"'>
+						and ub.bsns_nm like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "memberNm"'>
+						and cm.mber_nm like concat('%', #{keyword}, '%')
+					</when>
+				</choose>
+			</if>
+			<if test='applyIdList != null'>
+				and ulst.apply_id in
+				<foreach collection="applyIdList" item="item" open="(" close=")" separator=",">
+					#{item}
+				</foreach>
+			</if>
+			<if test='isPresentnTask == "Y"'>
+				and ur.pfmc_id is null
+			</if>
+		</where>
+	</sql>
+
+
+	<select id="selectListCount" resultType="Long">
+		/** UsptRsltDao.selectListCount */
+		select
+			count(ulst.apply_id)
+		from usp_api.uspt_last_slctn_trget ulst
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = ulst.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join auth_api.cmmt_mber_info cm
+					on cm.mber_id = ubpa.mber_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+					and ubp.use_at = true
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+					and ub.use_at = true
+				inner join usp_api.uspt_stdr_bsns usb
+					on usb.stdr_bsns_code = ub.stdr_bsns_code
+					and usb.bsns_ty_code != '${@aicluster.pms.common.util.Code@BSNS_TYPE_MVN_CODE}'
+				inner join usp_api.uspt_bsns_job_step ubjs
+					on ubjs.bsns_code = ub.bsns_code
+					and ubjs.job_step_code = '${@aicluster.pms.common.util.Code@JOBSTEP_RSLT}'
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+				<if test='isPresentnTask == "Y"'>
+					and ubc.charger_author_code = 'WRITE'
+				</if>
+				left outer join usp_api.uspt_pfmc ur
+					on ur.apply_id = ulst.apply_id
+					and ur.pfmc_ym is null
+		<include refid="selectList_where"/>
+	</select>
+
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.RsltListDto">
+		/** UsptRsltDao.selectList */
+		select
+			ulst.apply_id
+			, ur.pfmc_id											as rslt_id
+			, ub.bsns_year
+			, ub.bsns_nm
+			, ubpa.rcept_no											as receipt_no
+			, ubpat.task_korean_nm									as task_nm
+			, cm.mber_nm											as member_nm
+			, ur.presentn_dt
+			, ubc.charger_author_code								as charger_author_cd
+			, cm.mber_id											as member_id
+			, cm.encpt_email										as enc_email
+			, cm.encpt_mbtlnum										as enc_mobile_no
+			, row_number() over (order by ulst.creat_dt desc)		as rn
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@RSLT_CODE_GROUP}', ur.pfmc_sttus_code)	as rslt_sttus
+		from usp_api.uspt_last_slctn_trget ulst
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = ulst.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join auth_api.cmmt_mber_info cm
+					on cm.mber_id = ubpa.mber_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+					and ubp.use_at = true
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+					and ub.use_at = true
+				inner join usp_api.uspt_stdr_bsns usb
+					on usb.stdr_bsns_code = ub.stdr_bsns_code
+					and usb.bsns_ty_code != '${@aicluster.pms.common.util.Code@BSNS_TYPE_MVN_CODE}'
+				inner join usp_api.uspt_bsns_job_step ubjs
+					on ubjs.bsns_code = ub.bsns_code
+					and ubjs.job_step_code = '${@aicluster.pms.common.util.Code@JOBSTEP_RSLT}'
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+				<if test='isPresentnTask == "Y"'>
+					and ubc.charger_author_code = 'WRITE'
+				</if>
+				left outer join usp_api.uspt_pfmc ur
+					on ur.apply_id = ulst.apply_id
+					and ur.pfmc_ym is null
+		<include refid="selectList_where"/>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+
+	<sql id="selectFrontList_where">
+		<where>
+			ubpa.mber_id = #{memberId}
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and ub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='rsltSttusCd != null and rsltSttusCd != ""'>
+				and ur.pfmc_sttus_code = #{rsltSttusCd}
+			</if>
+			<if test='keyword != null and keyword != ""'>
+				<choose>
+					<when test='keywordDiv == "receiptNo"'>
+						and ubpa.rcept_no like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "taskNm"'>
+						and ubpat.task_korean_nm like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "pblancNm"'>
+						and ubp.pblanc_nm like concat('%', #{keyword}, '%')
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectFrontListCount" resultType="Long">
+		/** UsptRsltDao.selectFrontListCount */
+		select
+			count(ur.pfmc_id)
+		from usp_api.uspt_pfmc ur
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = ur.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+					on ubpr.pblanc_id = ubpa.pblanc_id
+					and ubpr.rcept_ordr = ubpa.rcept_ordr
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpr.pblanc_id
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+					and ub.use_at = true
+				inner join usp_api.uspt_stdr_bsns usb
+					on usb.stdr_bsns_code = ub.stdr_bsns_code
+					and usb.bsns_ty_code != '${@aicluster.pms.common.util.Code@BSNS_TYPE_MVN_CODE}'
+		<include refid="selectFrontList_where"/>
+	</select>
+
+	<select id="selectFrontList" resultType="aicluster.pms.common.dto.FrontRsltListDto">
+		/** UsptRsltDao.selectFrontList */
+		select
+			ur.pfmc_id											as rslt_id
+			, ur.pfmc_sttus_code								as rslt_sttus_cd
+			, ur.presentn_dt
+			, ubpa.rcept_no										as receipt_no
+			, ubpat.task_korean_nm								as task_nm
+			, ubp.pblanc_nm
+			, row_number() over (order by ur.creat_dt desc)		as rn
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@RSLT_CODE_GROUP}', ur.pfmc_sttus_code)	as rslt_sttus
+		from usp_api.uspt_pfmc ur
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = ur.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+					on ubpr.pblanc_id = ubpa.pblanc_id
+					and ubpr.rcept_ordr = ubpa.rcept_ordr
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpr.pblanc_id
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+					and ub.use_at = true
+				inner join usp_api.uspt_stdr_bsns usb
+					on usb.stdr_bsns_code = ub.stdr_bsns_code
+					and usb.bsns_ty_code != '${@aicluster.pms.common.util.Code@BSNS_TYPE_MVN_CODE}'
+		<include refid="selectFrontList_where"/>
+	</select>
+
+
+
+	<select id="selectStatsList" resultType="aicluster.pms.common.dto.RsltStatsListDto">
+		/** UsptRsltDao.selectStatsList */
+		select
+			sub.member_nm
+			, array_to_string(array_agg(sub.iem_unit_cd), '@@@')		as iem_unit_cd
+			, array_to_string(array_agg(sub.rslt_iem_nm), '@@@')		as rslt_iem_nm
+			, array_to_string(array_agg(sub.rslt_idx_iem_cn), '@@@')	as rslt_idx_iem_cn
+		from (
+				select
+					cm.mber_nm																							as member_nm
+					, case when ubri.stdr_idx_at = true then ubrisi.iem_unit_code else ubridi.iem_unit_code end			as iem_unit_cd
+					, concat(ubri.pfmc_idx_nm, ' ', ubridi.detail_iem_nm, case when ubri.stdr_idx_at = true then concat(' ', ubrisi.stdr_iem_nm) end)	as rslt_iem_nm
+					, uriic.pfmc_idx_iem_cn																				as rslt_idx_iem_cn
+				from usp_api.uspt_pfmc ur
+					inner join usp_api.uspt_pfmc_idx_iem urii
+						on urii.pfmc_id = ur.pfmc_id
+					inner join usp_api.uspt_bsns_pfmc_idx ubri
+						on ubri.pfmc_idx_id = urii.pfmc_idx_id
+					inner join usp_api.uspt_pfmc_idx_iem_cn uriic
+						on uriic.pfmc_idx_iem_id = urii.pfmc_idx_iem_id
+						and trim(uriic.pfmc_idx_iem_cn) != ''
+						and uriic.delete_at = false
+					inner join usp_api.uspt_bsns_pfmc_idx_detail_iem ubridi
+						on ubridi.pfmc_idx_detail_iem_id = uriic.pfmc_idx_detail_iem_id
+						and ubridi.iem_unit_code not in ('TEXT', 'DSCRP', 'PT')
+					left outer join usp_api.uspt_bsns_pfmc_idx_stdr_iem ubrisi
+						on ubrisi.pfmc_idx_stdr_iem_id = uriic.pfmc_idx_stdr_iem_id
+						and ubrisi.iem_unit_code not in ('TEXT', 'DSCRP', 'PT')
+					inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+						on ubpa.apply_id = ur.apply_id
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpa.pblanc_id
+					inner join usp_api.uspt_bsns ub
+						on ubp.bsns_code = ub.bsns_code
+					inner join usp_api.uspt_bsns_charger ubc
+						on ubc.bsns_code = ub.bsns_code
+						and ubc.insider_id = #{insiderId}
+					inner join auth_api.cmmt_mber_info cm
+						on cm.mber_id = ubpa.mber_id
+				where
+					ur.pfmc_sttus_code = '${@aicluster.pms.common.util.Code@RSLT_STTUS_RC_CODE}'
+					and ub.bsns_year = #{bsnsYear}
+					and ub.bsns_code = #{bsnsCd}
+				<if test='bsnsBgnde != null and bsnsBgnde != ""'>
+					and ubp.bsns_bgnde >= #{bsnsBgnde}
+				</if>
+				<if test='bsnsEndde != null and bsnsEndde != ""'>
+					and ubp.bsns_endde <![CDATA[<=]]> #{bsnsEndde}
+				</if>
+				<if test='memberNm != null and memberNm != ""'>
+					and cm.mber_nm like concat('%', #{memberNm}, '%')
+				</if>
+		) sub
+		where
+			sub.iem_unit_cd is not null
+		group by sub.member_nm
+	</select>
+
+
+</mapper>

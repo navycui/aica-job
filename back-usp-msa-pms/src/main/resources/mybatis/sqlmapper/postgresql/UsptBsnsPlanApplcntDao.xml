@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPlanApplcntDao">
+
+	<!-- 사업계획신청자 등록-->
+	<insert id="insert">
+		/** UsptBsnsPlanApplcntDao.insert */
+		insert into usp_api.uspt_bsns_plan_applcnt
+				 (
+						bsns_plan_applcnt_id
+						,bsns_wtpln_id
+						,applcnt_nm
+						,sexdstn_code
+						,encpt_mbtlnum
+						,encpt_brthdy
+						,native_at
+						,encpt_email
+						,indvdl_bsnm_div_code
+						,charger_nm
+						,ceo_nm
+						,bizrno
+						,creatr_id
+						,creat_dt
+						,updusr_id
+						,updt_dt
+					) values (
+						 #{bsnsPlanApplcntId}
+						,#{bsnsPlanDocId}
+						,#{applcntNm}
+						,#{genderCd}
+						,#{encMbtlnum}
+						,#{encBrthdy}
+						,#{nativeYn}
+						,#{encEmail}
+						,#{indvdlBsnmDivCd}
+						,#{chargerNm}
+						,#{ceoNm}
+						,#{bizrno}
+						,#{creatorId}
+						,#{createdDt}
+						,#{updaterId}
+						,#{updatedDt}
+					)
+	</insert>
+
+	<!-- 사업계획신청자 변경-->
+	<update id="update">
+		/** UsptBsnsPlanApplcntDao.update */
+		update usp_api.uspt_bsns_plan_applcnt
+			 set   applcnt_nm                   = #{applcntNm}
+					,sexdstn_code                  = #{genderCd}
+					,encpt_mbtlnum              = #{encMbtlnum}
+					,encpt_brthdy                  = #{encBrthdy}
+					,native_at                        = #{nativeYn}
+					,encpt_email                     = #{encEmail}
+					,indvdl_bsnm_div_code        = #{indvdlBsnmDivCd}
+					,charger_nm                   	 = #{chargerNm}
+					,ceo_nm                       	 = #{ceoNm}
+					,bizrno                       	 	 = #{bizrno}
+					,updusr_id                        = #{updaterId}
+					,updt_dt                            = #{updatedDt}
+		 where  bsns_wtpln_id = #{bsnsPlanDocId}
+	</update>
+
+	<!-- 협약변경요청 변경-->
+	<update id="updateChangeCnvn">
+		/** UsptBsnsPlanApplcntDao.updateChangeCnvn */
+		update usp_api.uspt_bsns_plan_applcnt
+			 set   applcnt_nm                = #{applcntNm}
+					,indvdl_bsnm_div_code  = #{indvdlBsnmDivCd}
+					,charger_nm 			 = #{chargerNm}
+					,ceo_nm  				= #{ceoNm}
+					,bizrno	  				= #{bizrno}
+					,updusr_id               = #{updaterId}
+					,updt_dt                   = #{updatedDt}
+		 where  bsns_wtpln_id = #{bsnsPlanDocId}
+	</update>
+
+	<!-- 사업계획신청자 삭제-->
+	<delete id="delete">
+		/** UsptBsnsPlanApplcntDao.delete */
+		delete from usp_api.uspt_bsns_plan_applcnt
+			   where bsns_wtpln_id = #{bsnsPlanDocId}
+	</delete>
+
+	<!-- 사업계획신청자 조회 -->
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsPlanApplcnt">
+		/** UsptBsnsPlanApplcntDao.selectList */
+			select	 	bsns_plan_applcnt_id
+						,bsns_wtpln_id
+						,applcnt_nm
+						,sexdstn_code as gender_cd
+						,encpt_mbtlnum
+						,encpt_brthdy
+						,native_at	 as native_yn
+						,encpt_email
+						,indvdl_bsnm_div_code as indvdl_bsnm_Div_Cd
+						,charger_nm
+						,ceo_nm
+						,bizrno
+						,creatr_id
+						,creat_dt
+						,updusr_id
+						,updt_dt
+			from usp_api.uspt_bsns_plan_applcnt
+		  where	1=1
+		   <if test='bsnsPlanApplcntId != null and bsnsPlanApplcntId != ""'>
+				 and 	 bsns_plan_applcnt_id = #{bsnsPlanApplcntId}
+			</if>
+			 <if test='bsnsPlanDocId != null and bsnsPlanDocId != ""'>
+			 	and 	 bsns_wtpln_id  = #{bsnsPlanDocId}
+			</if>
+			 <if test='applcntNm != null and applcntNm != ""'>
+			 	and 	 applcnt_nm  like '%' || #{applcntNm} || '%'
+			</if>
+	</select>
+
+	<!-- 사업계획신청자 조회 -->
+	<select id="selectOne" resultType="aicluster.pms.common.entity.UsptBsnsPlanApplcnt">
+		/** UsptBsnsPlanApplcntDao.selectOne */
+			select	 	bsns_plan_applcnt_id
+						,bsns_wtpln_id
+						,applcnt_nm
+						,sexdstn_code as gender_cd
+						,encpt_mbtlnum
+						,encpt_brthdy
+						,native_at  as native_yn
+						,encpt_email
+						,indvdl_bsnm_div_code	as indvdl_bsnm_Div_Cd
+						,charger_nm
+						,ceo_nm
+						,bizrno
+						,creatr_id
+						,creat_dt
+						,updusr_id
+						,updt_dt
+			from usp_api.uspt_bsns_plan_applcnt
+		  where	1=1
+		   	 and 	 bsns_wtpln_id = #{bsnsPlanDocId}
+	</select>
+
+</mapper>

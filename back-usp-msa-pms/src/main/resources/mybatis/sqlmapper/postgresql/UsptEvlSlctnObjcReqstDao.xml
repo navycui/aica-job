@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlSlctnObjcReqstDao">
+
+	<insert id="insert">
+		/** UsptEvlSlctnObjcReqstDao.insert */
+		insert into usp_api.uspt_evl_slctn_objc_reqst
+			(
+				evl_slctn_objc_reqst_id
+				, evl_trget_id
+				, objc_reqst_cn
+				, objc_reqst_dt
+				, objc_applcnt_id
+				, last_slctn_objc_process_sttus_code
+				, dlbrt_de
+				, dlbrt_cn
+				, dlbrt_opetr_id
+				, applcnt_atchmnfl_group_id
+				, dlbrt_result_atchmnfl_group_id
+				, return_resn_cn
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{evlSlctnObjcReqstId}
+				, #{evlTrgetId}
+				, #{objcReqstCn}
+				, #{objcReqstDt}
+				, #{objcApplcntId}
+				, #{lastSlctnObjcProcessSttusCd}
+				, #{dlbrtDe}
+				, #{dlbrtCn}
+				, #{dlbrtOpetrId}
+				, #{applcntAttachmentGroupId}
+				, #{dlbrtAttachmentGroupId}
+				, #{rejectReasonCn}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptEvlSlctnObjcReqstDao.update */
+		update usp_api.uspt_evl_slctn_objc_reqst
+		set
+			objc_reqst_cn		= #{objcReqstCn}
+			, objc_reqst_dt		= #{objcReqstDt}
+			, objc_applcnt_id	= #{objcApplcntId}
+			, dlbrt_de			= #{dlbrtDe}
+			, dlbrt_cn			= #{dlbrtCn}
+			, dlbrt_opetr_id	= #{dlbrtOpetrId}
+			, return_resn_cn	= #{rejectReasonCn}
+			, last_slctn_objc_process_sttus_code	= #{lastSlctnObjcProcessSttusCd}
+			, applcnt_atchmnfl_group_id				= #{applcntAttachmentGroupId}
+			, dlbrt_result_atchmnfl_group_id		= #{dlbrtAttachmentGroupId}
+			, updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+		where
+			evl_slctn_objc_reqst_id = #{evlSlctnObjcReqstId}
+	</update>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptEvlSlctnObjcReqst">
+		/** UsptEvlSlctnObjcReqstDao.select */
+		select
+			evl_slctn_objc_reqst_id
+			, evl_trget_id
+			, objc_reqst_cn
+			, objc_reqst_dt
+			, objc_applcnt_id
+			, last_slctn_objc_process_sttus_code		as last_slctn_objc_process_sttus_cd
+			, dlbrt_de
+			, dlbrt_cn
+			, dlbrt_opetr_id
+			, applcnt_atchmnfl_group_id					as applcnt_attachment_group_id
+			, dlbrt_result_atchmnfl_group_id			as dlbrt_attachment_group_id
+			, return_resn_cn							as reject_reason_cn
+			, creatr_id									as creator_id
+			, creat_dt									as created_dt
+			, updusr_id									as updater_id
+			, updt_dt									as updated_dt
+		from usp_api.uspt_evl_slctn_objc_reqst
+		where
+			evl_slctn_objc_reqst_id = #{evlSlctnObjcReqstId}
+	</select>
+
+
+	<select id="selectCountByTrgetId" resultType="Long">
+		/** UsptEvlSlctnObjcReqstDao.selectCountByTrgetId */
+		select
+			count(evl_slctn_objc_reqst_id)
+		from usp_api.uspt_evl_slctn_objc_reqst
+		where
+			evl_trget_id = #{trgetId}
+	</select>
+
+
+	<sql id="selectList_where">
+		<where>
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and ub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='lastSlctnObjcProcessSttusCd != null and lastSlctnObjcProcessSttusCd != ""'>
+				and sub.last_slctn_objc_process_sttus_cd = #{lastSlctnObjcProcessSttusCd}
+			</if>
+			<if test='keyword != null and keyword != ""'>
+				<choose>
+					<when test='keywordDiv == "memberNm"'>
+						cm.mber_nm like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "pblancNm"'>
+						and ubp.pblanc_nm like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "deptNm"'>
+						and fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@DEPT_CODE_GROUP}', ci.dept_code ) like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "chargerNm"'>
+						and ci.mber_nm like concat('%', #{keyword}, '%')
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectListCount" resultType="Long">
+		/** UsptEvlSlctnObjcReqstDao.selectListCount */
+		select
+			count(sub.objc_reqst_id)
+		from (
+				select
+					sor.evl_slctn_objc_reqst_id							as objc_reqst_id
+					, sor.last_slctn_objc_process_sttus_code			as last_slctn_objc_process_sttus_cd
+					, sor.objc_applcnt_id
+					, uet.apply_id
+					, ueoph.created_dt
+					, ueoph.creator_id
+				from usp_api.uspt_evl_slctn_objc_reqst sor
+					inner join usp_api.uspt_evl_trget uet
+						on uet.evl_trget_id = sor.evl_trget_id
+					left outer join (
+						select
+							distinct on(evl_slctn_objc_reqst_id) evl_slctn_objc_reqst_id
+							, creatr_id							as creator_id
+							, creat_dt							as created_dt
+						from usp_api.uspt_evl_objc_process_hist
+						where
+							last_slctn_objc_process_sttus_code = '${@aicluster.pms.common.util.Code@LSOPS_03_CODE_GROUP}'
+						order by evl_slctn_objc_reqst_id, created_dt desc
+					) ueoph
+						on ueoph.evl_slctn_objc_reqst_id = sor.evl_slctn_objc_reqst_id
+			union all
+				select
+					sor.last_slctn_objc_reqst_id						as objc_reqst_id
+					, sor.last_slctn_objc_process_sttus_code			as last_slctn_objc_process_sttus_cd
+					, sor.objc_applcnt_id
+					, ulst.apply_id
+					, ulsoph.created_dt
+					, ulsoph.creator_id
+				from usp_api.uspt_last_slctn_objc_reqst sor
+					inner join usp_api.uspt_last_slctn_trget ulst
+						on ulst.last_slctn_trget_id = sor.last_slctn_trget_id
+					left outer join (
+						select
+							distinct on(last_slctn_objc_reqst_id) last_slctn_objc_reqst_id
+							, creatr_id							as creator_id
+							, creat_dt							as created_dt
+						from usp_api.uspt_last_slctn_objc_process_hist
+						where
+							last_slctn_objc_process_sttus_code = '${@aicluster.pms.common.util.Code@LSOPS_03_CODE_GROUP}'
+						order by last_slctn_objc_reqst_id, created_dt desc
+					) ulsoph
+						on ulsoph.last_slctn_objc_reqst_id = sor.last_slctn_objc_reqst_id
+			) sub
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = sub.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+				inner join auth_api.cmmt_mber_info cm
+					on cm.mber_id = sub.objc_applcnt_id
+				left outer join auth_api.cmmt_emp_info ci
+					on ci.mber_id = sub.creator_id
+		<include refid="selectList_where" />
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.SlctnObjcReqstListDto">
+		/** UsptEvlSlctnObjcReqstDao.selectList */
+		select
+			sub.objc_reqst_id
+			, sub.last_slctn_objc_process_sttus_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@LSOPS_CODE_GROUP}', sub.last_slctn_objc_process_sttus_cd)		as last_slctn_objc_process_sttus
+			, ub.bsns_year
+			, ubp.pblanc_nm
+			, case when ubp.ordtm_rcrit_at = true then '상시모집' else '정시모집' end 									as ordtm_rcrit
+			, case when ubp.ordtm_rcrit_at = true then concat(cast(ubpa.rcept_ordr as varchar), '차')  else '' end 	as rcept_odr
+			, cm.mber_nm																							as member_nm
+			, ci.mber_nm																							as charger_nm
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@DEPT_CODE_GROUP}', ci.dept_code )				as dept_nm
+			, to_char(sub.created_dt, 'yyyy-mm-dd')																	as rcept_date
+			, ubc.charger_author_code																				as charger_author_cd
+			, row_number() over (order by sub.created_dt desc) as rn
+		from (
+				select
+					sor.evl_slctn_objc_reqst_id							as objc_reqst_id
+					, sor.last_slctn_objc_process_sttus_code			as last_slctn_objc_process_sttus_cd
+					, sor.objc_applcnt_id
+					, uet.apply_id
+					, ueoph.created_dt
+					, ueoph.creator_id
+				from usp_api.uspt_evl_slctn_objc_reqst sor
+					inner join usp_api.uspt_evl_trget uet
+						on uet.evl_trget_id = sor.evl_trget_id
+					left outer join (
+						select
+							distinct on(evl_slctn_objc_reqst_id) evl_slctn_objc_reqst_id
+							, creatr_id							as creator_id
+							, creat_dt							as created_dt
+						from usp_api.uspt_evl_objc_process_hist
+						where
+							last_slctn_objc_process_sttus_code = '${@aicluster.pms.common.util.Code@LSOPS_03_CODE_GROUP}'
+						order by evl_slctn_objc_reqst_id, created_dt desc
+					) ueoph
+						on ueoph.evl_slctn_objc_reqst_id = sor.evl_slctn_objc_reqst_id
+			union all
+				select
+					sor.last_slctn_objc_reqst_id						as objc_reqst_id
+					, sor.last_slctn_objc_process_sttus_code			as last_slctn_objc_process_sttus_cd
+					, sor.objc_applcnt_id
+					, ulst.apply_id
+					, ulsoph.created_dt
+					, ulsoph.creator_id
+				from usp_api.uspt_last_slctn_objc_reqst sor
+					inner join usp_api.uspt_last_slctn_trget ulst
+						on ulst.last_slctn_trget_id = sor.last_slctn_trget_id
+					left outer join (
+						select
+							distinct on(last_slctn_objc_reqst_id) last_slctn_objc_reqst_id
+							, creatr_id							as creator_id
+							, creat_dt							as created_dt
+						from usp_api.uspt_last_slctn_objc_process_hist
+						where
+							last_slctn_objc_process_sttus_code = '${@aicluster.pms.common.util.Code@LSOPS_03_CODE_GROUP}'
+						order by last_slctn_objc_reqst_id, created_dt desc
+					) ulsoph
+						on ulsoph.last_slctn_objc_reqst_id = sor.last_slctn_objc_reqst_id
+			) sub
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = sub.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+				inner join auth_api.cmmt_mber_info cm
+					on cm.mber_id = sub.objc_applcnt_id
+				left outer join auth_api.cmmt_emp_info ci
+					on ci.mber_id = sub.creator_id
+		<include refid="selectList_where" />
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+	<select id="selectDetail" resultType="aicluster.pms.common.dto.SlctnObjcDto">
+		/** UsptEvlSlctnObjcReqstDao.selectDetail */
+		select
+			sub.objc_reqst_id
+			, sub.last_slctn_objc_process_sttus_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@LSOPS_CODE_GROUP}', sub.last_slctn_objc_process_sttus_cd) as last_slctn_objc_process_sttus
+			, sub.objc_reqst_cn
+			, sub.objc_reqst_dt
+			, sub.objc_applcnt_id
+			, sub.dlbrt_de
+			, sub.dlbrt_cn
+			, sub.applcnt_attachment_group_id
+			, sub.dlbrt_attachment_group_id
+			, sub.slctn_type
+			, case when sub.slctn = true then '합격' else '탈락' end 												as slctn
+			, ub.bsns_nm
+			, ub.bsns_year
+			, ubp.pblanc_nm
+			, ubp.pblanc_no
+			, ubpa.rcept_no																							as receipt_no
+			, case when ubp.ordtm_rcrit_at = true then '상시모집' else '정시모집' end 									as ordtm_rcrit
+			, case when ubp.ordtm_rcrit_at = true then concat(cast(ubpa.rcept_ordr as varchar), '차')  else '' end 	as rcept_odr
+			, cm.mber_id 									as member_id
+			, cm.mber_nm									as member_nm
+			, cm.encpt_mbtlnum								as enc_mobile_no
+			, ci.mber_nm									as charger_nm
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@DEPT_CODE_GROUP}', ci.dept_code )	as dept_nm
+			, to_char(sub.created_dt, 'yyyy-mm-dd')			as rcept_date
+			, ubc.charger_author_code						as charger_author_cd
+			, row_number() over (order by sub.created_dt desc) as rn
+		from (
+				select
+					sor.evl_slctn_objc_reqst_id						as objc_reqst_id
+					, sor.last_slctn_objc_process_sttus_code		as last_slctn_objc_process_sttus_cd
+					, sor.objc_reqst_cn
+					, sor.objc_reqst_dt
+					, sor.objc_applcnt_id
+					, sor.dlbrt_de
+					, sor.dlbrt_cn
+					, sor.applcnt_atchmnfl_group_id					as applcnt_attachment_group_id
+					, sor.dlbrt_result_atchmnfl_group_id			as dlbrt_attachment_group_id
+					, uet.apply_id
+					, uet.slctn_at									as slctn
+					, ueoph.created_dt
+					, ueoph.creator_id
+					, 'EVL'											as slctn_type
+				from usp_api.uspt_evl_slctn_objc_reqst sor
+					inner join usp_api.uspt_evl_trget uet
+						on uet.evl_trget_id = sor.evl_trget_id
+					left outer join (
+						select
+							distinct on(evl_slctn_objc_reqst_id) evl_slctn_objc_reqst_id
+							, creatr_id							as creator_id
+							, creat_dt							as created_dt
+						from usp_api.uspt_evl_objc_process_hist
+						where
+							last_slctn_objc_process_sttus_code = '${@aicluster.pms.common.util.Code@LSOPS_03_CODE_GROUP}'
+						order by evl_slctn_objc_reqst_id, creat_dt desc
+					) ueoph
+						on ueoph.evl_slctn_objc_reqst_id = sor.evl_slctn_objc_reqst_id
+				where
+					sor.evl_slctn_objc_reqst_id = #{objcReqstId}
+			union all
+				select
+					sor.last_slctn_objc_reqst_id					as objc_reqst_id
+					, sor.last_slctn_objc_process_sttus_code		as last_slctn_objc_process_sttus_cd
+					, sor.objc_reqst_cn
+					, sor.objc_reqst_dt
+					, sor.objc_applcnt_id
+					, sor.dlbrt_de
+					, sor.dlbrt_cn
+					, sor.applcnt_atchmnfl_group_id					as applcnt_attachment_group_id
+					, sor.dlbrt_result_atchmnfl_group_id			as dlbrt_attachment_group_id
+					, ulst.apply_id
+					, ulst.slctn_at									as slctn
+					, ulsoph.created_dt
+					, ulsoph.creator_id
+					, 'LAST'										as slctn_type
+				from usp_api.uspt_last_slctn_objc_reqst sor
+					inner join usp_api.uspt_last_slctn_trget ulst
+						on ulst.last_slctn_trget_id = sor.last_slctn_trget_id
+					left outer join (
+						select
+							distinct on(last_slctn_objc_reqst_id) last_slctn_objc_reqst_id
+							, creatr_id							as creator_id
+							, creat_dt							as created_dt
+						from usp_api.uspt_last_slctn_objc_process_hist
+						where
+							last_slctn_objc_process_sttus_code = '${@aicluster.pms.common.util.Code@LSOPS_03_CODE_GROUP}'
+						order by last_slctn_objc_reqst_id, creat_dt desc
+					) ulsoph
+						on ulsoph.last_slctn_objc_reqst_id = sor.last_slctn_objc_reqst_id
+				where
+					sor.last_slctn_objc_reqst_id = #{objcReqstId}
+			) sub
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = sub.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+				inner join auth_api.cmmt_mber_info cm
+					on cm.mber_id = sub.objc_applcnt_id
+				left outer join auth_api.cmmt_emp_info ci
+					on ci.mber_id = sub.creator_id
+	</select>
+
+
+	<sql id="selectFrontList_where">
+		<where>
+			sor.objc_applcnt_id = #{memberId}
+			<if test='objcReqstStartDate != null and objcReqstStartDate != ""'>
+				and sor.objc_reqst_dt >= to_date(#{objcReqstStartDate}, 'yyyymmdd')
+			</if>
+			<if test='objcReqstEndDate != null and objcReqstEndDate != ""'>
+				and sor.objc_reqst_dt <![CDATA[<=]]> to_date(#{objcReqstEndDate}, 'yyyymmdd')
+			</if>
+			<if test='lastSlctnObjcProcessSttusCd != null and lastSlctnObjcProcessSttusCd != ""'>
+				and sor.last_slctn_objc_process_sttus_code = #{lastSlctnObjcProcessSttusCd}
+			</if>
+			<if test='keyword != null and keyword != ""'>
+				<choose>
+					<when test='keywordDiv == "taskNm"'>
+						and ubpat.task_korean_nm like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "pblancNm"'>
+						and ubp.pblanc_nm like concat('%', #{keyword}, '%')
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+
+	<select id="selectFrontListCount" resultType="Long">
+		/** UsptEvlSlctnObjcReqstDao.selectFrontListCount */
+		select
+			count(sub.objc_reqst_id)
+		from
+			(
+				select
+					sor.evl_slctn_objc_reqst_id			as objc_reqst_id
+				from usp_api.uspt_evl_slctn_objc_reqst sor
+						inner join usp_api.uspt_evl_trget uet
+							on uet.evl_trget_id = sor.evl_trget_id
+						inner join usp_api.uspt_evl_step ues
+							on ues.evl_step_id = uet.evl_step_id
+						inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+							on ubpa.apply_id = uet.apply_id
+						inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+							on ubpat.apply_id = ubpa.apply_id
+						inner join usp_api.uspt_bsns_pblanc ubp
+							on ubp.pblanc_id = ubpa.pblanc_id
+				<include refid="selectFrontList_where" />
+			union all
+				select
+					sor.last_slctn_objc_reqst_id	as objc_reqst_id
+				from usp_api.uspt_last_slctn_objc_reqst sor
+						inner join usp_api.uspt_last_slctn_trget ulst
+							on ulst.last_slctn_trget_id = sor.last_slctn_trget_id
+						inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+							on ubpa.apply_id = ulst.apply_id
+						inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+							on ubpat.apply_id = ubpa.apply_id
+						inner join usp_api.uspt_bsns_pblanc ubp
+							on ubp.pblanc_id = ubpa.pblanc_id
+				<include refid="selectFrontList_where" />
+			) sub
+	</select>
+
+
+	<select id="selectFrontList" resultType="aicluster.pms.common.dto.FrontSlctnObjcReqstListDto">
+		/** UsptEvlSlctnObjcReqstDao.selectFrontList */
+		select
+			sub.*
+		from
+			(
+				select
+					sor.evl_slctn_objc_reqst_id						as objc_reqst_id
+					, sor.objc_reqst_dt
+					, sor.last_slctn_objc_process_sttus_code																				as last_slctn_objc_process_sttus_cd
+					, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@LSOPS_CODE_GROUP}', sor.last_slctn_objc_process_sttus_code)		as last_slctn_objc_process_sttus
+					, ues.evl_step_nm
+					, ubpat.task_korean_nm							as task_nm
+					, ubp.pblanc_nm
+				from usp_api.uspt_evl_slctn_objc_reqst sor
+						inner join usp_api.uspt_evl_trget uet
+							on uet.evl_trget_id = sor.evl_trget_id
+						inner join usp_api.uspt_evl_step ues
+							on ues.evl_step_id = uet.evl_step_id
+						inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+							on ubpa.apply_id = uet.apply_id
+						inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+							on ubpat.apply_id = ubpa.apply_id
+						inner join usp_api.uspt_bsns_pblanc ubp
+							on ubp.pblanc_id = ubpa.pblanc_id
+				<include refid="selectFrontList_where" />
+			union all
+				select
+					sor.last_slctn_objc_reqst_id					as objc_reqst_id
+					, sor.objc_reqst_dt
+					, sor.last_slctn_objc_process_sttus_code																				as last_slctn_objc_process_sttus_cd
+					, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@LSOPS_CODE_GROUP}', sor.last_slctn_objc_process_sttus_code) 	as last_slctn_objc_process_sttus
+					, '최종선정' 										as evl_step_nm
+					, ubpat.task_korean_nm							as task_nm
+					, ubp.pblanc_nm
+				from usp_api.uspt_last_slctn_objc_reqst sor
+						inner join usp_api.uspt_last_slctn_trget ulst
+							on ulst.last_slctn_trget_id = sor.last_slctn_trget_id
+						inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+							on ubpa.apply_id = ulst.apply_id
+						inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+							on ubpat.apply_id = ubpa.apply_id
+						inner join usp_api.uspt_bsns_pblanc ubp
+							on ubp.pblanc_id = ubpa.pblanc_id
+				<include refid="selectFrontList_where" />
+			) sub
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+	<select id="selectFrontDetail" resultType="aicluster.pms.common.dto.FrontSlctnObjcDto">
+		/** UsptEvlSlctnObjcReqstDao.selectFrontDetail */
+				select
+					sor.evl_slctn_objc_reqst_id								as objc_reqst_id
+					, sor.objc_reqst_cn
+					, sor.objc_reqst_dt
+					, sor.last_slctn_objc_process_sttus_code																				as last_slctn_objc_process_sttus_cd
+					, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@LSOPS_CODE_GROUP}', sor.last_slctn_objc_process_sttus_code) 	as last_slctn_objc_process_sttus
+					, sor.dlbrt_de
+					, sor.dlbrt_cn
+					, sor.dlbrt_opetr_id
+					, sor.applcnt_atchmnfl_group_id							as applcnt_attachment_group_id
+					, sor.dlbrt_result_atchmnfl_group_id					as dlbrt_attachment_group_id
+					, ues.evl_step_nm
+					, ubpa.rcept_no											as receipt_no
+					, ubpat.task_korean_nm									as task_nm
+					, ubp.pblanc_nm
+				from usp_api.uspt_evl_slctn_objc_reqst sor
+						inner join usp_api.uspt_evl_trget uet
+							on uet.evl_trget_id = sor.evl_trget_id
+						inner join usp_api.uspt_evl_step ues
+							on ues.evl_step_id = uet.evl_step_id
+						inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+							on ubpa.apply_id = uet.apply_id
+						inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+							on ubpat.apply_id = ubpa.apply_id
+						inner join usp_api.uspt_bsns_pblanc ubp
+							on ubp.pblanc_id = ubpa.pblanc_id
+				where
+					sor.evl_slctn_objc_reqst_id = #{objcReqstId}
+					and sor.objc_applcnt_id = #{memberId}
+		union all
+			select
+				sor.last_slctn_objc_reqst_id								as objc_reqst_id
+				, sor.objc_reqst_cn
+				, sor.objc_reqst_dt
+				, sor.last_slctn_objc_process_sttus_code																				as last_slctn_objc_process_sttus_cd
+				, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@LSOPS_CODE_GROUP}', sor.last_slctn_objc_process_sttus_code) 	as last_slctn_objc_process_sttus
+				, sor.dlbrt_de
+				, sor.dlbrt_cn
+				, sor.dlbrt_opetr_id
+				, sor.applcnt_atchmnfl_group_id								as applcnt_attachment_group_id
+				, sor.dlbrt_result_atchmnfl_group_id						as dlbrt_attachment_group_id
+				, '최종선정' 													as evl_step_nm
+				, ubpa.rcept_no												as 	receipt_no
+				, ubpat.task_korean_nm										as task_nm
+				, ubp.pblanc_nm
+			from usp_api.uspt_last_slctn_objc_reqst sor
+					inner join usp_api.uspt_last_slctn_trget ulst
+						on ulst.last_slctn_trget_id = sor.last_slctn_trget_id
+					inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+						on ubpa.apply_id = ulst.apply_id
+					inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+						on ubpat.apply_id = ubpa.apply_id
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpa.pblanc_id
+			where
+				sor.last_slctn_objc_reqst_id = #{objcReqstId}
+				and sor.objc_applcnt_id = #{memberId}
+	</select>
+</mapper>

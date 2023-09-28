@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsBhExmntDao">
+
+	<insert id="insert">
+		/** UsptBsnsBhExmntDao.insert */
+		insert into usp_api.uspt_bsns_bh_exmnt
+			(
+				bh_exmnt_id
+				, bsns_code
+				, bh_exmnt_div_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{bhExmntId}
+				, #{bsnsCd}
+				, #{bhExmntDivNm}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsBhExmntDao.insertList */
+		insert into usp_api.uspt_bsns_bh_exmnt
+			(
+				bh_exmnt_id
+				, bsns_code
+				, bh_exmnt_div_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.bhExmntId}
+				, #{item.bsnsCd}
+				, #{item.bhExmntDivNm}
+				, #{item.creatorId}
+				, #{item.createdDt}
+				, #{item.updaterId}
+				, #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsBhExmntDao.update */
+		update usp_api.uspt_bsns_bh_exmnt
+		set
+			updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+			, bh_exmnt_div_nm = #{bhExmntDivNm}
+		where
+			bh_exmnt_id = #{bhExmntId}
+			and bsns_code = #{bsnsCd}
+	</update>
+
+	<delete id="delete">
+		/** UsptBsnsBhExmntDao.delete */
+		delete from usp_api.uspt_bsns_bh_exmnt
+		where
+			bh_exmnt_id = #{bhExmntId}
+			and bsns_code = #{bsnsCd}
+	</delete>
+
+
+	<resultMap id="bhExmntMap" type="aicluster.pms.common.dto.BhExmntDto">
+		<collection property="bhExmntIemList" column="{bhExmntId = bh_exmnt_id}"
+					ofType="aicluster.pms.common.entity.UsptBsnsBhExmntIem"
+					select="selectBhExmntIemList"></collection>
+	</resultMap>
+
+	<select id="selectList" resultMap="bhExmntMap">
+		/** UsptBsnsBhExmntDao.selectList */
+		select
+			bh_exmnt_id
+			, bh_exmnt_div_nm
+		from usp_api.uspt_bsns_bh_exmnt
+		where
+			bsns_code = #{bsnsCd}
+	</select>
+
+	<select id="selectBhExmntIemList" resultType="aicluster.pms.common.entity.UsptBsnsBhExmntIem">
+		/** UsptBsnsBhExmntDao.selectBhExmntIemList */
+		select
+			bh_exmnt_iem_id
+			, bh_exmnt_iem_nm
+		from usp_api.uspt_bsns_bh_exmnt_iem
+		where
+			bh_exmnt_id = #{bhExmntId}
+	</select>
+
+</mapper>

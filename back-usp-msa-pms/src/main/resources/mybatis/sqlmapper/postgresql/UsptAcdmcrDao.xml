@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptAcdmcrDao">
+
+	<insert id="insert">
+		/** UsptAcdmcrDao.insert */
+		insert into usp_api.uspt_acdmcr
+			(
+				acdmcr_id
+				, mber_id
+				, bgnde
+				, endde
+				, schul_nm
+				, major_nm
+				, grdtn_div_code
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{acdmcrId}
+				, #{memberId}
+				, #{bgnde}
+				, #{endde}
+				, #{schulNm}
+				, #{major}
+				, #{grdtnDivCd}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptAcdmcrDao.update */
+		update usp_api.uspt_acdmcr
+		set
+			bgnde			= #{bgnde}
+			, endde			= #{endde}
+			, schul_nm		= #{schulNm}
+			, major_nm		= #{major}
+			, grdtn_div_code= #{grdtnDivCd}
+			, updusr_id		= #{updaterId}
+			, updt_dt		= #{updatedDt}
+		where
+			mber_id = #{memberId}
+			and acdmcr_id = #{acdmcrId}
+	</update>
+
+	<delete id="delete">
+		/** UsptAcdmcrDao.delete */
+		delete from usp_api.uspt_acdmcr
+		where
+			mber_id = #{memberId}
+			and acdmcr_id = #{acdmcrId}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptAcdmcr">
+		/** UsptAcdmcrDao.selectList */
+		select
+			acdmcr_id
+			, mber_id			as member_id
+			, bgnde
+			, endde
+			, schul_nm
+			, major_nm			as major
+			, grdtn_div_code	as grdtn_div_cd
+			, creatr_id			as creator_id
+			, creat_dt			as created_dt
+			, updusr_id			as updater_id
+			, updt_dt			as updated_dt
+			, fn_cmm_get_code_nm('GRDTN_DIV', grdtn_div_code) as grdtn_div
+			, row_number() over (order by bgnde, creat_dt) as rn
+		from usp_api.uspt_acdmcr
+		where
+			mber_id = #{memberId}
+	</select>
+</mapper>

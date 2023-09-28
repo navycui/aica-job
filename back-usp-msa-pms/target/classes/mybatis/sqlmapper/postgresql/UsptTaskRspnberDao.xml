@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptTaskRspnberDao">
+
+	<!-- 과제책임자 등록-->
+	<insert id="insert">
+		/** UsptTaskRspnberDao.insert */
+		insert into usp_api.uspt_task_rspnber
+			(
+				task_rspnber_id
+				,bsns_wtpln_id
+				,rspnber_nm
+				,encpt_brthdy
+				,encpt_mbtlnum
+				,encpt_email
+				,dept_nm
+				,clsf_nm
+				,adres
+				,encpt_telno
+				,encpt_fxnum
+				,nrno
+				,creatr_id
+				,creat_dt
+				,updusr_id
+				,updt_dt
+			) values (
+				 #{taskRspnberId}
+				,#{bsnsPlanDocId}
+				,#{rspnberNm}
+				,#{encBrthdy}
+				,#{encMbtlnum}
+				,#{encEmail}
+				,#{deptNm}
+				,#{clsfNm}
+				,#{adres}
+				,#{encTelno}
+				,#{encFxnum}
+				,#{tlsyRegistNo}
+				,#{creatorId}
+				,#{createdDt}
+				,#{updaterId}
+				,#{updatedDt}
+			)
+	</insert>
+
+	<!-- 과제책임자 변경-->
+	<update id="update">
+	/** UsptTaskRspnberDao.update */
+	update usp_api.uspt_task_rspnber
+		set		rspnber_nm			= #{rspnberNm}
+				,encpt_brthdy		= #{encBrthdy}
+				,encpt_mbtlnum	= #{encMbtlnum}
+				,encpt_email		= #{encEmail}
+				,dept_nm			= #{deptNm}
+				,clsf_nm				= #{clsfNm}
+				,adres					= #{adres}
+				,encpt_telno		= #{encTelno}
+				,encpt_fxnum		= #{encFxnum}
+				,nrno					= #{tlsyRegistNo}
+				,updusr_id			= #{updaterId}
+				,updt_dt				= #{updatedDt}
+	where  task_rspnber_id		= #{taskRspnberId}
+	  and   bsns_wtpln_id		= #{bsnsPlanDocId}
+	</update>
+
+	<!-- 과제책임자 변경-->
+	<update id="updateByBsnsPlanDocId">
+	/** UsptTaskRspnberDao.updateByBsnsPlanDocId */
+	update usp_api.uspt_task_rspnber
+		set		rspnber_nm			= #{rspnberNm}
+				,encpt_brthdy		= #{encBrthdy}
+				,encpt_mbtlnum	= #{encMbtlnum}
+				,encpt_email		= #{encEmail}
+				,dept_nm			= #{deptNm}
+				,clsf_nm				= #{clsfNm}
+				,adres					= #{adres}
+				,encpt_telno		= #{encTelno}
+				,encpt_fxnum		= #{encFxnum}
+				,nrno					= #{tlsyRegistNo}
+				,updusr_id			= #{updaterId}
+				,updt_dt				= #{updatedDt}
+	where   bsns_wtpln_id		= #{bsnsPlanDocId}
+	</update>
+
+	<!-- 과제책임자 삭제-->
+	<delete id="delete">
+		/** UsptTaskRspnberDao.delete */
+		delete from usp_api.uspt_task_rspnber
+				where task_rspnber_id = #{taskRspnberId}
+				<if test='bsnsPlanDocId != null and bsnsPlanDocId != ""'>
+			       and bsns_wtpln_id = #{bsnsPlanDocId}
+			    </if>
+	</delete>
+
+	<!-- 과제책임자 조회 -->
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptTaskRspnber">
+		/** UsptTaskRspnberDao.selectList */
+		select
+				 task_rspnber_id
+				,bsns_wtpln_id			as bsns_plan_doc_id
+				,rspnber_nm
+				,encpt_brthdy			as enc_brthdy
+				,encpt_mbtlnum		as enc_mbtlnum
+				,encpt_email			as enc_email
+				,dept_nm
+				,clsf_nm
+				,adres
+				,encpt_telno			as enc_telno
+				,encpt_fxnum			as enc_fxnum
+				,nrno
+				,creatr_id				as creator_id
+				,creat_dt					as created_dt
+				,updusr_id				as updater_id
+				,updt_dt					as updated_dt
+		from usp_api.uspt_task_rspnber
+		where 1=1
+		<if test='taskRspnberId != null and taskRspnberId != ""'>
+			 and task_rspnber_id = #{taskRspnberId}
+		</if>
+		<if test='bsnsPlanDocId != null and bsnsPlanDocId != ""'>
+			and bsns_wtpln_id = #{bsnsPlanDocId}
+		</if>
+		 <if test='rspnberNm != null and rspnberNm != ""'>
+			and 	 rspnber_nm  like '%' || #{rspnberNm} || '%'
+		</if>
+	</select>
+
+	<!-- 과제책임자 단건조회 -->
+	<select id="selectOne" resultType="aicluster.pms.common.entity.UsptTaskRspnber">
+		/** UsptTaskRspnberDao.selectOne */
+		select
+				 task_rspnber_id
+				,bsns_wtpln_id			as bsns_plan_doc_id
+				,rspnber_nm
+				,encpt_brthdy			as enc_brthdy
+				,encpt_mbtlnum		as enc_mbtlnum
+				,encpt_email			as enc_email
+				,dept_nm
+				,clsf_nm
+				,adres
+				,encpt_telno			as enc_telno
+				,encpt_fxnum			as enc_fxnum
+				,nrno
+				,creatr_id				as creator_id
+				,creat_dt					as created_dt
+				,updusr_id				as updater_id
+				,updt_dt					as updated_dt
+		from usp_api.uspt_task_rspnber
+	   where 1=1
+		  and bsns_wtpln_id = #{bsnsPlanDocId}
+	</select>
+
+
+</mapper>

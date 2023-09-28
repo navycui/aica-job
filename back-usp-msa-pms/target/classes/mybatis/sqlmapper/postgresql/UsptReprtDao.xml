@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptReprtDao">
+
+	<insert id="insert">
+		/** UsptReprtDao.insert */
+		insert into usp_api.uspt_reprt
+			(
+				reprt_id
+				, last_slctn_trget_id
+				, reprt_ty_code
+				, reprt_sttus_code
+				, presentn_dt
+				, reprt_sumry
+				, atchmnfl_group_id
+				, splemnt_reqst_dt
+				, splemnt_reqst_cn
+				, splemnt_atchmnfl_group_id
+				, sndng_mth_code
+				, sndng_cn
+				, recent_sndng_dt
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{reprtId}
+				, #{lastSlctnTrgetId}
+				, #{reprtTypeCd}
+				, #{reprtSttusCd}
+				, #{presentnDt}
+				, #{reprtSumryCn}
+				, #{attachmentGroupId}
+				, #{makeupReqDe}
+				, #{makeupReqCn}
+				, #{makeupAttachmentGroupId}
+				, #{sndngMth}
+				, #{sndngCn}
+				, #{recentSendDate}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptReprtDao.update */
+		update usp_api.uspt_reprt
+		set
+			reprt_sttus_code	= #{reprtSttusCd}
+			, reprt_sumry		= #{reprtSumryCn}
+			, splemnt_reqst_dt	= #{makeupReqDe}
+			, splemnt_reqst_cn	= #{makeupReqCn}
+			, presentn_dt		= #{presentnDt}
+			, sndng_mth_code	= #{sndngMth}
+			, sndng_cn			= #{sndngCn}
+			, recent_sndng_dt	= #{recentSendDate}
+			, updusr_id			= #{updaterId}
+			, updt_dt			= #{updatedDt}
+			, atchmnfl_group_id			= #{attachmentGroupId}
+			, splemnt_atchmnfl_group_id	= #{makeupAttachmentGroupId}
+		where
+			reprt_id = #{reprtId}
+	</update>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptReprt">
+		/** UsptReprtDao.select */
+		select
+			reprt_id
+			, last_slctn_trget_id
+			, reprt_ty_code						as reprt_type_cd
+			, reprt_sttus_code					as reprt_sttus_cd
+			, presentn_dt
+			, reprt_sumry						as reprt_sumry_cn
+			, atchmnfl_group_id					as attachment_group_id
+			, splemnt_reqst_dt					as makeup_req_de
+			, splemnt_reqst_cn					as makeup_req_cn
+			, splemnt_atchmnfl_group_id			as makeup_attachment_group_id
+			, sndng_mth_code					as sndng_mth
+			, sndng_cn
+			, recent_sndng_dt					as recent_send_date
+			, creatr_id							as creator_id
+			, creat_dt							as created_dt
+			, updusr_id							as updater_id
+			, updt_dt							as updated_dt
+		from usp_api.uspt_reprt
+		where
+			reprt_id = #{reprtId}
+	</select>
+
+	<select id="selectBasic" resultType="aicluster.pms.common.dto.ReprtDto">
+		/** UsptReprtDao.selectBasic */
+		select
+			ur.reprt_id
+			, ur.reprt_sttus_code																				as reprt_sttus_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@REPRT_CODE_GROUP}', ur.reprt_sttus_code)	as reprt_sttus
+			, ur.reprt_sumry																					as reprt_sumry_cn
+			, ur.atchmnfl_group_id																				as attachment_group_id
+			, ur.presentn_dt
+			, ub.bsns_nm
+			, ub.bsns_year
+			, ubpa.apply_id
+			, ubpa.rcept_no																						as receipt_no
+			, ubpa.mber_id																						as member_id
+			, fn_cmm_get_member_nm(ubpa.mber_id)																as member_nm
+			, ubpat.task_korean_nm																				as task_nm
+			, ubpat.rspnber_nm
+			, ubpat.encpt_mbtlnum																				as enc_mbtlnum
+			, ubc.charger_author_code																			as charger_author_cd
+		from usp_api.uspt_reprt ur
+				inner join usp_api.uspt_last_slctn_trget ulst
+					on ulst.last_slctn_trget_id = ur.last_slctn_trget_id
+					and ulst.slctn_at = true
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = ulst.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+					and ubp.use_at = true
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+					and ub.use_at = true
+				inner join usp_api.uspt_bsns_job_step ubjs
+					on ubjs.bsns_code = ub.bsns_code
+					and ubjs.job_step_code = '${@aicluster.pms.common.util.Code@JOBSTEP_TASK}'
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+		where
+			ur.reprt_id = #{reprtId}
+	</select>
+
+	<select id="selectCount" resultType="Integer">
+		/** UsptReprtDao.selectCount */
+		select
+			count(*)
+		from usp_api.uspt_reprt
+		where
+			last_slctn_trget_id = #{lastSlctnTrgetId}
+			and reprt_ty_code = #{reprtTypeCd}
+	</select>
+
+
+	<sql id="selectList_where">
+		<where>
+			ulst.slctn_at = true
+			<if test='bsnsYear != null and bsnsYear != ""'>
+				and ub.bsns_year = #{bsnsYear}
+			</if>
+			<if test='reprtSttusCd != null and reprtSttusCd != ""'>
+				and ur.reprt_sttus_code = #{reprtSttusCd}
+			</if>
+			<if test='keyword != null and keyword != ""'>
+				<choose>
+					<when test='keywordDiv == "receiptNo"'>
+						and ubpa.rcept_no like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "taskNm"'>
+						and ubpat.task_korean_nm like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "bsnsNm"'>
+						and ub.bsns_nm like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "memberNm"'>
+						and cm.mber_nm like concat('%', #{keyword}, '%')
+					</when>
+				</choose>
+			</if>
+			<if test='trgetIdList != null'>
+				and ulst.last_slctn_trget_id in
+				<foreach collection="trgetIdList" item="item" open="(" close=")" separator=",">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectListCount" resultType="Long">
+		/** UsptReprtDao.selectListCount */
+		select
+			count(*)
+		from usp_api.uspt_last_slctn_trget ulst
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = ulst.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join auth_api.cmmt_mber_info cm
+					on cm.mber_id = ubpa.mber_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+					and ubp.use_at = true
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+					and ub.use_at = true
+				inner join usp_api.uspt_bsns_job_step ubjs
+					on ubjs.bsns_code = ub.bsns_code
+					and ubjs.job_step_code = '${@aicluster.pms.common.util.Code@JOBSTEP_TASK}'
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+				left outer join usp_api.uspt_reprt ur
+					on ur.last_slctn_trget_id = ulst.last_slctn_trget_id
+					and ur.reprt_ty_code = #{reprtTypeCd}
+		<include refid="selectList_where"/>
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.ReprtListDto">
+		/** UsptReprtDao.selectList */
+		select
+			ur.reprt_id
+			, ur.atchmnfl_group_id																				as attachment_group_id
+			, ulst.last_slctn_trget_id
+			, ur.presentn_dt
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@REPRT_CODE_GROUP}', ur.reprt_sttus_code)	as reprt_sttus
+			, ubpa.rcept_no																						as receipt_no
+			, ubpat.task_korean_nm																				as task_nm
+			, ub.bsns_year
+			, ub.bsns_nm
+			, cm.mber_nm																						as 	member_nm
+			, ubc.charger_author_code																			as charger_author_cd
+			, cm.mber_id																						as member_id
+			, cm.encpt_email																					as enc_email
+			, cm.encpt_mbtlnum																					as enc_mobile_no
+			, row_number() over (order by ulst.creat_dt desc) as rn
+		from usp_api.uspt_last_slctn_trget ulst
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = ulst.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join auth_api.cmmt_mber_info cm
+					on cm.mber_id = ubpa.mber_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+					and ubp.use_at = true
+				inner join usp_api.uspt_bsns ub
+					on ub.bsns_code = ubp.bsns_code
+					and ub.use_at = true
+				inner join usp_api.uspt_bsns_job_step ubjs
+					on ubjs.bsns_code = ub.bsns_code
+					and ubjs.job_step_code = '${@aicluster.pms.common.util.Code@JOBSTEP_TASK}'
+				inner join usp_api.uspt_bsns_charger ubc
+					on ubc.bsns_code = ub.bsns_code
+					and ubc.insider_id = #{insiderId}
+				left outer join usp_api.uspt_reprt ur
+					on ur.last_slctn_trget_id = ulst.last_slctn_trget_id
+					and ur.reprt_ty_code = #{reprtTypeCd}
+		<include refid="selectList_where"/>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+
+	<sql id="selectFrontList_where">
+		<where>
+			ubpa.mber_id = #{memberId}
+			<if test='reprtTypeCd != null and reprtTypeCd != ""'>
+				and ur.reprt_ty_code = #{reprtTypeCd}
+			</if>
+			<if test='reprtSttusCd != null and reprtSttusCd != ""'>
+				and ur.reprt_sttus_code = #{reprtSttusCd}
+			</if>
+			<if test='presentnStartDate != null and presentnStartDate != ""'>
+				and ur.presentn_dt >= to_date(#{presentnStartDate}, 'yyyyMMdd')
+			</if>
+			<if test='presentnEndDate != null and presentnEndDate != ""'>
+				and ur.presentn_dt <![CDATA[<=]]> to_date(#{presentnEndDate}, 'yyyyMMdd')
+			</if>
+			<if test='keyword != null and keyword != ""'>
+				<choose>
+					<when test='keywordDiv == "taskNm"'>
+						and ubpat.task_korean_nm like concat('%', #{keyword}, '%')
+					</when>
+					<when test='keywordDiv == "pblancNm"'>
+						and ubp.pblanc_nm like concat('%', #{keyword}, '%')
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectFrontListCount" resultType="Long">
+		/** UsptReprtDao.selectFrontListCount */
+		select
+			count(ur.reprt_id)
+		from usp_api.uspt_reprt ur
+				inner join usp_api.uspt_last_slctn_trget ulst
+					on ulst.last_slctn_trget_id = ur.last_slctn_trget_id
+					and ulst.slctn_at = true
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = ulst.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+					and ubp.use_at = true
+		<include refid="selectFrontList_where"/>
+	</select>
+
+	<select id="selectFrontList" resultType="aicluster.pms.common.dto.FrontReprtListDto">
+		/** UsptReprtDao.selectFrontList */
+		select
+			ur.reprt_id
+			, ur.reprt_ty_code																					as reprt_type_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@REPRT_TYPE_CODE_GROUP}', ur.reprt_ty_code)	as reprt_type
+			, ur.reprt_sttus_code																				as reprt_sttus_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@REPRT_CODE_GROUP}', ur.reprt_sttus_code)	as reprt_sttus
+			, ur.presentn_dt
+			, ubpa.rcept_no																						as receipt_no
+			, ubpat.task_korean_nm																				as task_nm
+			, ubpat.rspnber_nm
+			, ubp.pblanc_nm
+		from usp_api.uspt_reprt ur
+				inner join usp_api.uspt_last_slctn_trget ulst
+					on ulst.last_slctn_trget_id = ur.last_slctn_trget_id
+					and ulst.slctn_at = true
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = ulst.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+					and ubp.use_at = true
+		<include refid="selectFrontList_where"/>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+	<select id="selectFront" resultType="aicluster.pms.common.dto.FrontReprtDto">
+		/** UsptReprtDao.selectFront */
+		select
+			ur.reprt_id
+			, ur.reprt_ty_code																					as reprt_type_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@REPRT_TYPE_CODE_GROUP}', ur.reprt_ty_code)	as reprt_type
+			, ur.reprt_sttus_code																				as reprt_sttus_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@REPRT_CODE_GROUP}', ur.reprt_sttus_code)	as reprt_sttus
+			, ur.presentn_dt
+			, ur.reprt_sumry																					as reprt_sumry_cn
+			, ur.atchmnfl_group_id																				as attachment_group_id
+			, ubpa.rcept_no																						as receipt_no
+			, ubpat.task_korean_nm																				as task_nm
+			, ubp.pblanc_nm
+		from usp_api.uspt_reprt ur
+				inner join usp_api.uspt_last_slctn_trget ulst
+					on ulst.last_slctn_trget_id = ur.last_slctn_trget_id
+					and ulst.slctn_at = true
+				inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+					on ubpa.apply_id = ulst.apply_id
+				inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+					on ubpat.apply_id = ubpa.apply_id
+				inner join usp_api.uspt_bsns_pblanc ubp
+					on ubp.pblanc_id = ubpa.pblanc_id
+					and ubp.use_at = true
+		where
+			ur.reprt_id = #{reprtId}
+	</select>
+</mapper>

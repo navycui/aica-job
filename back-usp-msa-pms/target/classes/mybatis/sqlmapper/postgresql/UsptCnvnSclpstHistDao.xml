@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptCnvnSclpstHistDao">
+
+
+	<!-- ******************************************************************* 협약수행기관신분변경이력 ********************************************************************** -->
+
+	<insert id="insert">
+		/** UsptCnvnSclpstHistDao.insert */
+		insert into usp_api.uspt_cnvn_sclpst_change_hist
+			(
+				cnvn_sclpst_change_hist_id
+				, cnvn_change_reqst_id
+				, confm_cnvn_sclpst_change_hist_id
+				, indvdl_bsnm_div_code
+				, intprts_nm
+				, sexdstn_code
+				, encpt_mbtlnum
+				, native_at
+				, encpt_email
+				, encpt_brthdy
+				, bsnm_nm
+				, bizrno
+				, ceo_nm
+				, charger_nm
+				, creatr_id
+				, creat_dt
+			) values (
+				#{cnvnSclpstHistId}
+				, #{cnvnChangeReqId}
+				, #{confmCnvnSclpstHistId}
+				, #{indvdlBsnmDivCd}
+				, #{nm}
+				, #{genderCd}
+				, #{encMbtlnum}
+				, #{NativeYn}
+				, #{encEmail}
+				, #{encBrthdy}
+				, #{bsnmNm}
+				, #{bizrno}
+				, #{ceoNm}
+				, #{chargerNm}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<!--  협약수행기관신분변경이력 조회 -->
+	<select id="selectMaxHist" resultType="aicluster.pms.common.entity.UsptCnvnSclpstHist">
+		/** UsptCnvnSclpstHistDao.selectMaxHist */
+			select
+				a.*
+			from
+				(
+					select
+						cnvn_sclpst_change_hist_id					as cnvn_sclpst_hist_id
+						, cnvn_change_reqst_id						as cnvn_change_req_id
+						, confm_cnvn_sclpst_change_hist_id			as confm_cnvn_sclpst_hist_id
+						, indvdl_bsnm_div_code						as indvdl_bsnm_div_cd
+						, bsnm_nm
+						, bizrno
+						, ceo_nm
+						, charger_nm
+						, row_number() over (order by creat_dt desc) as rn
+					from usp_api.uspt_cnvn_sclpst_change_hist
+					where
+						cnvn_change_reqst_id = #{cnvnChangeReqId}
+						and ( confm_cnvn_sclpst_change_hist_id is null or confm_cnvn_sclpst_change_hist_id = '')
+				) a
+			where
+				a.rn = 1
+	</select>
+
+
+	<!--  협약수행기관신분변경이력 변경날자 목록-->
+	<select id="selectUsptCnvnSclpstHistChangeDe" resultType="aicluster.pms.common.entity.UsptCnvnChangeReqHistDt">
+		/** UsptCnvnSclpstHistDao.selectUsptCnvnSclpstHistChangeDe */
+		select
+			cnvn_change_reqst_id							as cnvn_change_req_id
+			, to_char(creat_dt,'yyyymmdd')					as change_de
+			, to_char(creat_dt,'yyyymmddhh24miss')			as change_dt
+		from usp_api.uspt_cnvn_sclpst_change_hist
+		where
+			cnvn_change_reqst_id = #{cnvnChangeReqId}
+			and ( confm_cnvn_sclpst_change_hist_id is null or confm_cnvn_sclpst_change_hist_id ='' )
+		order by creat_dt desc
+	</select>
+
+	<!--  협약수행기관신분변경이력 날자별 내역조회 -->
+	<select id="selectUsptCnvnSclpstHistByDt" resultType="aicluster.pms.common.entity.UsptCnvnSclpstHist">
+		/** UsptCnvnSclpstHistDao.selectUsptCnvnSclpstHistByDt */
+			select
+				'before' 								as change_be_af
+				, cnvn_sclpst_change_hist_id			as cnvn_sclpst_hist_id
+				, cnvn_change_reqst_id					as cnvn_change_req_id
+				, confm_cnvn_sclpst_change_hist_id		as confm_cnvn_sclpst_hist_id
+				, indvdl_bsnm_div_code					as indvdl_bsnm_div_cd
+				, intprts_nm							as nm
+				, sexdstn_code							as gender_cd
+				, encpt_mbtlnum							as enc_mbtlnum
+				, native_at								as native
+				, encpt_email 							as enc_email
+				, encpt_brthdy							as enc_brthdy
+				, bsnm_nm								as bsnm_nm
+				, bizrno								as bizrno
+				, ceo_nm								as ceo_nm
+				, charger_nm							as charger_nm
+				, to_char(creat_dt,'yyyy-mm-dd')		as change_de
+			from usp_api.uspt_cnvn_sclpst_change_hist
+			where
+				cnvn_change_reqst_id = #{cnvnChangeReqId}
+				and confm_cnvn_sclpst_change_hist_id is not null
+				and confm_cnvn_sclpst_change_hist_id !=''
+		union all
+			select
+				'after' 								as change_be_af
+				, cnvn_sclpst_change_hist_id			as cnvn_sclpst_hist_id
+				, cnvn_change_reqst_id					as cnvn_change_req_id
+				, confm_cnvn_sclpst_change_hist_id		as confm_cnvn_sclpst_hist_id
+				, indvdl_bsnm_div_code					as indvdl_bsnm_div_cd
+				, intprts_nm							as nm
+				, sexdstn_code							as gender_cd
+				, encpt_mbtlnum							as enc_mbtlnum
+				, native_at								as native
+				, encpt_email 							as enc_email
+				, encpt_brthdy							as enc_brthdy
+				, bsnm_nm								as bsnm_nm
+				, bizrno								as bizrno
+				, ceo_nm								as ceo_nm
+				, charger_nm							as charger_nm
+				, to_char(creat_dt,'yyyy-mm-dd')		as change_de
+			from usp_api.uspt_cnvn_sclpst_change_hist
+			where
+				cnvn_change_reqst_id = #{cnvnChangeReqId}
+				and ( confm_cnvn_sclpst_change_hist_id is null or confm_cnvn_sclpst_change_hist_id = '')
+				and to_char(creat_dt,'yyyymmddhh24miss') = #{changeDt}
+	</select>
+
+</mapper>

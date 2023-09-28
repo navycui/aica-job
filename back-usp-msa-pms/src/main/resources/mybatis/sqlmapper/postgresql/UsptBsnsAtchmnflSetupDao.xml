@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsAtchmnflSetupDao">
+
+	<insert id="insert">
+		/** UsptBsnsAtchmnflSetupDao.insert */
+		insert into usp_api.uspt_bsns_atchmnfl_setup
+			(
+				atchmnfl_setup_id
+				, bsns_code
+				, file_knd_nm
+				, essntl_at
+				, format_atchmnfl_id
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{atchmnflSetupId}
+				, #{bsnsCd}
+				, #{fileKndNm}
+				, #{essntl}
+				, #{formatAttachmentId}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsAtchmnflSetupDao.insertList */
+		insert into usp_api.uspt_bsns_atchmnfl_setup
+			(
+				atchmnfl_setup_id
+				, bsns_code
+				, file_knd_nm
+				, essntl_at
+				, format_atchmnfl_id
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.atchmnflSetupId}
+				, #{item.bsnsCd}
+				, #{item.fileKndNm}
+				, #{item.essntl}
+				, #{item.formatAttachmentId}
+				, #{item.creatorId}
+				, #{item.createdDt}
+				, #{item.updaterId}
+				, #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsAtchmnflSetupDao.update */
+		update usp_api.uspt_bsns_atchmnfl_setup
+		set
+			updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+			, file_knd_nm = #{fileKndNm}
+			, essntl_at = #{essntl}
+			, format_atchmnfl_id = #{formatAttachmentId}
+		where
+			atchmnfl_setup_id = #{atchmnflSetupId}
+			and bsns_code = #{bsnsCd}
+	</update>
+
+	<delete id="delete">
+		/** UsptBsnsAtchmnflSetupDao.delete */
+		delete from usp_api.uspt_bsns_atchmnfl_setup
+		where
+			atchmnfl_setup_id = #{atchmnflSetupId}
+			and bsns_code = #{bsnsCd}
+	</delete>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptBsnsAtchmnflSetup">
+		/** UsptBsnsAtchmnflSetupDao.select */
+		select
+			atchmnfl_setup_id	as atchmnfl_setup_id
+			bsns_code			as bsns_cd
+			file_knd_nm			as file_knd_nm
+			essntl_at			as essntl
+			format_atchmnfl_id	as format_attachment_id
+			creatr_id			as creator_id
+			creat_dt			as created_dt
+			updusr_id			as updater_id
+			updt_dt				as updated_dt
+		from usp_api.uspt_bsns_atchmnfl_setup
+		where
+			bsns_code = #{bsnsCd}
+			and atchmnfl_setup_id = #{atchmnflSetupId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsAtchmnflSetup">
+		/** UsptBsnsAtchmnflSetupDao.selectList */
+		select
+			atchmnfl_setup_id
+			, bsns_code				as bsns_cd
+			, file_knd_nm
+			, essntl_at				as essntl
+			, format_atchmnfl_id	as format_attachment_id
+			, (	select
+					file_nm
+				from com_api.cmmt_atchmnfl
+				where
+					atchmnfl_id = format_atchmnfl_id
+					and atchmnfl_group_id = '${@aicluster.pms.common.util.Code@SINGLE_FILE_GROUP_ID}'
+					and file_delete_at = false
+			) as format_attachment_nm
+		from usp_api.uspt_bsns_atchmnfl_setup
+		where
+			bsns_code = #{bsnsCd}
+	</select>
+</mapper>

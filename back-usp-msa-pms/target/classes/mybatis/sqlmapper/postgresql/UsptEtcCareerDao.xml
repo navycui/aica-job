@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEtcCareerDao">
+
+	<insert id="insert">
+		/** UsptEtcCareerDao.insert */
+		insert into usp_api.uspt_etc_career
+			(
+				etc_career_id
+				, mber_id
+				, career_nm
+				, career_ty_code
+				, bgnde
+				, endde
+				, cn
+				, instt_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{etcCareerId}
+				, #{memberId}
+				, #{careerNm}
+				, #{careerTypeCd}
+				, #{bgnde}
+				, #{endde}
+				, #{cn}
+				, #{instt}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptEtcCareerDao.update */
+		update usp_api.uspt_etc_career
+		set
+			career_nm		= #{careerNm}
+			, career_ty_code = #{careerTypeCd}
+			, bgnde			= #{bgnde}
+			, endde			= #{endde}
+			, cn			= #{cn}
+			, instt_nm		= #{instt}
+			, updusr_id		= #{updaterId}
+			, updt_dt		= #{updatedDt}
+		where
+			mber_id = #{memberId}
+			and etc_career_id = #{etcCareerId}
+	</update>
+
+	<delete id="delete">
+		/** UsptEtcCareerDao.delete */
+		delete from usp_api.uspt_etc_career
+		where
+			mber_id = #{memberId}
+			and etc_career_id = #{etcCareerId}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptEtcCareer">
+		/** UsptEtcCareerDao.selectList */
+		select
+			etc_career_id
+			, mber_id						as member_id
+			, career_nm
+			, career_ty_code										as career_type_cd
+			, fn_cmm_get_code_nm('CAREER_TYPE', career_ty_code)		as career_type
+			, bgnde
+			, endde
+			, cn
+			, instt_nm						as instt
+			, creatr_id						as creator_id
+			, creat_dt						as created_dt
+			, updusr_id						as updater_id
+			, updt_dt						as updated_dt
+			, row_number() over (order by career_ty_code, bgnde, creat_dt) as rn
+		from usp_api.uspt_etc_career
+		where
+			mber_id = #{memberId}
+	</select>
+</mapper>

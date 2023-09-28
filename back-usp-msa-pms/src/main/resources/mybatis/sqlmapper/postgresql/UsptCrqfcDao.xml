@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptCrqfcDao">
+
+	<insert id="insert">
+		/** UsptCrqfcDao.insert */
+		insert into usp_api.uspt_crqfc
+			(
+				crqfc_id
+				, mber_id
+				, crqfc_nm
+				, grad
+				, acqs_de
+				, athrz_instt_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{crqfcId}
+				, #{memberId}
+				, #{crqfcNm}
+				, #{grad}
+				, #{acqdt}
+				, #{athrzInstt}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptCrqfcDao.update */
+		update usp_api.uspt_crqfc
+		set
+			crqfc_nm			= #{crqfcNm}
+			, grad				= #{grad}
+			, acqs_de			= #{acqdt}
+			, athrz_instt_nm	= #{athrzInstt}
+			, updusr_id			= #{updaterId}
+			, updt_dt			= #{updatedDt}
+		where
+			mber_id = #{memberId}
+			and crqfc_id = #{crqfcId}
+	</update>
+
+	<delete id="delete">
+		/** UsptCrqfcDao.delete */
+		delete from usp_api.uspt_crqfc
+		where
+			mber_id = #{memberId}
+			and crqfc_id = #{crqfcId}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptCrqfc">
+		/** UsptCrqfcDao.selectList */
+		select
+			crqfc_id
+			, mber_id					as member_id
+			, crqfc_nm
+			, grad
+			, acqs_de
+			, athrz_instt_nm			as athrz_instt
+			, creatr_id					as creator_id
+			, creat_dt 					as created_dt
+			, updusr_id					as updater_id
+			, updt_dt					as updated_dt
+			, row_number() over (order by creat_dt) as rn
+		from usp_api.uspt_crqfc
+		where
+			mber_id = #{memberId}
+	</select>
+</mapper>

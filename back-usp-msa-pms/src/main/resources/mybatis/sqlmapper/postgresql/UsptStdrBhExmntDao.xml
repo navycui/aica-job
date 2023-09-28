@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptStdrBhExmntDao">
+
+	<insert id="insert">
+		/** UsptStdrBhExmntDao.insert */
+		insert into usp_api.uspt_stdr_bsns_bh_exmnt
+			(
+				bh_exmnt_id
+				, stdr_bsns_code
+				, bh_exmnt_div_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{bhExmntId}
+				, #{stdrBsnsCd}
+				, #{bhExmntDivNm}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptStdrBhExmntDao.update */
+		update usp_api.uspt_stdr_bsns_bh_exmnt
+		set
+			updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+			, bh_exmnt_div_nm = #{bhExmntDivNm}
+		where
+			bh_exmnt_id = #{bhExmntId}
+			and stdr_bsns_code = #{stdrBsnsCd}
+	</update>
+
+	<delete id="delete">
+		/** UsptStdrBhExmntDao.delete */
+		delete from usp_api.uspt_stdr_bsns_bh_exmnt
+		where
+			bh_exmnt_id = #{bhExmntId}
+			and stdr_bsns_code = #{stdrBsnsCd}
+	</delete>
+
+
+	<resultMap id="bhExmntMap" type="aicluster.pms.common.dto.BhExmntDto">
+		<collection property="bhExmntIemList" column="{bhExmntId = bh_exmnt_id}"
+					ofType="aicluster.pms.common.entity.UsptStdrBhExmntIem"
+					select="selectBhExmntIemList"></collection>
+	</resultMap>
+
+	<select id="selectList" resultMap="bhExmntMap">
+		/** UsptStdrBhExmntDao.selectList */
+		select
+			bh_exmnt_id
+			, bh_exmnt_div_nm
+		from usp_api.uspt_stdr_bsns_bh_exmnt
+		where
+			stdr_bsns_code = #{stdrBsnsCd}
+	</select>
+
+	<select id="selectBhExmntIemList" resultType="aicluster.pms.common.entity.UsptStdrBhExmntIem">
+		/** UsptStdrBhExmntDao.selectBhExmntIemList */
+		select
+			bh_exmnt_iem_id
+			, bh_exmnt_iem_nm
+		from usp_api.uspt_stdr_bsns_bh_exmnt_iem
+		where
+			bh_exmnt_id = #{bhExmntId}
+	</select>
+
+</mapper>

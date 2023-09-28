@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptExpertReqstHistDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptExpertReqstHist">
+		/** UsptExpertReqstHistDao.selectList */
+		select	 expert_reqst_process_hist_id as expert_reqst_hist_id						/**	전문가신청처리이력**/
+				,expert_id                      				/**  전문가ID**/
+				,expert_reqst_process_sttus_code as expert_reqst_process_sttus_cd  		/**  전문가신청처리상태코드(G:EXPERT_REQST_PROCESS_STTUS)**/
+				,resn_cn                        				/**  사유내용**/
+				,creatr_id  as creator_id                     				/**  생성자ID**/
+				,creat_dt  as created_dt                     				/**  생성일시**/
+		 from usp_api.uspt_expert_reqst_process_hist
+		 where 1=1
+		 <if test='expertReqstHistId != null and expertReqstHistId != ""'>
+			and  expert_acdmcr_id = #{expertReqstHistId}
+		</if>
+		<if test='expertCareerId != null and expertCareerId != ""'>
+			and  expert_id = #{expertId}
+		</if>
+	</select>
+
+	<insert id="insert">
+		/** UsptExpertReqstHistDao.insert */
+		insert into usp_api.uspt_expert_reqst_process_hist (
+				 expert_reqst_process_hist_id
+				,expert_id
+				,expert_reqst_process_sttus_code
+				,resn_cn
+				,creatr_id
+				,creat_dt
+			) values (
+				 #{expertReqstHistId}
+				,#{expertId}
+				,#{expertReqstProcessSttusCd}
+				,#{resnCn}
+				,#{creatorId}
+				,#{createdDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptExpertReqstHistDao.insert */
+		update usp_api.uspt_expert_reqst_process_hist
+		     set expert_reqst_process_sttus_code  = #{expertReqstProcessSttusCd}
+				,resn_cn                   = #{resnCn}
+		where expert_reqst_process_hist_id  = #{expertReqstHistId}
+		   and  expert_id = #{expertId}
+	</update>
+
+	<delete id="delete">
+		/** UsptExpertReqstHistDao.delete*/
+		delete from usp_api.uspt_expert_reqst_process_hist
+		where expert_reqst_process_hist_id  = #{expertReqstHistId}
+		  and  expert_id = #{expertId}
+	</delete>
+
+	<delete id="deleteExpert">
+		/** UsptExpertReqstHistDao.deleteExpert*/
+		delete from usp_api.uspt_expert_reqst_process_hist
+		where expert_id = #{expertId}
+	</delete>
+
+	<!-- 전문가신청 처리 이력 조회-->
+	<select id="selectExpertReqstHistList" resultType="aicluster.pms.common.entity.UsptExpertReqstHist">
+		/** UsptExpertReqstHistDao.selectExpertReqstHistList */
+		select	  a.expert_reqst_process_hist_id as expert_reqst_hist_id						/**	전문가신청처리이력ID**/
+				, a.expert_id                      				/**  전문가ID**/
+				, a.expert_reqst_process_sttus_code as expert_reqst_process_sttus_cd  		/**  전문가신청처리상태코드**/
+				, fn_cmm_get_code_nm('EXPERT_REQST_PROCESS_STTUS',a.expert_reqst_process_sttus_code ) as expert_reqst_process_sttus_nm  /**  전문가신청처리상태명**/
+				, a.resn_cn                        				/**  사유내용**/
+				, b.login_id                     								 as reg_id					/**  생성자ID**/
+				, b.mber_nm 												  as member_nm		/**처리자명**/
+				, to_char(a.creat_dt   ,'YYYY-MM-DD HH24:MI:SS')  as  reg_dt             /** 생성일시**/
+		 from usp_api.uspt_expert_reqst_process_hist   a
+		 left outer  join auth_api.cmmt_emp_info b
+		                 on a.creatr_id   = b.mber_id
+		 where 1=1
+		    and a.expert_id = #{expertId}
+		 	and a.expert_reqst_process_sttus_code  in ('ERPS02','ERPS03')	/*반려 승인*/
+		 order by a.creat_dt  desc
+	</select>
+
+</mapper>

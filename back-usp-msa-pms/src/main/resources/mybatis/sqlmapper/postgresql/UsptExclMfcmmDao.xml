@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptExclMfcmmDao">
+
+	<insert id="insertList">
+		/** UsptExclMfcmmDao.insertList */
+		insert into usp_api.uspt_excl_mfcmm (
+			   excl_mfcmm_id
+			 , mfcmm_extrc_id
+			 , expert_id
+			 , excl_resn_cn
+			 , creatr_id
+			 , creat_dt
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+			(
+				   #{item.exclMfcmmId}
+				 , #{item.mfcmmExtrcId}
+				 , #{item.expertId}
+				 , #{item.exclResnCn}
+				 , #{item.creatorId}
+				 , #{item.createdDt}
+			)
+		</foreach>
+	</insert>
+
+	<delete id="deleteByCmitId">
+		/** UsptExclMfcmmDao.deleteByCmitId */
+		delete
+		  from usp_api.uspt_excl_mfcmm
+		 where mfcmm_extrc_id in (
+		 						  select mfcmm_extrc_id
+		 						    from usp_api.uspt_evl_mfcmm_extrc
+								   where evl_cmit_id = #{evlCmitId}
+								 )
+	</delete>
+
+	<!-- 전문가 삭제 -->
+	<delete id="deleteByExpertId">
+		/** UsptExclMfcmmDao.deleteByExpertId */
+		delete  from usp_api.uspt_excl_mfcmm
+		 where expert_id = #{expertId}
+	</delete>
+
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsCnvnPrtcmpnySignDao">
+
+
+	<insert id="insert" >
+		/** UsptBsnsCnvnPrtcmpnySignDao.insert */
+			insert into usp_api.uspt_bsns_cnvn_prtcmpny_sign
+			(
+				bsns_cnvn_prtcmpny_sign_id
+				,bsns_cnvn_id
+				,mber_id
+				,bsnm_sign_dt
+				,creatr_id
+				,creat_dt
+				,updusr_id
+				,updt_dt
+
+		) values (
+				#{bsnsCnvnPrtcmpnySignId}
+				,#{bsnsCnvnId}
+				,#{memberId}
+				,#{bsnmSignDt}
+				,#{creatorId}
+				,#{createdDt}
+				,#{updaterId}
+				,#{updatedDt}
+		)
+	</insert>
+
+	<!-- 사업협약참여기업서명 조회-->
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsCnvnPrtcmpnySign">
+		/** UsptBsnsCnvnPrtcmpnySignDao.selectList */
+		select ubcps.bsns_cnvn_prtcmpny_sign_id
+				, ubcps.bsns_cnvn_id
+				, ubcps.mber_id			as member_id
+				, cm.mber_nm			as member_nm		/** 신청자명 */
+				, cm.ceo_nm										/** 대표자명 */
+				, ubcps.bsnm_sign_dt
+				, to_char(ubcps.bsnm_sign_dt ,'YYYY-MM-DD HH24:MI')	as char_bsnm_sign_dt			/*사업자서명일시	*/
+				, cm.bizrno				/*사업자번호*/
+		from usp_api.uspt_bsns_cnvn_prtcmpny_sign   ubcps
+		inner join auth_api.cmmt_mber_info cm
+		    on ubcps.mber_id  = cm.mber_id
+        where ubcps.bsns_cnvn_id = #{bsnsCnvnId}
+	</select>
+
+	<!-- 사업협약참여기업서명 대상 여부 조회-->
+	<select id="selectSignRegYn" resultType="aicluster.pms.common.entity.UsptBsnsCnvnPrtcmpnySign">
+		/** UsptBsnsCnvnPrtcmpnySignDao.selectSignRegYn */
+		select bsns_cnvn_prtcmpny_sign_id
+		       , to_char(bsnm_sign_dt ,'YYYY-MM-DD HH24:MI')	as char_bsnm_sign_dt			/*사업자서명일시	*/
+		 from usp_api.uspt_bsns_cnvn_prtcmpny_sign
+       where bsns_cnvn_id 	= #{bsnsCnvnId}
+          and mber_id 	= #{memberId}
+	</select>
+
+	<update id="updateSign">
+		/** UsptBsnsCnvnPrtcmpnySignDao.updateSign */
+		update usp_api.uspt_bsns_cnvn_prtcmpny_sign
+			 set  bsnm_sign_dt 	= #{updatedDt}
+			     , cert_session_id = #{certSessionId}
+			  	 , updusr_id       = #{updaterId}
+				 , updt_dt      = #{updatedDt}
+			where bsns_cnvn_prtcmpny_sign_id = #{bsnsCnvnPrtcmpnySignId}
+			  and  bsns_cnvn_id 						= #{bsnsCnvnId}
+			  and  mber_id 							= #{memberId}
+	</update>
+
+	<!-- 사업협약ID의 서명할 전체 건수 조회-->
+	<select id="selectSignTotCnt" resultType="int">
+		/** UsptBsnsCnvnPrtcmpnySignDao.selectSignTotCnt */
+		select count(1)
+		 from usp_api.uspt_bsns_cnvn_prtcmpny_sign
+       where bsns_cnvn_id 	= #{bsnsCnvnId}
+	</select>
+
+	<!-- 사업협약ID의 서명한 건수 조회-->
+	<select id="selectSignCnt" resultType="int">
+		/** UsptBsnsCnvnPrtcmpnySignDao.selectSignCnt */
+		select count(1)
+		 from usp_api.uspt_bsns_cnvn_prtcmpny_sign
+       where bsns_cnvn_id 	= #{bsnsCnvnId}
+          and bsnm_sign_dt is not null
+	</select>
+
+	<delete id="delete">
+		/** UsptBsnsCnvnPrtcmpnySignDao.delete */
+		delete from usp_api.uspt_bsns_cnvn_prtcmpny_sign
+		where bsns_cnvn_id =  #{bsnsCnvnId}
+	</delete>
+
+</mapper>

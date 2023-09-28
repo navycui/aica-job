@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsChklstDao">
+
+	<insert id="insert">
+		/** UsptBsnsChklstDao.insert */
+		insert into usp_api.uspt_bsns_chklst
+			(
+				chklst_id
+				, bsns_code
+				, chklst_cn
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{chklstId}
+				, #{bsnsCd}
+				, #{chklstCn}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsChklstDao.insertList */
+		insert into usp_api.uspt_bsns_chklst
+			(
+				chklst_id
+				, bsns_code
+				, chklst_cn
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.chklstId}
+				, #{item.bsnsCd}
+				, #{item.chklstCn}
+				, #{item.creatorId}
+				, #{item.createdDt}
+				, #{item.updaterId}
+				, #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsChklstDao.update */
+		update usp_api.uspt_bsns_chklst
+		set
+			chklst_cn = #{chklstCn}
+			, updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+		where
+			chklst_id = #{chklstId}
+			and bsns_code = #{bsnsCd}
+	</update>
+
+	<delete id="delete">
+		/** UsptBsnsChklstDao.delete */
+		delete from usp_api.uspt_bsns_chklst
+		where
+			chklst_id = #{chklstId}
+			and bsns_code = #{bsnsCd}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsChklst">
+		/** UsptBsnsChklstDao.selectList */
+		select
+			chklst_id
+			, chklst_cn
+		from usp_api.uspt_bsns_chklst
+		where
+			bsns_code = #{bsnsCd}
+	</select>
+
+</mapper>

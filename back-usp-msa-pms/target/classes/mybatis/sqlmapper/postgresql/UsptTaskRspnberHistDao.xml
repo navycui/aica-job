@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptTaskRspnberHistDao">
+
+	<!-- ******************************************************************* 과제책임자변경이력 ********************************************************************** -->
+	<insert id="insert">
+		/** UsptTaskRspnberHistDao.insert */
+		insert into usp_api.uspt_task_rspnber_change_hist (
+				task_rspnber_change_hist_id
+				,cnvn_change_reqst_id
+				,confm_task_rspnber_change_hist_id
+				,rspnber_nm
+				,encpt_brthdy
+				,encpt_mbtlnum
+				,encpt_email
+				,dept_nm
+				,clsf_nm
+				,adres
+				,encpt_telno
+				,encpt_fxnum
+				,nrno
+				,creatr_id
+				,creat_dt
+			) values (
+				 #{taskRspnberHistId}
+				,#{cnvnChangeReqId}
+				,#{confmTaskRspnberHistId}
+				,#{rspnberNm}
+				,#{encBrthdy}
+				,#{encMbtlnum}
+				,#{encEmail}
+				,#{deptNm}
+				,#{clsfNm}
+				,#{adres}
+				,#{encTelno}
+				,#{encFxnum}
+				,#{tlsyRegistNo}
+				,#{creatorId}
+				,#{createdDt}
+			)
+	</insert>
+
+	<!--  과제책임자변경이력 조회 -->
+	<select id="selectMaxHist" resultType="aicluster.pms.common.entity.UsptTaskRspnberHist">
+		/** UsptTaskRspnberHistDao.selectMaxHist */
+			select a.*
+			from (
+					select	 task_rspnber_change_hist_id 				as task_rspnber_hist_id
+							,cnvn_change_reqst_id 						as cnvn_change_req_id
+							,confm_task_rspnber_change_hist_id 	as  confm_task_rspnber_hist_id
+							,rspnber_nm		as	rspnber_nm
+							,encpt_brthdy		as	enc_brthdy
+							,encpt_mbtlnum	as	enc_mbtlnum
+							,encpt_email		as	enc_email
+							,dept_nm
+							,clsf_nm
+							,adres
+							,encpt_telno		as	enc_telno
+							,encpt_fxnum		as	enc_fxnum
+							,nrno					as	tlsy_regist_no
+					        ,row_number() over (order by creat_dt desc) as rn
+					from usp_api.uspt_task_rspnber_change_hist
+					where cnvn_change_reqst_id = #{cnvnChangeReqId}
+					  and ( confm_task_rspnber_change_hist_id is null or confm_task_rspnber_change_hist_id = '')
+				) a
+			  where a.rn = 1
+	</select>
+
+	<!--  과제책임자변경이력 변경날자 목록-->
+	<select id="selectUsptTaskRspnberHistChangeDe" resultType="aicluster.pms.common.entity.UsptCnvnChangeReqHistDt">
+		/** UsptTaskRspnberHistDao.selectUsptTaskRspnberHistChangeDe */
+			select	  cnvn_change_reqst_id					 		as cnvn_change_req_id
+					, to_char(creat_dt,'yyyymmdd') 				as change_de
+					, to_char(creat_dt,'yyyymmddhh24miss') 	as change_dt
+		 	 from usp_api.uspt_task_rspnber_change_hist
+			where cnvn_change_reqst_id = #{cnvnChangeReqId}
+			and ( confm_task_rspnber_change_hist_id is null or confm_task_rspnber_change_hist_id ='')	/*변경전정보는 제외*/
+			order by creat_dt desc
+	</select>
+
+	<!--  협약과제정보변경이력 날자별 내역조회  -->
+	<select id="selectUsptTaskRspnberHistByDt" resultType="aicluster.pms.common.entity.UsptTaskRspnberHist">
+		/** UsptTaskRspnberHistDao.selectUsptTaskRspnberHistByDt */
+				  select  'before' 					as change_be_af
+				            ,task_rspnber_change_hist_id 				as task_rspnber_hist_id
+							,cnvn_change_reqst_id 						as cnvn_change_req_id
+							,confm_task_rspnber_change_hist_id 	as  confm_task_rspnber_hist_id
+							,rspnber_nm		as	rspnber_nm
+							,encpt_brthdy		as	enc_brthdy
+							,encpt_mbtlnum	as	enc_mbtlnum
+							,encpt_email		as	enc_email
+							,dept_nm
+							,clsf_nm
+							,adres
+							,encpt_telno		as	enc_telno
+							,encpt_fxnum		as	enc_fxnum
+							,nrno					as	tlsy_regist_no
+					        ,to_char(creat_dt,'yyyy-mm-dd') as change_de
+				 	 from usp_api.uspt_task_rspnber_change_hist
+					where cnvn_change_reqst_id = #{cnvnChangeReqId}
+					   and confm_task_rspnber_change_hist_id is not null
+					   and confm_task_rspnber_change_hist_id !=''
+			union all
+				select   'after' 					as change_be_af
+				           ,task_rspnber_change_hist_id 				as task_rspnber_hist_id
+							,cnvn_change_reqst_id 						as cnvn_change_req_id
+							,confm_task_rspnber_change_hist_id 	as  confm_task_rspnber_hist_id
+							,rspnber_nm		as	rspnber_nm
+							,encpt_brthdy		as	enc_brthdy
+							,encpt_mbtlnum	as	enc_mbtlnum
+							,encpt_email		as	enc_email
+							,dept_nm
+							,clsf_nm
+							,adres
+							,encpt_telno		as	enc_telno
+							,encpt_fxnum		as	enc_fxnum
+							,nrno					as	tlsy_regist_no
+						   ,to_char(creat_dt,'yyyy-mm-dd') as change_de
+					from usp_api.uspt_task_rspnber_change_hist
+					where cnvn_change_reqst_id = #{cnvnChangeReqId}
+					  and ( confm_task_rspnber_change_hist_id is null or confm_task_rspnber_change_hist_id = '')
+					  and to_char(creat_dt,'yyyymmddhh24miss') = #{changeDt}
+	</select>
+
+</mapper>

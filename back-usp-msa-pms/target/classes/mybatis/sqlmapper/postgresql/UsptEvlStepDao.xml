@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlStepDao">
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptEvlStep">
+		select
+			evl_step_id
+			, evl_plan_id
+			, evl_step_nm
+			, sort_ordr as sort_ordr_no
+			, evl_step_sttus_code as evl_step_sttus_cd
+			, slctn_trget_co as slctn_target_co
+			, drpt_stdr_code as drpt_stdr_cd
+			, top_lwet_excl_at as top_lwet_excl
+			, dspth_at as dspth
+			, dspth_dt
+			, creatr_id as creator_id
+			, creat_dt as created_dt
+			, updusr_id as updater_id
+			, updt_dt as updated_dt
+		from usp_api.uspt_evl_step
+		where
+			evl_step_id = #{evlStepId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptEvlStep">
+		/** UsptEvlStepDao.selectList */
+		select
+			b.evl_step_id
+			, b.evl_plan_id
+			, b.evl_step_nm
+			, b.sort_ordr as sort_ordr_no
+			, b.evl_step_sttus_code as evl_step_sttus_cd
+			, b.slctn_trget_co as slctn_target_co
+			, b.drpt_stdr_code as drpt_stdr_cd
+			, b.top_lwet_excl_at as top_lwet_excl
+			, b.dspth_at as dspth
+			, b.dspth_dt
+			, b.creatr_id as creator_id
+			, b.creat_dt as created_dt
+			, b.updusr_id as updater_id
+			, b.updt_dt as updated_dt
+			, (select count(atchmnfl_group_id) from usp_api.uspt_evl_trget where evl_step_id = b.evl_step_id) as attachment_co
+		from usp_api.uspt_evl_plan a
+				inner join usp_api.uspt_evl_step b
+					on a.evl_plan_id = b.evl_plan_id
+		where
+			a.evl_plan_id = #{evlPlanId}
+			<if test='sortOrdrNo != null and sortOrdrNo != ""'>
+				and b.sort_ordr = '1' /*첫번째 단계에만 대상자 등록함*/
+			</if>
+		order by b.sort_ordr
+	</select>
+
+	<select id="selectExistList" resultType="aicluster.pms.common.entity.UsptEvlStep">
+		/** UsptEvlStepDao.selectExistList */
+		select b.evl_step_id
+			 , b.evl_plan_id
+			 , b.evl_step_nm
+			 , b.sort_ordr as sort_ordr_no
+			 , b.evl_step_sttus_code as evl_step_sttus_cd
+			 , b.slctn_trget_co as slctn_target_co
+			 , b.drpt_stdr_code as drpt_stdr_cd
+			 , b.top_lwet_excl_at as top_lwet_excl
+			 , b.dspth_at as dspth
+			 , b.dspth_dt
+			 , b.creatr_id as creator_id
+			 , b.creat_dt as created_dt
+			 , b.updusr_id as updater_id
+			 , b.updt_dt as updated_dt
+		 from usp_api.uspt_evl_plan a
+		 	  inner join usp_api.uspt_evl_step b
+				  	  on a.evl_plan_id = b.evl_plan_id
+		where 1 = 1
+			<if test='evlPlanId != null and evlPlanId != ""'>
+		  and a.evl_plan_id = #{evlPlanId}
+		  	</if>
+		  and b.evl_step_id = #{evlStepId}
+	</select>
+
+	<insert id="insert">
+		/** UsptEvlStepDao.insert */
+		insert into usp_api.uspt_evl_step (
+			   evl_step_id
+			 , evl_plan_id
+			 , evl_step_nm
+			 , sort_ordr
+			 , evl_step_sttus_code
+			 , slctn_trget_co
+			 , drpt_stdr_code
+			 , top_lwet_excl_at
+			 , dspth_at
+			 , dspth_dt
+			 , creatr_id
+			 , creat_dt
+			 , updusr_id
+			 , updt_dt
+		) values (
+			   #{evlStepId}
+			 , #{evlPlanId}
+			 , #{evlStepNm}
+			 , #{sortOrdrNo}
+			 , #{evlStepSttusCd}
+			 , #{slctnTargetCo}
+			 , #{drptStdrCd}
+			 , #{topLwetExcl}
+			 , #{dspth}
+			 , #{dspthDt}
+			 , #{creatorId}
+			 , #{createdDt}
+			 , #{updaterId}
+			 , #{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** UsptEvlStepDao.update */
+		update usp_api.uspt_evl_step
+		set
+			evl_step_nm			= #{evlStepNm}
+			, sort_ordr		= #{sortOrdrNo}
+			, evl_step_sttus_code	= #{evlStepSttusCd}
+			, slctn_trget_co	= #{slctnTargetCo}
+			, drpt_stdr_code		= #{drptStdrCd}
+			, top_lwet_excl_at		= #{topLwetExcl}
+			, dspth_at				= #{dspth}
+			, dspth_dt			= #{dspthDt}
+			, updusr_id		= #{updaterId}
+			, updt_dt		= #{updatedDt}
+		where
+			evl_step_id = #{evlStepId}
+	</update>
+
+	<delete id="delete">
+		/** UsptEvlStepDao.delete */
+		delete
+		  from usp_api.uspt_evl_step
+		 where evl_step_id = #{evlStepId}
+	</delete>
+
+	<delete id="deleteBySectId">
+		/** UsptEvlStepDao.deleteBySectId */
+		delete
+		  from usp_api.uspt_evl_step
+		 where evl_step_id in (
+		 					   select evl_step_id
+		 					     from usp_api.uspt_evl_cmit
+								where sect_id = #{sectId}
+							  )
+	</delete>
+
+
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlIemResultAdsbtrDao">
+
+	<insert id="insert">
+		/** UsptEvlIemResultAdsbtrDao.insert */
+		insert into usp_api.uspt_evl_iem_result_adsbtr
+			(
+				evl_iem_result_adsbtr_id
+				, evl_iem_id
+				, evl_trget_id
+				, evl_cmit_id
+				, evl_score
+				, evl_cn
+				, adsbtr_resn_cn
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{evlIemResultAdsbtrId}
+				, #{evlIemId}
+				, #{evlTrgetId}
+				, #{evlCmitId}
+				, #{evlScore}
+				, #{evlCn}
+				, #{adsbtrResnCn}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptEvlIemResultAdsbtrDao.update */
+		update usp_api.uspt_evl_iem_result_adsbtr
+		set
+			updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+			, evl_score	= #{evlScore}
+			, evl_cn	= #{evlCn}
+			, adsbtr_resn_cn = #{adsbtrResnCn}
+		where
+			evl_iem_result_adsbtr_id = #{evlIemResultAdsbtrId}
+	</update>
+
+</mapper>

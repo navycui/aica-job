@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptExpertAcdmcrDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptExpertAcdmcr">
+		/** UsptExpertAcdmcrDao.selectList */
+		select
+				 expert_acdmcr_id   /**전문가학력ID **/
+				,expert_id          		/**전문가ID**/
+				,acdmcr_bgnde       	/**학력시작일**/
+				,acdmcr_endde       	/**학력종료일**/
+				,dgri_code  as  dgri_cd            		/**학위코드**/
+				,dept_nm            	/**부서명**/
+				,ofcps_nm           	/**직위명**/
+				,chrg_job_nm        	/**담당업무명**/
+				,schul_nm           	/**학교명**/
+				,major_nm           	/**전공명**/
+				,acdmadv_nm  as  profsr_nm          	/**지도교수명**/
+				,grdtn_div_code  as  grdtn_div_cd       	/**졸업구분코드(G:GRDTN_DIV)**/
+				,creatr_id as creator_id         	/**생성자ID**/
+				,creat_dt	 as created_dt         	/**생성일시**/
+				,updusr_id as updater_id       /**수정자ID**/
+				,updt_dt 	as updated_dt     /**수정일시**/
+	   from usp_api.uspt_expert_acdmcr
+	  where 1=1
+		 <if test='expertAcdmcrId != null and expertAcdmcrId != ""'>
+			and  expert_acdmcr_id = #{expertAcdmcrId}
+		</if>
+		<if test='expertId != null and expertId != ""'>
+			and  expert_id = #{expertId}
+		</if>
+	</select>
+
+
+	<update id="update">
+		/** UsptExpertAcdmcrDao.update */
+		update usp_api.uspt_expert_acdmcr
+			  set	 acdmcr_bgnde        = #{acdmcrBgnde}
+					, acdmcr_endde        = #{acdmcrEndde}
+					, dgri_code              = #{dgriCd}
+					, dept_nm               = #{deptNm}
+					, ofcps_nm              = #{ofcpsNm}
+					, chrg_job_nm          = #{chrgJobNm}
+					, schul_nm               = #{schulNm}
+					, major_nm              = #{majorNm}
+					, acdmadv_nm          = #{profsrNm}
+					, grdtn_div_code       = #{grdtnDivCd}
+					, updusr_id             	= #{updaterId}
+					, updt_dt 	            = #{updatedDt}
+		where expert_acdmcr_id  = #{expertAcdmcrId}
+		  and  expert_id             = #{expertId}
+	</update>
+
+	<insert id="insert">
+		/** UsptExpertAcdmcrDao.insert */
+		insert into usp_api.uspt_expert_acdmcr
+			(
+			 expert_acdmcr_id
+			,expert_id
+			,acdmcr_bgnde
+			,acdmcr_endde
+			,dgri_code
+			,dept_nm
+			,ofcps_nm
+			,chrg_job_nm
+			,schul_nm
+			,major_nm
+			,acdmadv_nm
+			,grdtn_div_code
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{expertAcdmcrId}
+			,#{expertId}
+			,#{acdmcrBgnde}
+			,#{acdmcrEndde}
+			,#{dgriCd}
+			,#{deptNm}
+			,#{ofcpsNm}
+			,#{chrgJobNm}
+			,#{schulNm}
+			,#{majorNm}
+			,#{profsrNm}
+			,#{grdtnDivCd}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		 )
+	</insert>
+
+	<delete id="delete">
+		/** UsptExpertAcdmcrDao.delete*/
+		delete from  usp_api.uspt_expert_acdmcr
+				where expert_acdmcr_id = #{expertAcdmcrId}
+				  and  expert_id             = #{expertId}
+	</delete>
+
+<delete id="deleteExpert">
+		/** UsptExpertAcdmcrDao.deleteExpert*/
+		delete from usp_api.uspt_expert_acdmcr
+		where expert_id = #{expertId}
+	</delete>
+
+</mapper>

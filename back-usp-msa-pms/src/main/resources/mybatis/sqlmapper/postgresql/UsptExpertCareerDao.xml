@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptExpertCareerDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptExpertCareer">
+		/** UsptExpertCareerDao.selectList */
+		select expert_career_id		/**전문가경력ID**/
+				, expert_id               /**전문가ID**/
+				, work_bgnde           /**근무시작일**/
+				, work_endde           /**근무종료일**/
+				, wrc_nm                 /**직장명**/
+				, dept_nm                /**부서명**/
+				, ofcps_nm               /**직위명**/
+				, chrg_job_nm           /**담당업무명**/
+				, creatr_id	as creator_id               /**생성자ID**/
+				, creat_dt	as created_dt               /**생성일시**/
+				, updusr_id	as updater_id               /**수정자ID**/
+				, updt_dt	as updated_dt               /**수정일시**/
+		from usp_api.uspt_expert_career
+		where	1=1
+		<if test='expertCareerId != null and expertCareerId != ""'>
+			and  expert_career_id = #{expertCareerId}
+		</if>
+		<if test='expertId != null and expertId != ""'>
+			and  expert_id = #{expertId}
+		</if>
+	</select>
+
+
+	<insert id="insert">
+		/** UsptExpertCareerDao.insert */
+		insert into usp_api.uspt_expert_career
+		 (
+			 expert_career_id
+			, expert_id
+			, work_bgnde
+			, work_endde
+			, wrc_nm
+			, dept_nm
+			, ofcps_nm
+			, chrg_job_nm
+			, creatr_id
+			, creat_dt
+			, updusr_id
+			, updt_dt
+		) values (
+			 #{expertCareerId}
+			, #{expertId}
+			, #{workBgnde}
+			, #{workEndde}
+			, #{wrcNm}
+			, #{deptNm}
+			, #{ofcpsNm}
+			, #{chrgJobNm}
+			, #{creatorId}
+			, #{createdDt}
+			, #{updaterId}
+			, #{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** UsptExpertCareerDao.update */
+		update usp_api.uspt_expert_career
+		      set	 work_bgnde                = #{workBgnde}
+					, work_endde                = #{workEndde}
+					, wrc_nm                    = #{wrcNm}
+					, dept_nm                   = #{deptNm}
+					, ofcps_nm                  = #{ofcpsNm}
+					, chrg_job_nm               = #{chrgJobNm}
+					, updusr_id              = #{updaterId}
+					, updt_dt             = #{updatedDt}
+		where	expert_career_id 		= #{expertCareerId}
+		   and    expert_id                 = #{expertId}
+	</update>
+
+	<delete id="delete">
+		/** UsptExpertCareerDao.delete*/
+		delete from usp_api.uspt_expert_career
+		where expert_career_id = #{expertCareerId}
+	</delete>
+
+<delete id="deleteExpert">
+		/** UsptExpertCareerDao.deleteExpert*/
+		delete from usp_api.uspt_expert_career
+		where expert_id = #{expertId}
+	</delete>
+
+</mapper>

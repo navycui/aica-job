@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptWnpzDao">
+
+	<insert id="insert">
+		/** UsptWnpzDao.insert */
+		insert into usp_api.uspt_wnpz
+			(
+				wnpz_id
+				, mber_id
+				, wnpz_nm
+				, acqs_de
+				, isu_instt_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{wnpzId}
+				, #{memberId}
+				, #{wnpzNm}
+				, #{acqdt}
+				, #{isuInstt}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptWnpzDao.update */
+		update usp_api.uspt_wnpz
+		set
+			wnpz_nm			= #{wnpzNm}
+			, acqs_de		= #{acqdt}
+			, isu_instt_nm	= #{isuInstt}
+			, updusr_id 	= #{updaterId}
+			, updt_dt	 	= #{updatedDt}
+		where
+			mber_id = #{memberId}
+			and wnpz_id = #{wnpzId}
+	</update>
+
+	<delete id="delete">
+		/** UsptWnpzDao.delete */
+		delete from usp_api.uspt_wnpz
+		where
+			mber_id = #{memberId}
+			and wnpz_id = #{wnpzId}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptWnpz">
+		/** UsptWnpzDao.selectList */
+		select
+			wnpz_id
+			, mber_id								as member_id
+			, wnpz_nm
+			, acqs_de								as acqdt
+			, isu_instt_nm							as isu_instt
+			, creatr_id								as creator_id
+			, creat_dt 								as created_dt
+			, updusr_id								as updater_id
+			, updt_dt  								as updated_dt
+			, row_number() over (order by creat_dt) as rn
+		from usp_api.uspt_wnpz
+		where
+			mber_id = #{memberId}
+	</select>
+</mapper>

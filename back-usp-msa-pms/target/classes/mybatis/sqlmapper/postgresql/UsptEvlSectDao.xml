@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlSectDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptSect">
+		/** UsptEvlSectDao.selectList */
+		select brnh_id as sect_id
+			 , evl_plan_id
+			 , brnh_nm as sect_nm
+			 , evl_trget_co
+			 , creatr_id as creator_id
+			 , creat_dt as created_dt
+			 , updusr_id as updater_id
+			 , updt_dt as updated_dt
+		  from usp_api.uspt_brnh
+		 where 1 = 1
+	 	   and evl_plan_id = #{evlPlanId}
+	</select>
+
+	<select id="selectExistList" resultType="aicluster.pms.common.entity.UsptSect">
+		/** UsptEvlSectDao.selectExistList */
+		select brnh_id as sect_id
+			 , evl_plan_id
+			 , brnh_nm as sect_nm
+			 , evl_trget_co
+			 , creatr_id as creator_id
+			 , creat_dt as created_dt
+			 , updusr_id as updater_id
+			 , updt_dt as updated_dt
+		  from usp_api.uspt_brnh
+		 where 1 = 1
+	 	   and evl_plan_id = #{evlPlanId}
+			<if test='sectId != null and sectId != ""'>
+	 	   		and brnh_id = #{sectId}
+			</if>
+	</select>
+
+	<insert id="insert">
+		/** UsptEvlSectDao.insert */
+		insert into usp_api.uspt_brnh (
+			   brnh_id
+			 , evl_plan_id
+			 , brnh_nm
+			 , evl_trget_co
+			 , creatr_id
+			 , creat_dt
+			 , updusr_id
+			 , updt_dt
+		) values (
+			   #{sectId}
+			 , #{evlPlanId}
+			 , #{sectNm}
+			 , #{evlTrgetCo}
+			 , #{creatorId}
+			 , #{createdDt}
+			 , #{updaterId}
+			 , #{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** UsptEvlSectDao.update */
+		update usp_api.uspt_brnh set
+			   brnh_nm                   = #{sectNm}
+			 , evl_trget_co              = #{evlTrgetCo}
+			 , updusr_id                = #{updaterId}
+			 , updt_dt                = #{updatedDt}
+		where
+			brnh_id = #{sectId}
+	</update>
+
+	<delete id="delete">
+		/** UsptEvlSectDao.delete */
+		delete from usp_api.uspt_brnh
+   		 where brnh_id = #{sectId}
+	</delete>
+
+</mapper>

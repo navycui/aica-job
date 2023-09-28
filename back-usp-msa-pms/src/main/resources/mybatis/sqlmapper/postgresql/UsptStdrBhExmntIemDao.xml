@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptStdrBhExmntIemDao">
+
+	<insert id="insert">
+		/** UsptStdrBhExmntIemDao.insert */
+		insert into usp_api.uspt_stdr_bsns_bh_exmnt_iem
+			(
+				bh_exmnt_iem_id
+				, bh_exmnt_id
+				, bh_exmnt_iem_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{bhExmntIemId}
+				, #{bhExmntId}
+				, #{bhExmntIemNm}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptStdrBhExmntIemDao.update */
+		update usp_api.uspt_stdr_bsns_bh_exmnt_iem
+		set
+			updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+			, bh_exmnt_iem_nm = #{bhExmntIemNm}
+		where
+			bh_exmnt_iem_id = #{bhExmntIemId}
+			and bh_exmnt_id = #{bhExmntId}
+	</update>
+
+	<delete id="delete">
+		/** UsptStdrBhExmntIemDao.delete */
+		delete from usp_api.uspt_stdr_bsns_bh_exmnt_iem
+		where
+			bh_exmnt_iem_id = #{bhExmntIemId}
+			and bh_exmnt_id = #{bhExmntId}
+	</delete>
+
+	<delete id="deleteAll">
+		/** UsptStdrBhExmntIemDao.deleteAll */
+		delete from usp_api.uspt_stdr_bsns_bh_exmnt_iem
+		where
+			bh_exmnt_id = #{bhExmntId}
+	</delete>
+
+</mapper>

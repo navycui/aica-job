@@ -1,0 +1,959 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlTrgetDao">
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptEvlTrget">
+		/** UsptEvlTargetDao.select */
+		select evl_trget_id
+			 , apply_id
+			 , brnh_id as sect_id
+			 , evl_step_id
+			 , presentn_dta_process_div_code as presnatn_process_div_cd
+			 , presentn_dt
+			 , slctn_at as slctn
+			 , slctn_dt
+			 , atchmnfl_group_id as attachment_group_id
+			 , creatr_id as creator_id
+			 , creat_dt as created_dt
+			 , updusr_id as updater_id
+			 , updt_dt as updated_dt
+		 from usp_api.uspt_evl_trget
+		where evl_trget_id = #{evlTrgetId}
+	</select>
+
+	<select id="selectExistChk" resultType="aicluster.pms.common.entity.UsptEvlTrget">
+		/** UsptEvlTargetDao.select */
+		select evl_trget_id
+			 , apply_id
+			 , brnh_id as sect_id
+			 , evl_step_id
+			 , presentn_dta_process_div_code as presnatn_process_div_cd
+			 , presentn_dt
+			 , slctn_at as slctn
+			 , slctn_dt
+			 , atchmnfl_group_id as attachment_group_id
+			, creatr_id as creator_id
+			, creat_dt as created_dt
+			, updusr_id as updater_id
+			, updt_dt as updated_dt
+		 from usp_api.uspt_evl_trget
+		where apply_id = #{applyId}
+		  and brnh_id = #{sectId}
+		  and evl_step_id = #{evlStepId}
+	</select>
+
+	<select id="selectExistChkByCmitId" resultType="aicluster.pms.common.entity.UsptEvlTrget">
+		/** UsptEvlTargetDao.select */
+		select a.evl_trget_id
+			 , a.apply_id
+			 , a.brnh_id as sect_id
+			 , a.evl_step_id
+			 , a.presentn_dta_process_div_code as presnatn_process_div_cd
+			 , a.presentn_dt
+			 , a.slctn_at as slctn
+			 , a.slctn_dt
+		 from usp_api.uspt_evl_trget a
+		      inner join  usp_api.uspt_evl_cmit b
+					  on a.brnh_id  = b.brnh_id
+					 and a.evl_step_id = b.evl_step_id
+		where b.evl_cmit_id = #{evlCmit_id}
+	</select>
+
+	<select id="selectExistChkByPlanId" resultType="aicluster.pms.common.entity.UsptEvlTrget">
+		/** UsptEvlTargetDao.selectExistChkByPlanId */
+		select b.apply_id
+  	      from usp_api.uspt_brnh a
+	 		   inner join usp_api.uspt_evl_trget b
+					   on a.brnh_id = b.brnh_id
+		 where a.evl_plan_id = #{evlPlanId}
+        <if test='applyId != null and applyId != ""'>
+           and b.apply_id = #{applyId}
+        </if>
+
+	</select>
+
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptEvlTrget">
+		/** UsptEvlTargetDao.selectList */
+		select a.rcept_no as receipt_no 				/*접수번호*/
+			 , mem.mber_nm as member_nm 				/*회원명(사업자명)*/
+			 , mem.charger_nm 				/*담당자명*/
+			 , b.task_korean_nm as task_nm_ko					/*과제명*/
+			 , b.apply_realm_id 			/*지원분야id*/
+			 , c.apply_realm_nm 			/*과제분야명*/
+			 , a.apply_id 					/*신청id*/
+			 , a.pblanc_id 					/*공고id*/
+			 , a.rcept_ordr as rcept_odr 					/*접수차수*/
+			 , row_number() over (order by a.creat_dt desc) as rn
+		from usp_api.uspt_bsns_pblanc_applcnt a 					/*신청자*/
+			 inner join usp_api.uspt_bsns_pblanc_apply_task b 		/*신청과제*/
+			 		 on a.apply_id = b.apply_id
+			 left outer join usp_api.uspt_bsns_apply_realm c 		/*과제분야*/
+						on b.apply_realm_id = c.apply_realm_id
+			 left outer join auth_api.cmmt_mber_info mem
+						on a.mber_id = mem.mber_id
+		where 1 = 1
+		  and a.pblanc_id = #{pblancId} /*공고ID는 필수*/
+		  and a.apply_id not in (
+		   						  select b.apply_id
+		   						    from usp_api.uspt_brnh a
+										 inner join usp_api.uspt_evl_trget b
+												 on a.brnh_id = b.brnh_id
+								   where a.evl_plan_id = #{evlPlanId}
+								  )			/*해당 계획에 이미 등록된 신청자는 제외하고 조회함*/
+		  and a.rcept_sttus_code = '${@aicluster.pms.common.util.Code@RS_COMPT_CODE}'
+		<if test='applyRealmId != null and applyRealmId != ""'>
+			and b.apply_realm_id = #{applyRealmId}
+		</if>
+
+		<if test='memberTypeCd != null and memberTypeCd != ""'>
+			and mem.mber_ty_code = #{memberTypeCd}
+		</if>
+
+		<if test='chargerNm != null and chargerNm != ""'>
+			and mem.charger_nm like '%' || #{chargerNm} || '%'
+		</if>
+
+		<if test='memberNm != null and memberNm != ""'>
+			and mem.mber_nm like '%' || #{memberNm} || '%'
+		</if>
+
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+	<select id="selectListCount" resultType="Long">
+		/** UsptEvlTargetDao.selectListCount */
+		select count(a.apply_id) as cnt
+		  from usp_api.uspt_bsns_pblanc_applcnt a 					/*신청자*/
+			   inner join usp_api.uspt_bsns_pblanc_apply_task b 		/*신청과제*/
+				 	   on a.apply_id = b.apply_id
+			   left outer join usp_api.uspt_bsns_apply_realm c 		/*과제분야*/
+							on b.apply_realm_id = c.apply_realm_id
+			   left outer join auth_api.cmmt_mber_info mem
+							on a.mber_id = mem.mber_id
+		 where 1 = 1
+		   and a.pblanc_id = #{pblancId} /*공고ID는 필수*/
+		   and a.apply_id not in (
+		   						  select b.apply_id
+		   						    from usp_api.uspt_brnh a
+										 inner join usp_api.uspt_evl_trget b
+												 on a.brnh_id = b.brnh_id
+								   where a.evl_plan_id = #{evlPlanId}
+								  )
+								  /*해당 계획에 이미 등록된 신청자는 제외하고 조회함*/
+		   and a.rcept_sttus_code = '${@aicluster.pms.common.util.Code@RS_COMPT_CODE}'
+		<if test='applyRealmId != null and applyRealmId != ""'>
+			and b.apply_realm_id = #{applyRealmId}
+		</if>
+
+		<if test='memberTypeCd != null and memberTypeCd != ""'>
+			and mem.mber_ty_code = #{memberTypeCd}
+		</if>
+
+		<if test='chargerNm != null and chargerNm != ""'>
+			and mem.charger_nm like '%' || #{chargerNm} || '%'
+		</if>
+
+		<if test='memberNm != null and memberNm != ""'>
+			and mem.mber_nm like '%' || #{memberNm} || '%'
+		</if>
+	</select>
+
+
+	<select id="selectListBySect" resultType="aicluster.pms.common.entity.UsptEvlTrget">
+		/** UsptEvlTargetDao.selectListBySect */
+		select a.evl_plan_id
+			 , d.evl_trget_id
+			 , d.brnh_id as sect_id
+			 , d.evl_step_id
+			 , d.apply_id
+			 , e.rcept_no as receipt_no
+			 , e.mber_nm as member_nm
+			 , e.task_korean_nm as task_nm_ko
+			 , e.apply_realm_nm
+		     , row_number() over (order by e.creat_dt desc) as rn
+		  from usp_api.uspt_evl_plan a 						/*평가계획*/
+			   inner join usp_api.uspt_evl_step b 			/*평가단계*/
+						on a.evl_plan_id = b.evl_plan_id and b.sort_ordr = 1 /*평가단계의 첫번째 것으로만 join*/
+			   inner join usp_api.uspt_brnh c 				/*평가분과*/
+					   on a.evl_plan_id = c.evl_plan_id
+			   inner join usp_api.uspt_evl_trget d 			/*평가대상*/
+					   on b.evl_step_id  = d.evl_step_id
+				 	  and c.brnh_id = d.brnh_id
+			   inner join (select a.rcept_no 				/*접수번호*/
+							    , mem.mber_nm 			/*회원명(사업자명)*/
+							    , mem.charger_nm 			/*담당자명*/
+							    , b.task_korean_nm				/*과제명*/
+							    , b.apply_realm_id 			/*지원분야id*/
+							    , c.apply_realm_nm 			/*과제분야명*/
+							    , a.apply_id 				/*신청id*/
+							    , a.pblanc_id 				/*공고id*/
+							    , a.rcept_ordr as rcept_odr 				/*접수차수*/
+							    , a.creat_dt
+							 from usp_api.uspt_bsns_pblanc_applcnt a 					/*신청자*/
+								  inner join usp_api.uspt_bsns_pblanc_apply_task b 		/*신청과제*/
+								 		  on a.apply_id = b.apply_id
+								  left outer join usp_api.uspt_bsns_apply_realm c 		/*과제분야*/
+											   on b.apply_realm_id = c.apply_realm_id
+								  left outer join auth_api.cmmt_mber_info mem				/*회원정보*/
+											   on a.mber_id = mem.mber_id) e 		/*평가대상 정보*/
+			  on d.apply_id = e.apply_id
+		where 1 = 1
+		<if test='evlPlanId != null and evlPlanId != ""'>
+			and a.evl_plan_id = #{evlPlanId}
+		</if>
+
+		<if test='sectId != null and sectId != ""'>
+			and c.brnh_id = #{sectId}
+		</if>
+	</select>
+
+
+	<select id="selectListBySectCount" resultType="Long">
+		/** UsptEvlTargetDao.selectListBySectCount */
+		select count(a.evl_plan_id) as cnt
+		  from usp_api.uspt_evl_plan a 						/*평가계획*/
+			   inner join usp_api.uspt_evl_step b 			/*평가단계*/
+						on a.evl_plan_id = b.evl_plan_id and b.sort_ordr = 1 /*평가단계의 첫번째 것으로만 join*/
+			   inner join usp_api.uspt_brnh c 				/*평가분과*/
+					   on a.evl_plan_id = c.evl_plan_id
+			   inner join usp_api.uspt_evl_trget d 			/*평가대상*/
+					   on b.evl_step_id  = d.evl_step_id
+				 	  and c.brnh_id = d.brnh_id
+		where 1 = 1
+		<if test='evlPlanId != null and evlPlanId != ""'>
+			and a.evl_plan_id = #{evlPlanId}
+		</if>
+
+		<if test='sectId != null and sectId != ""'>
+			and c.brnh_id = #{sectId}
+		</if>
+
+		<if test='evlTrgetId != null and evlTrgetId != ""'>
+			and d.evl_trget_id = #{evlTrgetId}
+		</if>
+	</select>
+
+	<insert id="insert">
+		/** UsptEvlTrgetDao.insert */
+		insert into usp_api.uspt_evl_trget (
+			   evl_trget_id
+			 , apply_id
+			 , brnh_id
+			 , evl_step_id
+			 , presentn_dta_process_div_code
+			 , presentn_dt
+			 , slctn_at
+			 , slctn_dt
+			 , atchmnfl_group_id
+			 , creatr_id
+			 , creat_dt
+			 , updusr_id
+			 , updt_dt
+		) values (
+			   #{evlTrgetId}
+			 , #{applyId}
+			 , #{sectId}
+			 , #{evlStepId}
+			 , #{presnatnProcessDivCd}
+			 , #{presentnDt}
+			 , #{slctn}
+			 , #{slctnDt}
+			 , #{attachmentGroupId}
+			 , #{creatorId}
+			 , #{createdDt}
+			 , #{updaterId}
+			 , #{updatedDt}
+		)
+	</insert>
+
+	<delete id="delete">
+		/** UsptEvlTrgetDao.delete */
+		delete from usp_api.uspt_evl_trget
+ 			  where evl_trget_id = #{evlTrgetId}
+	</delete>
+
+	<delete id="deleteBySectId">
+		/** UsptEvlTrgetDao.deleteBySectId */
+		delete
+		  from usp_api.uspt_evl_trget
+		 where brnh_id = #{sectId}
+	</delete>
+
+	<update id="updateSlctn">
+		/** UsptEvlTrgetDao.updateSlctn */
+		update usp_api.uspt_evl_trget
+		set
+			slctn_at			= #{slctn}
+			, slctn_dt		= #{slctnDt}
+			, updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+		where
+			evl_trget_id	= #{evlTrgetId}
+	</update>
+<!-- ========================== 발표자로 관리 front ============================== -->
+<!-- 발표자료관리 목록 총건수 조회  -->
+<select id="selectFrontPresnatnTargetListCount" resultType="Long">
+		/*UsptEvlTrgetDao.selectFrontPresnatnTargetListCount*/
+			select count(a.evl_trget_id) as cnt
+		  	  	from usp_api.uspt_evl_trget a 						/*평가대상 - 발표자료 대상*/
+			  inner join usp_api.uspt_bsns_pblanc_applcnt b 	/*공고신청자*/
+			     on b.apply_id = a.apply_id
+			   inner join usp_api.uspt_bsns_pblanc c 			/*공고*/
+					   on c.pblanc_id = b.pblanc_id
+			   inner join usp_api.uspt_bsns d 					/*사업*/
+					   on d.bsns_code = c.bsns_code
+				inner join usp_api.uspt_evl_cmit  uec 							/*평가위원회*/
+				   on a.brnh_id = uec.brnh_id
+				  and a.evl_step_id = uec.evl_step_id
+			   inner join auth_api.cmmt_mber_info cm
+					   on cm.mber_id = b.mber_id
+			   left outer join usp_api.uspt_bsns_pblanc_apply_task e
+			  				on e.apply_id = b.apply_id
+		 where 1 = 1
+		 	<if test='memberId != null and memberId != ""'>
+		   		and b.mber_id = #{memberId}					--회원ID
+			</if>
+		 	<if test='presnatnBgnde != null and presnatnBgnde != "" and presnatnEndde != null and presnatnEndde != ""'>
+	 			and ( to_char(a.presentn_dt,'yyyymmdd')  between #{presnatnBgnde} and #{presnatnEndde}	  or  a.presentn_dt is null )/*제출시작일 제출종료일*/
+	 	 	</if>
+			<if test='presnatnProcessDivCd != null and presnatnProcessDivCd != ""'>
+				and a.presentn_dta_process_div_code  = #{presnatnProcessDivCd}		/*발표자료처리구분코드(G:PRESNATN_PROCESS_DIV)*/
+			</if>
+			<if test='pblancNm != null and pblancNm != ""'>
+		   		and c.pblanc_nm like '%' || #{pblancNm} || '%' 			--공고명
+	   		</if>
+			<if test='taskNmKo != null and taskNmKo != ""'>
+		   		and e.task_korean_nm like '%' || #{taskNmKo} || '%' 			--과제명
+	   		</if>
+	</select>
+
+<!-- 발표자료관리 목록 조회  -->
+	<select id="selectFrontPresnatnTargetList" resultType="aicluster.pms.common.dto.FrontEvlPresnatnListDto">
+		/*UsptEvlTrgetDao.selectFrontPresnatnTargetList*/
+		 select   a.evl_trget_id		/*평가대상ID*/
+	             , c.pblanc_nm			/*공고명*/
+	             , to_char(to_date(uec.evl_prarnde,'yyyymmdd'),'yyyy-mm-dd')||' '||uec.begin_time||':00' as evl_prarndt /*평가예정일시*/
+	             , case when a.presentn_dt is null then '-'
+                        else to_char(a.presentn_dt,'yyyy-mm-dd hh24:mi') end    as fmt_presentn_dt			/*제출일*/
+	              , a.presentn_dta_process_div_code as presnatn_process_div_cd 				-- 발표자료 처리코드
+				 , coalesce(usp_api.fn_cmm_get_code_nm('PRESNATN_PROCESS_DIV',a.presentn_dta_process_div_code), '미진행') as presnatn_process_div_nm  /*발표자료 처리구분명*/
+				 , row_number() over (order by a.creat_dt desc) as rn
+				 , a.atchmnfl_group_id as attachment_group_id   								 /*첨부파일그룹ID*/
+		  from usp_api.uspt_evl_trget a 								/*평가대상 - 발표자료 대상*/
+			   inner join usp_api.uspt_bsns_pblanc_applcnt b 	/*공고신청자*/
+					   on b.apply_id = a.apply_id
+			   inner join usp_api.uspt_bsns_pblanc c 			/*공고*/
+					   on c.pblanc_id = b.pblanc_id
+			   inner join usp_api.uspt_bsns d 						/*사업*/
+					   on d.bsns_code = c.bsns_code
+			   inner join usp_api.uspt_evl_cmit  uec 				/*평가위원회*/
+					   on a.brnh_id = uec.brnh_id
+					  and a.evl_step_id = uec.evl_step_id
+			   inner join auth_api.cmmt_mber_info cm
+					   on cm.mber_id = b.mber_id
+			   left outer join usp_api.uspt_bsns_pblanc_apply_task e
+			  				on e.apply_id = b.apply_id
+		 where 1 = 1
+			<if test='memberId != null and memberId != ""'>
+		   		and b.mber_id = #{memberId}					--회원ID
+			</if>
+			<if test='presnatnBgnde != null and presnatnBgnde != "" and presnatnEndde != null and presnatnEndde != ""'>
+	 			and ( to_char(a.presentn_dt,'yyyymmdd')  between #{presnatnBgnde} and #{presnatnEndde}	  or  a.presentn_dt is null )/*제출시작일 제출종료일*/
+	 	 	</if>
+			<if test='presnatnProcessDivCd != null and presnatnProcessDivCd != ""'>
+				and a.presentn_dta_process_div_code  = #{presnatnProcessDivCd}		/*발표자료처리구분코드(G:PRESNATN_PROCESS_DIV)*/
+			</if>
+			<if test='pblancNm != null and pblancNm != ""'>
+		   		and c.pblanc_nm like '%' || #{pblancNm} || '%' 			--공고명
+	   		</if>
+			<if test='taskNmKo != null and taskNmKo != ""'>
+		   		and e.task_korean_nm like '%' || #{taskNmKo} || '%' 			--과제명
+	   		</if>
+
+			offset #{beginRowNum} -1
+			limit #{itemsPerPage}
+	</select>
+
+	<!-- 발표자료제출 상세 조회  -->
+	<select id="selectFrontPresnatnTargetDetailList" resultType="aicluster.pms.common.dto.FrontEvlPresnatnListDto">
+		/*UsptEvlTrgetDao.selectFrontPresnatnTargetDetailList*/
+		 select   a.evl_trget_id		/*평가대상ID*/
+	             , c.pblanc_nm			/*공고명*/
+	             , e.task_korean_nm as task_nm_ko  								 /*과제명*/
+	             , to_char(to_date(uec.evl_prarnde,'yyyymmdd'),'yyyy-mm-dd')||' '||uec.begin_time||':00' as evl_prarndt /*평가예정일시*/
+	              ,to_char(a.presentn_dt,'yyyy-mm-dd') 	as fmt_presentn_dt			/*제출일*/
+	              , a.presentn_dta_process_div_code as presnatn_process_div_cd 				-- 발표자료 처리코드
+				 , coalesce(usp_api.fn_cmm_get_code_nm('PRESNATN_PROCESS_DIV',a.presentn_dta_process_div_code), '미진행') as presnatn_process_div_nm  /*발표자료 처리구분명*/
+				 , a.atchmnfl_group_id as attachment_group_id   				 /*첨부파일그룹ID*/
+		  from usp_api.uspt_evl_trget a 								/*평가대상 - 발표자료 대상*/
+			   inner join usp_api.uspt_bsns_pblanc_applcnt b 	/*공고신청자*/
+					   on b.apply_id = a.apply_id
+			   inner join usp_api.uspt_bsns_pblanc c 			/*공고*/
+					   on c.pblanc_id = b.pblanc_id
+			   inner join usp_api.uspt_bsns d 						/*사업*/
+					   on d.bsns_code = c.bsns_code
+			   inner join usp_api.uspt_evl_cmit  uec 				/*평가위원회*/
+					   on a.brnh_id = uec.brnh_id
+					  and a.evl_step_id = uec.evl_step_id
+			   inner join auth_api.cmmt_mber_info cm
+					   on cm.mber_id = b.mber_id
+			   left outer join usp_api.uspt_bsns_pblanc_apply_task e
+			  				on e.apply_id = b.apply_id
+		 where 1 = 1
+			<if test='evlTrgetId != null and evlTrgetId != ""'>
+		   		and a.evl_trget_id= #{evlTrgetId}					/*평가대상ID*/
+	   		</if>
+	</select>
+
+
+<!-- ========================== 발표자로 관리 front  end ============================== -->
+
+
+	<select id="selectPresnatnTargetListCount" resultType="Long">
+		/*UsptEvlTrgetDao.selectPresnatnTargetListCount*/
+		select count(a.evl_trget_id) as cnt
+		  from usp_api.uspt_evl_trget a 						/*평가대상 - 발표자료 대상*/
+			   inner join usp_api.uspt_bsns_pblanc_applcnt b 	/*공고신청자*/
+					   on b.apply_id = a.apply_id
+			   inner join usp_api.uspt_bsns_pblanc c 			/*공고*/
+					   on c.pblanc_id = b.pblanc_id
+			   inner join usp_api.uspt_bsns d 					/*사업*/
+					   on d.bsns_code = c.bsns_code
+			   inner join auth_api.cmmt_mber_info cm
+					   on cm.mber_id = b.mber_id
+			   left outer join usp_api.uspt_bsns_pblanc_apply_task e
+			  				on e.apply_id = b.apply_id
+			  	inner join usp_api.uspt_evl_step ues /*평가단계*/
+						     on ues.evl_step_id = a.evl_step_id
+		 where 1 = 1
+		 	<if test='memberId != null and memberId != ""'>
+		   		and b.mber_id = #{memberId}					--회원ID
+			</if>
+
+		 	<if test='bsnsYear != null and bsnsYear != ""'>
+		   		and d.bsns_year = #{bsnsYear}					--사업년도
+			</if>
+
+			<if test='presnatnProcessDivCd != null and presnatnProcessDivCd != ""'>
+				and a.presentn_dta_process_div_code  = #{presnatnProcessDivCd}
+			</if>
+
+			<if test='evlTrgetId != null and evlTrgetId != ""'>
+		   		and a.evl_trget_id = #{evlTrgetId} -- 대상id
+	   		</if>
+
+			<if test='pblancNm != null and pblancNm != ""'>
+		   		and c.pblanc_nm like '%' || #{pblancNm} || '%' 			--공고명
+	   		</if>
+
+	   		<if test='receiptNo != null and receiptNo != ""'>
+				and b.rcept_no = #{receiptNo} --접수번호
+			</if>
+
+			<if test='memberNm != null and memberNm != ""'>
+				and cm.mber_nm like '%' || #{memberNm} || '%' -- 회원명
+			</if>
+
+			<if test='presnatnBgnde != null and presnatnBgnde != "" '>
+				and to_char(a.presentn_dt,'yyyymmdd') >= #{presnatnBgnde}
+			</if>
+
+			<if test='presnatnEndde != null and presnatnEndde != ""'>
+				and to_char(a.presentn_dt,'yyyymmdd') <![CDATA[<=]]> #{presnatnEndde}
+			</if>
+
+			<if test='taskNmKo != null and taskNmKo != ""'>
+		   		and e.task_korean_nm like '%' || #{taskNmKo} || '%' 			--과제명
+	   		</if>
+
+	   		<if test='memberId != null and memberId != ""'>
+		   		and b.mber_id = #{memberId}
+			</if>
+
+			<if test='isFront'>
+				and a.presentn_dta_process_div_code is not null
+			</if>
+
+	</select>
+
+
+	<select id="selectPresnatnTargetList" resultType="aicluster.pms.common.dto.EvlPresnatnListDto">
+		/*UsptEvlTrgetDao.selectPresnatnTargetList*/
+		select c.pblanc_nm 		--공고명
+			 , a.presentn_dta_process_div_code as presnatn_process_div_cd 				-- 발표자료 처리코드
+			 , coalesce(usp_api.fn_cmm_get_code_nm('PRESNATN_PROCESS_DIV',a.presentn_dta_process_div_code), '미진행') as presnatn_process_div_nm -- 발표자료 처리구분명
+			 , b.rcept_no as receipt_no 							--접수번호
+			 , b.mber_id as member_id  							--회원id
+			 , cm.mber_nm as member_nm 							--회원명
+			 , case when c.ordtm_rcrit_at = true then '상시모집' else '정시모집' end as ordtm_rcrit_nm --상시모집여부명
+			 , b.rcept_ordr as rcept_odr 								--접수차수
+			 , case when a.presentn_dt is null then '-'
+                       else to_char(a.presentn_dt,'yyyy-mm-dd') end    as fmt_presentn_dt
+			 , d.bsns_year
+ 			 , d.bsns_nm --사업명
+			 , cm.encpt_mbtlnum as enc_mobile_no
+			 , a.evl_trget_id
+			 , e.task_korean_nm as task_nm_ko
+			 , a.atchmnfl_group_id as attachment_group_id   				 /*첨부파일그룹ID*/
+ 			 , (
+			    select presentn_hist_id
+			      from (
+					    select row_number() over (order by creat_dt desc) as rn, presentn_hist_id
+					      from usp_api.uspt_evl_trget_presentn_hist
+					     where presentn_dta_process_div_code = '${@aicluster.pms.common.util.Code@splemntRequest}'
+					       and evl_trget_id = a.evl_trget_id
+					   ) hist where hist.rn = 1
+			   ) as presentn_hist_id  --보완요청 최신 이력 ID
+			 , ues.evl_step_nm
+			 , row_number() over (order by a.creat_dt desc) as rn
+		  from usp_api.uspt_evl_trget a 						/*평가대상 - 발표자료 대상*/
+			   inner join usp_api.uspt_bsns_pblanc_applcnt b 	/*공고신청자*/
+					   on b.apply_id = a.apply_id
+			   inner join usp_api.uspt_bsns_pblanc c 			/*공고*/
+					   on c.pblanc_id = b.pblanc_id
+			   inner join usp_api.uspt_bsns d 					/*사업*/
+					   on d.bsns_code = c.bsns_code
+			   inner join auth_api.cmmt_mber_info cm
+					   on cm.mber_id = b.mber_id
+			   left outer join usp_api.uspt_bsns_pblanc_apply_task e
+			  				on e.apply_id = b.apply_id
+ 				inner join usp_api.uspt_evl_step ues /*평가단계*/
+						     on ues.evl_step_id = a.evl_step_id
+		 where 1 = 1
+			<if test='memberId != null and memberId != ""'>
+		   		and b.mber_id = #{memberId}					--회원ID
+			</if>
+
+		 	<if test='bsnsYear != null and bsnsYear != ""'>
+		   		and d.bsns_year = #{bsnsYear}					--사업년도
+			</if>
+
+			<if test='presnatnProcessDivCd != null and presnatnProcessDivCd != ""'>
+				and a.presentn_dta_process_div_code  = #{presnatnProcessDivCd}
+			</if>
+
+			<if test='evlTrgetId != null and evlTrgetId != ""'>
+		   		and a.evl_trget_id = #{evlTrgetId} -- 대상id
+	   		</if>
+
+			<if test='pblancNm != null and pblancNm != ""'>
+		   		and c.pblanc_nm like '%' || #{pblancNm} || '%' 			--공고명
+	   		</if>
+
+	   		<if test='receiptNo != null and receiptNo != ""'>
+				and b.rcept_no = #{receiptNo} --접수번호
+			</if>
+
+			<if test='memberNm != null and memberNm != ""'>
+				and cm.mber_nm like '%' || #{memberNm} || '%' -- 회원명
+			</if>
+
+			<if test='presnatnBgnde != null and presnatnBgnde != "" '>
+				and to_char(a.presentn_dt,'yyyymmdd') >= #{presnatnBgnde}
+			</if>
+
+			<if test='presnatnEndde != null and presnatnEndde != ""'>
+				and to_char(a.presentn_dt,'yyyymmdd') <![CDATA[<=]]> #{presnatnEndde}
+			</if>
+
+			<if test='taskNmKo != null and taskNmKo != ""'>
+		   		and e.task_korean_nm like '%' || #{taskNmKo} || '%' 			--과제명
+	   		</if>
+
+			<if test='memberId != null and memberId != ""'>
+		   		and b.mber_id = #{memberId}
+			</if>
+
+			<if test='isFront'>
+				and a.presentn_dta_process_div_code is not null
+			</if>
+
+		<if test="!isExcel">
+			offset #{beginRowNum} -1
+			limit #{itemsPerPage}
+		</if>
+	</select>
+
+	<!-- 조회목록의 전체  첨부파일 목록   -->
+	<select id="selectPresnatnTargetFileList" resultType="aicluster.pms.common.dto.EvlPresnatnListDto">
+		/*UsptEvlTrgetDao.selectPresnatnTargetFileList*/
+		select  ca.atchmnfl_id as attachment_id
+		  from usp_api.uspt_evl_trget a  						/*평가대상 - 발표자료 대상*/
+			   inner join usp_api.uspt_bsns_pblanc_applcnt b 	/*공고신청자*/
+					   on b.apply_id = a.apply_id
+			   inner join usp_api.uspt_bsns_pblanc c 			/*공고*/
+					   on c.pblanc_id = b.pblanc_id
+			   inner join usp_api.uspt_bsns d 					/*사업*/
+					   on d.bsns_code = c.bsns_code
+			   inner join auth_api.cmmt_mber_info cm
+					   on cm.mber_id = b.mber_id
+			   left outer join usp_api.uspt_bsns_pblanc_apply_task e
+			  				on e.apply_id = b.apply_id
+			  	inner join com_api.cmmt_atchmnfl ca		/*첨부파일*/
+				        on a.atchmnfl_group_id = ca.atchmnfl_group_id
+		 where 1 = 1
+		 	<if test='bsnsYear != null and bsnsYear != ""'>
+		   		and d.bsns_year = #{bsnsYear}					--사업년도
+			</if>
+
+			<if test='presnatnProcessDivCd != null and presnatnProcessDivCd != ""'>
+				and a.presentn_dta_process_div_code  = #{presnatnProcessDivCd} --처리상태(제출)
+			</if>
+
+			<if test='pblancNm != null and pblancNm != ""'>
+		   		and c.pblanc_nm like '%' || #{pblancNm} || '%' 			--공고명
+	   		</if>
+
+	   		<if test='receiptNo != null and receiptNo != ""'>
+				and b.rcept_no = #{receiptNo} --접수번호
+			</if>
+
+			<if test='memberNm != null and memberNm != ""'>
+				and cm.mber_nm like '%' || #{memberNm} || '%' -- 회원명
+			</if>
+	</select>
+
+
+	<update id="updatePresnatnSttus">
+		/** UsptEvlTrgetDao.updatePresnatnSttus */
+		update usp_api.uspt_evl_trget
+		   set presentn_dta_process_div_code  = #{presnatnProcessDivCd}
+		  	 <if test='attachmentGroupId != null and attachmentGroupId != ""'>
+		   		, atchmnfl_group_id     = #{attachmentGroupId}
+			</if>
+			 , updusr_id   = #{updaterId}
+			 , updt_dt   = #{updatedDt}
+		where evl_trget_id 	= #{evlTrgetId}
+	</update>
+
+	<update id="updatePresnatn">
+		/** UsptEvlTrgetDao.updatePresnatn */
+		update usp_api.uspt_evl_trget
+		   set presentn_dta_process_div_code  = #{presnatnProcessDivCd}
+		        , presentn_dt 				  = #{presentnDt}
+		  	 <if test='attachmentGroupId != null and attachmentGroupId != ""'>
+		   		, atchmnfl_group_id     = #{attachmentGroupId}
+			</if>
+			 , updusr_id   = #{updaterId}
+			 , updt_dt   = #{updatedDt}
+		where evl_trget_id 	= #{evlTrgetId}
+	</update>
+
+
+
+
+	<select id="selectFrontEvlResultListCount" resultType="Long">
+		/** UsptEvlTrgetDao.selectFrontEvlResultListCount */
+		select
+			count(*)
+		from 	(
+					select
+						ulst.last_slctn_trget_id as evl_trget_id
+					from usp_api.uspt_bsns_pblanc_applcnt ubpa
+						inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+							on ubpat.apply_id = ubpa.apply_id
+						inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+							on ubpr.pblanc_id = ubpa.pblanc_id
+							and ubpr.rcept_ordr = ubpr.rcept_ordr
+						inner join usp_api.uspt_bsns_pblanc ubp
+							on ubp.pblanc_id = ubpr.pblanc_id
+						inner join usp_api.uspt_evl_plan uep
+							on uep.pblanc_id = ubpr.pblanc_id
+							and uep.rcept_ordr = ubpr.rcept_ordr
+						inner join usp_api.uspt_evl_last_slctn uels
+							on uels.evl_plan_id = uep.evl_plan_id
+						inner join usp_api.uspt_last_slctn_trget ulst
+							on ulst.evl_last_slctn_id = uels.evl_last_slctn_id
+							and ulst.apply_id = ubpa.apply_id
+						left outer join usp_api.uspt_last_slctn_objc_reqst ulsor
+							on ulsor.last_slctn_trget_id = ulst.last_slctn_trget_id
+					where
+						ubpa.mber_id = #{memberId}
+					<if test='slctnBgnde != null and slctnBgnde != ""'>
+						and ulst.updt_dt >= to_date(#{slctnBgnde}, 'yyyymmdd')
+					</if>
+					<if test='slctnEndde != null and slctnEndde != ""'>
+						and ulst.updt_dt <![CDATA[<=]]> to_date(#{slctnEndde}, 'yyyymmdd')
+					</if>
+					<if test='slctnResult != null and slctnResult != ""'>
+						<choose>
+							<when test='slctnResult == "Y"'>and ulst.slctn_at = true</when>
+							<when test='slctnResult == "N"'>and (ulst.slctn_at = false or ulst.slctn_at is null)</when>
+						</choose>
+					</if>
+					<if test='keyword != null and keyword != ""'>
+						<choose>
+							<when test='keywordDiv == "pblancNm"'>
+								and ubp.pblanc_nm like concat('%', #{keyword}, '%')
+							</when>
+							<when test='keywordDiv == "taskNm"'>
+								and ubpat.task_korean_nm like concat('%', #{keyword}, '%')
+							</when>
+						</choose>
+					</if>
+				union all
+					select
+						uet.evl_trget_id
+					from usp_api.uspt_bsns_pblanc_applcnt ubpa
+						inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+							on ubpat.apply_id = ubpa.apply_id
+						inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+							on ubpr.pblanc_id = ubpa.pblanc_id
+							and ubpr.rcept_ordr = ubpr.rcept_ordr
+						inner join usp_api.uspt_bsns_pblanc ubp
+							on ubp.pblanc_id = ubpr.pblanc_id
+						inner join usp_api.uspt_evl_plan uep
+							on uep.pblanc_id = ubpr.pblanc_id
+							and uep.rcept_ordr = ubpr.rcept_ordr
+							and uep.evl_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STTUS_03_CODE}'
+						inner join usp_api.uspt_evl_step ues
+							on ues.evl_plan_id = uep.evl_plan_id
+							 and ues.evl_step_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STEP_03_CODE}'
+						inner join usp_api.uspt_brnh us
+							on us.evl_plan_id = uep.evl_plan_id
+						inner join usp_api.uspt_evl_trget uet
+							on uet.evl_step_id = ues.evl_step_id
+							and uet.brnh_id = us.brnh_id
+							and uet.apply_id = ubpa.apply_id
+						left outer join usp_api.uspt_evl_slctn_objc_reqst uesor
+							on uesor.evl_trget_id = uet.evl_trget_id
+					where
+						ubpa.mber_id = #{memberId}
+					<if test='slctnBgnde != null and slctnBgnde != ""'>
+						and uet.slctn_dt >= to_date(#{slctnBgnde}, 'yyyymmdd')
+					</if>
+					<if test='slctnEndde != null and slctnEndde != ""'>
+						and uet.slctn_dt <![CDATA[<=]]> to_date(#{slctnEndde}, 'yyyymmdd')
+					</if>
+					<if test='slctnResult != null and slctnResult != ""'>
+						<choose>
+							<when test='slctnResult == "Y"'>and uet.slctn_at = true</when>
+							<when test='slctnResult == "N"'>and (uet.slctn_at = false or uet.slctn_at is null)</when>
+						</choose>
+					</if>
+					<if test='keyword != null and keyword != ""'>
+						<choose>
+							<when test='keywordDiv == "pblancNm"'>
+								and ubp.pblanc_nm like concat('%', #{keyword}, '%')
+							</when>
+							<when test='keywordDiv == "taskNm"'>
+								and ubpat.task_korean_nm like concat('%', #{keyword}, '%')
+							</when>
+						</choose>
+					</if>
+				) sub
+	</select>
+
+
+
+	<select id="selectFrontEvlResultList" resultType="aicluster.pms.common.dto.FrontEvlResultListDto">
+		/** UsptEvlTrgetDao.selectFrontEvlResultList */
+		select
+			sub.*
+			, row_number() over (order by sub.receipt_no desc) as rn
+		from (
+				select
+					ubp.pblanc_nm
+					, ubpa.rcept_no as receipt_no
+					, ubpat.task_korean_nm as task_nm_ko
+					, '최종선정' as evl_step_nm
+					, ulst.last_slctn_trget_id as evl_trget_id
+					, case when ulst.slctn_at = true then 'Y' else 'N' end as slctn_at
+					, ulst.updt_dt as slctn_dt
+					, ulsor.last_slctn_objc_reqst_id  as slctn_objc_reqst_id
+					, case when ulsor.last_slctn_objc_reqst_id is null then 'N' else 'Y' end as objc_reqst_at
+				<if test='evlTrgetId != null and evlTrgetId !=""'>
+					, ubpat.task_korean_nm as task_nm_ko
+					, case when ulst.slctn_at = true
+							then coalesce((to_char(now(), 'yyyymmdd')::date - to_char(uels.slctn_dspth_dt, 'yyyymmdd')::date), 0)
+							else coalesce((to_char(now(), 'yyyymmdd')::date - to_char(uels.ptrmsn_dspth_dt, 'yyyymmdd')::date), 0)
+						end as dspth_elapse_de
+				</if>
+				from usp_api.uspt_bsns_pblanc_applcnt ubpa
+					inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+						on ubpat.apply_id = ubpa.apply_id
+					inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+						on ubpr.pblanc_id = ubpa.pblanc_id
+						and ubpr.rcept_ordr = ubpr.rcept_ordr
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpr.pblanc_id
+					inner join usp_api.uspt_evl_plan uep
+						on uep.pblanc_id = ubpr.pblanc_id
+						and uep.rcept_ordr = ubpr.rcept_ordr
+					inner join usp_api.uspt_evl_last_slctn uels
+						on uels.evl_plan_id = uep.evl_plan_id
+					inner join usp_api.uspt_last_slctn_trget ulst
+						on ulst.evl_last_slctn_id = uels.evl_last_slctn_id
+						and ulst.apply_id = ubpa.apply_id
+					left outer join usp_api.uspt_last_slctn_objc_reqst ulsor
+						on ulsor.last_slctn_trget_id = ulst.last_slctn_trget_id
+				where
+					ubpa.mber_id = #{memberId}
+				<if test='slctnBgnde != null and slctnBgnde != ""'>
+					and ulst.updt_dt >= to_date(#{slctnBgnde}, 'yyyymmdd')
+				</if>
+				<if test='slctnEndde != null and slctnEndde != ""'>
+					and ulst.updt_dt <![CDATA[<=]]> to_date(#{slctnEndde}, 'yyyymmdd')
+				</if>
+				<if test='slctnResult != null and slctnResult != ""'>
+					<choose>
+						<when test='slctnResult == "Y"'>and ulst.slctn_at = true</when>
+						<when test='slctnResult == "N"'>and (ulst.slctn_at = false or ulst.slctn_at is null)</when>
+					</choose>
+				</if>
+				<if test='keyword != null and keyword != ""'>
+					<choose>
+						<when test='keywordDiv == "pblancNm"'>
+							and ubp.pblanc_nm like concat('%', #{keyword}, '%')
+						</when>
+						<when test='keywordDiv == "taskNm"'>
+							and ubpat.task_korean_nm like concat('%', #{keyword}, '%')
+						</when>
+					</choose>
+				</if>
+			union all
+				select
+					ubp.pblanc_nm
+					, ubpa.rcept_no as receipt_no
+					, ubpat.task_korean_nm as task_nm_ko
+					, ues.evl_step_nm
+					, uet.evl_trget_id
+					, case when uet.slctn_at = true then 'Y' else 'N' end as slctn_at
+					, uet.slctn_dt
+					, uesor.evl_slctn_objc_reqst_id as slctn_objc_reqst_id
+					, case when uesor.evl_slctn_objc_reqst_id is null then 'N' else 'Y' end as objc_reqst_at
+				<if test='evlTrgetId != null and evlTrgetId !=""'>
+					, ubpat.task_korean_nm as task_nm_ko
+					, case when uet.slctn_at = true
+							then coalesce((to_char(now(), 'yyyymmdd')::date - to_char(uec.slctn_dspth_dt, 'yyyymmdd')::date),0)
+							else coalesce((to_char(now(), 'yyyymmdd')::date - to_char(uec.ptrmsn_dspth_dt, 'yyyymmdd')::date),0)
+						end as dspth_elapse_de
+				</if>
+				from usp_api.uspt_bsns_pblanc_applcnt ubpa
+					inner join usp_api.uspt_bsns_pblanc_apply_task ubpat
+						on ubpat.apply_id = ubpa.apply_id
+					inner join usp_api.uspt_bsns_pblanc_rcept ubpr
+						on ubpr.pblanc_id = ubpa.pblanc_id
+						and ubpr.rcept_ordr = ubpr.rcept_ordr
+					inner join usp_api.uspt_bsns_pblanc ubp
+						on ubp.pblanc_id = ubpr.pblanc_id
+					inner join usp_api.uspt_evl_plan uep
+						on uep.pblanc_id = ubpr.pblanc_id
+						and uep.rcept_ordr = ubpr.rcept_ordr
+						and uep.evl_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STTUS_03_CODE}'
+					inner join usp_api.uspt_evl_step ues
+						on ues.evl_plan_id = uep.evl_plan_id
+						and ues.evl_step_sttus_code = '${@aicluster.pms.common.util.Code@EVL_STEP_03_CODE}'
+					inner join usp_api.uspt_brnh us
+						on us.evl_plan_id = uep.evl_plan_id
+					inner join usp_api.uspt_evl_trget uet
+						on uet.evl_step_id = ues.evl_step_id
+						and uet.brnh_id = us.brnh_id
+						and uet.apply_id = ubpa.apply_id
+					left outer join usp_api.uspt_evl_slctn_objc_reqst uesor
+						on uesor.evl_trget_id = uet.evl_trget_id
+				<if test='evlTrgetId != null and evlTrgetId !=""'>
+					inner join usp_api.uspt_evl_cmit uec
+						on uec.brnh_id = us.brnh_id
+						and uec.evl_step_id = ues.evl_step_id
+				</if>
+				where
+					ubpa.mber_id = #{memberId}
+				<if test='slctnBgnde != null and slctnBgnde != ""'>
+					and uet.slctn_dt >= to_date(#{slctnBgnde}, 'yyyymmdd')
+				</if>
+				<if test='slctnEndde != null and slctnEndde != ""'>
+					and uet.slctn_dt <![CDATA[<=]]> to_date(#{slctnEndde}, 'yyyymmdd')
+				</if>
+				<if test='slctnResult != null and slctnResult != ""'>
+					<choose>
+						<when test='slctnResult == "Y"'>and uet.slctn_at = true</when>
+						<when test='slctnResult == "N"'>and (uet.slctn_at = false or uet.slctn_at is null)</when>
+					</choose>
+				</if>
+				<if test='keyword != null and keyword != ""'>
+					<choose>
+						<when test='keywordDiv == "pblancNm"'>
+							and ubp.pblanc_nm like concat('%', #{keyword}, '%')
+						</when>
+						<when test='keywordDiv == "taskNm"'>
+							and ubpat.task_korean_nm like concat('%', #{keyword}, '%')
+						</when>
+					</choose>
+				</if>
+			) sub
+		<where>
+			<if test='evlTrgetId != null and evlTrgetId !=""'>
+			sub.evl_trget_id = #{evlTrgetId}
+			</if>
+		</where>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+	<select id="selectFrontEvlOpinionList" resultType="aicluster.pms.common.dto.FrontEvlOpinionListDto">
+		/** UsptEvlTrgetDao.selectFrontEvlOpinionList */
+		select
+			ue.expert_nm
+			, uemr.evl_opinion
+		from usp_api.uspt_evl_trget uet
+			inner join usp_api.uspt_evl_step ues
+				on ues.evl_step_id = uet.evl_step_id
+			inner join usp_api.uspt_brnh us
+				on us.brnh_id = uet.brnh_id
+			inner join usp_api.uspt_evl_cmit uec
+				on uec.brnh_id = us.brnh_id
+				and uec.evl_step_id = ues.evl_step_id
+			inner join usp_api.uspt_evl_mfcmm uem
+				on uem.evl_cmit_id = uec.evl_cmit_id
+			inner join usp_api.uspt_expert ue
+				on ue.expert_id = uem.expert_id
+			left outer join usp_api.uspt_evl_mfcmm_result uemr
+				on uemr.evl_mfcmm_id = uem.evl_mfcmm_id
+				and uemr.evl_trget_id = uet.evl_trget_id
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.apply_id = uet.apply_id
+				and ubpa.mber_id = #{memberId}
+		where
+			uet.evl_trget_id  = #{evlTrgetId}
+	</select>
+
+
+	<select id="selectSlctnList" resultType="aicluster.pms.common.dto.SlctnListDto">
+		/** UsptEvlTrgetDao.selectSlctnList */
+		select
+			uet.evl_trget_id
+			, uet.apply_id
+			, uet.brnh_id as sect_id
+			, uet.evl_step_id
+			, uet.slctn_at as slctn
+			, uet.slctn_dt
+			, cm.mber_id as member_id
+			, cm.mber_nm as member_nm
+			, cm.encpt_email as enc_email
+			, cm.encpt_mbtlnum as enc_mobile_no
+		from usp_api.uspt_evl_trget uet
+			inner join usp_api.uspt_bsns_pblanc_applcnt ubpa
+				on ubpa.apply_id = uet.apply_id
+			inner join auth_api.cmmt_mber_info cm
+				on cm.mber_id = ubpa.mber_id
+		where
+			uet.evl_step_id = #{evlStepId}
+			and uet.brnh_id = #{sectId}
+			and uet.slctn_at = #{slctn}
+	</select>
+
+
+	<select id="selectApplyIdCount" resultType="Integer">
+		/** UsptEvlTrgetDao.selectApplyIdCount */
+		select
+			count(*)
+		from usp_api.uspt_evl_trget
+		where
+			apply_id = #{applyId}
+	</select>
+</mapper>

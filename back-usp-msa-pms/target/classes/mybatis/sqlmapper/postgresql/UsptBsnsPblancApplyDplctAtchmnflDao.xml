@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancApplyDplctAtchmnflDao">
+
+	<insert id="insert">
+		/** UsptBsnsPblancApplyDplctAtchmnflDao.insert */
+		insert into usp_api.uspt_bsns_pblanc_apply_dplct_atchmnfl
+		(
+			dplct_doc_atchmnfl_id
+			,apply_id
+			,atchmnfl_setup_id
+			,atchmnfl_id
+			,doc_id
+			,file_nm
+			,samenss_rate
+			,creatr_id
+			,creat_dt
+			) values (
+			#{dplctDocAtchmnflId}
+			, #{applyId}
+			, #{atchmnflSetupId}
+			, #{atchmnflId}
+			, #{docId}
+			, #{fileNm}
+			, #{samenssRate}
+			, #{creatorId}
+			, #{createdDt}
+		)
+	</insert>
+
+	<delete id="delete">
+		/** UsptBsnsPblancApplyDplctAtchmnflDao.delete */
+		delete from usp_api.uspt_bsns_pblanc_apply_dplct_atchmnfl
+		where apply_id = #{applyId}
+		and atchmnfl_id =#{atchmnflId}
+	</delete>
+
+	<select id="selectSamenssRateListCnt" resultType="int">
+		/** UsptBsnsPblancApplyDplctAtchmnflDao.selectSamenssRateListCnt */
+		select count(1)
+		from usp_api.uspt_bsns_pblanc_apply_dplct_atchmnfl ubpat
+		where apply_id  = #{applyId}
+		and atchmnfl_id = #{atchmnflId}
+	</select>
+
+	<select id="selectSamenssRateList" resultType="aicluster.pms.common.entity.UsptBsnsPblancApplyDplctAtchmnfl">
+		/** UsptBsnsPblancApplyDplctAtchmnflDao.selectSamenssRateList */
+		select file_nm
+				,samenss_rate
+		from usp_api.uspt_bsns_pblanc_apply_dplct_atchmnfl
+		where apply_id  = #{applyId}
+		and atchmnfl_id = #{atchmnflId}
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsCnvnTrmnatHistDao">
+
+<!-- 처리이력 조회 -->
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsCnvnTrmnatHist">
+		/** UsptBsnsCnvnTrmnatHistDao.selectList */
+		select	 bsns_cnvn_trmnat_hist_id
+				, bsns_cnvn_id
+				, to_char(creat_dt ,'YYYY-MM-DD HH24:MI') as char_created_dt
+				, fn_cmm_get_code_nm('CNVN_TRMNAT_PROCESS_DIV', cnvn_trmnat_process_div_code) as cnvn_trmnat_process_div_nm	/*협약해지처리구분코드명*/
+				, cnvn_trmnat_process_div_code as cnvn_trmnat_process_div_cd
+				, resn_cn
+				, ubcth.creatr_id as creator_id
+		from usp_api.uspt_bsns_cnvn_trmnat_hist ubcth
+		where bsns_cnvn_id = #{bsnsCnvnId}			/*사업협약ID*/
+		 order by ubcth.creat_dt desc
+	</select>
+
+	<!-- 협약서 서명시 파일그룹ID 변경 -->
+	<update id="insert">
+		/** UsptBsnsCnvnTrmnatHistDao.insert */
+	      insert into usp_api.uspt_bsns_cnvn_trmnat_hist
+	            (
+						 bsns_cnvn_trmnat_hist_id
+						,bsns_cnvn_id
+						,cnvn_trmnat_process_div_code
+						,resn_cn
+						,creatr_id
+						,creat_dt
+					) values (
+						 #{bsnsCnvnTrmnatHistId}
+						,#{bsnsCnvnId}
+						,#{cnvnTrmnatProcessDivCd}
+						,#{resnCn}
+						,#{creatorId}
+						,#{createdDt}
+					)
+	</update>
+
+</mapper>

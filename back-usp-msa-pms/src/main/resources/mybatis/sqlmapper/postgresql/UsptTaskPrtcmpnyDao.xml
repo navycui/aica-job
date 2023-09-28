@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptTaskPrtcmpnyDao">
+
+	<update id="updateRecentSendDate">
+		/** UsptTaskPrtcmpnyDao.updateRecentSendDate */
+		update usp_api.uspt_task_prtcmpny
+		set
+			recent_sndng_dt = #{updatedDt}
+		where
+			task_partcptn_entrprs_id = #{taskPartcptnEntrprsId}
+	</update>
+
+	<!-- 참여기업 조회 -->
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptTaskPrtcmpny">
+			/** UsptTaskPrtcmpnyDao.selectList */
+			select	 task_partcptn_entrprs_id
+					,bsns_wtpln_id 	as bsns_plan_doc_id
+					,entrprs_nm 		as  entrps_nm
+					,rspnber_nm
+					,clsf_nm
+					,encpt_telno 		as enc_telno
+					,encpt_mbtlnum 	as enc_mbtlnum
+					,encpt_email 		as enc_email
+					,nrno 				as tlsy_regist_no
+					,mber_id 			as member_id
+					, (select mber_nm from auth_api.cmmt_mber_info cm  where cm.mber_id = utp.mber_id)		as member_nm
+					,creatr_id 	as creator_id
+					,creat_dt  	as created_dt
+					,updusr_id 	as updater_id
+					,updt_dt   	as updated_dt
+		   from usp_api.uspt_task_prtcmpny utp
+		 where 1=1
+			and bsns_wtpln_id = #{bsnsPlanDocId}
+	</select>
+
+	<!-- 참여기업 조회 목록만 조회-->
+	<select id="selectBoxList" resultType="aicluster.pms.common.entity.UsptTaskPrtcmpny">
+			/** UsptTaskPrtcmpnyDao.selectBoxList */
+			select	 mber_id 	as member_id
+					,entrprs_nm as entrps_nm
+		   from usp_api.uspt_task_prtcmpny
+		 where 1=1
+			and bsns_wtpln_id = #{bsnsPlanDocId}
+	</select>
+
+	<insert id="insert">
+		/** UsptTaskPrtcmpnyDao.insert */
+			insert into usp_api.uspt_task_prtcmpny (
+							task_partcptn_entrprs_id
+							,bsns_wtpln_id
+							,entrprs_nm
+							,rspnber_nm
+							,clsf_nm
+							,encpt_telno
+							,encpt_mbtlnum
+							,encpt_email
+							,nrno
+							,mber_id
+							,creatr_id
+							,creat_dt
+							,updusr_id
+							,updt_dt
+					) values (
+						 #{taskPartcptnEntrprsId}
+						,#{bsnsPlanDocId}
+						,#{entrpsNm}
+						,#{rspnberNm}
+						,#{clsfNm}
+						,#{encTelno}
+						,#{encMbtlnum}
+						,#{encEmail}
+						,#{tlsyRegistNo}
+						,#{memberId}
+						,#{creatorId}
+						,#{createdDt}
+						,#{updaterId}
+						,#{updatedDt}
+					)
+	</insert>
+
+	<update id="update">
+	/** UsptTaskPrtcmpnyDao.update */
+	update usp_api.uspt_task_prtcmpny
+		 set    entrprs_nm            = #{entrpsNm}
+				,rspnber_nm           = #{rspnberNm}
+				,clsf_nm                 = #{clsfNm}
+				,encpt_telno           = #{encTelno}
+				,encpt_mbtlnum      = #{encMbtlnum}
+				,encpt_email           = #{encEmail}
+				,nrno           			 = #{tlsyRegistNo}
+				,mber_id					=#{memberId}
+				,updusr_id                = #{updaterId}
+				,updt_dt                = #{updatedDt}
+	where  task_partcptn_entrprs_id  = #{taskPartcptnEntrprsId}
+	  and	  bsns_wtpln_id          = #{bsnsPlanDocId}
+	</update>
+
+	<delete id="delete">
+	/** UsptTaskPrtcmpnyDao.delete */
+		delete from usp_api.uspt_task_prtcmpny
+				where task_partcptn_entrprs_id = #{taskPartcptnEntrprsId}
+				  and	 bsns_wtpln_id          = #{bsnsPlanDocId}
+	</delete>
+
+	<delete id="deleteBsnsPlanDocIdAll">
+	/** UsptTaskPrtcmpnyDao.deleteBsnsPlanDocIdAll */
+		delete from usp_api.uspt_task_prtcmpny
+				where bsns_wtpln_id =  #{bsnsPlanDocId}
+	</delete>
+
+	<!--협약변경관리 변경요청 업체명 조회 -->
+	<select id="selectCnvnChangeEntrpsNm" resultType="aicluster.pms.common.entity.UsptTaskPrtcmpny">
+		/** UsptTaskPrtcmpnyDao.selectCnvnChangeEntrpsNm */
+	   				select	 rspnber_nm
+	   				       , mber_id as member_id
+					from usp_api.uspt_task_prtcmpny
+				     and  bsns_wtpln_id          = #{bsnsPlanDocId}
+	</select>
+	<!--전자협약체결 조회 -->
+	<select id="selectBsnsCnvnList" resultType="aicluster.pms.common.entity.UsptBsnsCnvnPrtcmpnySign">
+	/** UsptTaskPrtcmpnyDao.selectBsnsCnvnList */
+			select		''					as bsns_cnvn_prtcmpny_sign_id
+				    ,    ''					as bsns_cnvn_id
+					,utp.mber_id 		as member_id
+					, cm.mber_nm		as member_nm		/** 신청자명 */
+					, cm.ceo_nm										/** 대표자명 */
+					, null 					as bsnm_sign_dt
+					,'' 						as char_bsnm_sign_dt			/*사업자서명일시	*/
+					, cm.bizrno				/*사업자번호*/
+		   from usp_api.uspt_task_prtcmpny utp
+	  	inner join auth_api.cmmt_mber_info cm
+		    on utp.mber_id  = cm.mber_id
+		    and bsns_wtpln_id  = #{bsnsPlanDocId}
+	</select>
+</mapper>

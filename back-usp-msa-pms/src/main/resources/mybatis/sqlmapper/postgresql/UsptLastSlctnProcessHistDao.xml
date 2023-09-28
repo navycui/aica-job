@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptLastSlctnProcessHistDao">
+
+	<insert id="insert">
+		/** UsptLastSlctnProcessHistDao.insert */
+		insert into usp_api.uspt_last_slctn_process_hist
+			(
+				last_slctn_process_hist_id
+				, evl_last_slctn_id
+				, last_slctn_process_div_code
+				, resn_cn
+				, creatr_id
+				, creat_dt
+			) values (
+				#{lastSlctnProcessHistId}
+				, #{evlLastSlctnId}
+				, #{lastSlctnProcessDivCd}
+				, #{resnCn}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.LastSlctnProcessHistDto">
+		/** UsptLastSlctnProcessHistDao.selectList */
+		select
+			fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@LSPD_CODE_GROUP}', ulsph.last_slctn_process_div_code)		as last_slctn_process_div
+			, ulsph.resn_cn
+			, ci.mber_nm											as member_nm
+			, ci.login_id
+			, ulsph.creat_dt										as created_dt
+			, row_number() over (order by ulsph.creat_dt desc)		as rn
+		from usp_api.uspt_last_slctn_process_hist ulsph
+			inner join auth_api.cmmt_emp_info ci
+				on ci.mber_id = ulsph.creatr_id
+		where
+			evl_last_slctn_id = #{evlLastSlctnId}
+	</select>
+
+</mapper>

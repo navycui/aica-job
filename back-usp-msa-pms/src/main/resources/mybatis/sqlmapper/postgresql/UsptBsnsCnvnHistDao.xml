@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsCnvnHistDao">
+
+
+	<!-- ******************************************************************* 사업협약변경이력 ********************************************************************** -->
+
+	<insert id="insert" >
+		/** UsptBsnsCnvnHistDao.insert */
+	insert into usp_api.uspt_bsns_cnvn_change_hist (
+				 	bsns_cnvn_change_hist_id
+					,cnvn_change_reqst_id
+					,cnvn_change_iem_div_code
+					,cnvn_change_sttus_code
+					,cnvn_change_ty_code
+					,resn_cn
+					,atchmnfl_group_id
+					,creatr_id
+					,creat_dt
+				) values (
+					 #{bsnsCnvnHistId}
+					,#{cnvnChangeReqId}
+					,#{changeIemDivCd}
+					,#{cnvnChangeSttusCd}
+					,#{cnvnChangeTypeCd}
+					,#{resnCn}
+					,#{attachmentGroupId}
+					,#{creatorId}
+					,#{createdDt}
+				)
+	</insert>
+
+	<!-- 사업협약변경이력  가장 최신 버전 조회 -->
+	<select id="selectUsptBsnsCnvnHistMax" resultType="aicluster.pms.common.entity.UsptBsnsCnvnHist">
+		/** UsptBsnsCnvnHistDao.selectUsptBsnsCnvnHistMax */
+			select a.*
+			from (
+					select	 bsns_cnvn_change_hist_id		as bsns_cnvn_hist_id
+							,cnvn_change_reqst_id			as cnvn_change_req_id
+							,cnvn_change_iem_div_code	as change_iem_div_cd
+							,cnvn_change_sttus_code		as cnvn_change_sttus_cd
+							,cnvn_change_ty_code			as cnvn_change_type_cd
+							,resn_cn
+							,atchmnfl_group_id				as attachment_group_id
+					        ,row_number() over (order by creat_dt desc) as rn
+					from usp_api.uspt_bsns_cnvn_change_hist
+					where cnvn_change_reqst_id = #{cnvnChangeReqId}
+					   and cnvn_change_iem_div_code  = #{changeIemDivCd}
+				) a
+			  where a.rn = 1
+	</select>
+
+	<!-- 사업협약변경이력 조회 -->
+	<select id="selectBsnsCnvnHist" resultType="aicluster.pms.common.entity.UsptBsnsCnvnHist">
+		/** UsptBsnsCnvnHistDao.selectBsnsCnvnHist */
+			select  to_char(ubch.creat_dt,'yyyy-mm-dd HH24:MI:SS') as hist_dt
+					, ubch.cnvn_change_sttus_code							as cnvn_change_sttus_cd
+					, fn_cmm_get_code_nm('CNVN_CHANGE_STTUS', ubch.cnvn_change_sttus_code) as cnvn_change_sttus_nm	/*협약변경상태명*/
+					, ubch.resn_cn
+					, ubch.creatr_id as  member_id
+			from usp_api.uspt_bsns_cnvn_change_hist ubch
+			where ubch.cnvn_change_reqst_id = #{cnvnChangeReqId}
+			   and ubch.cnvn_change_iem_div_code  = #{changeIemDivCd}
+			 order by ubch.creat_dt desc
+	</select>
+
+	<!-- 사업협약변경이력  가장 최신 버전 조회 사유확인 -->
+	<select id="selectUsptBsnsCnvnHistResnCnMax" resultType="aicluster.pms.common.entity.UsptBsnsCnvnHist">
+		/** UsptBsnsCnvnHistDao.selectUsptBsnsCnvnHistResnCnMax */
+			select a.*
+			from (
+				select	 bsns_cnvn_change_hist_id		as bsns_cnvn_hist_id
+							,cnvn_change_reqst_id			as cnvn_change_req_id
+							,cnvn_change_iem_div_code	as change_iem_div_cd
+							,cnvn_change_sttus_code		as cnvn_change_sttus_cd
+							,cnvn_change_ty_code			as cnvn_change_type_cd
+							,resn_cn
+							,atchmnfl_group_id				as attachment_group_id
+					        ,row_number() over (order by creat_dt desc) as rn
+					from usp_api.uspt_bsns_cnvn_change_hist
+					where cnvn_change_reqst_id = #{cnvnChangeReqId}
+					   and cnvn_change_iem_div_code  = #{changeIemDivCd}
+					    and cnvn_change_sttus_code  = #{cnvnChangeSttusCd}
+				) a
+			  where a.rn = 1
+	</select>
+
+</mapper>

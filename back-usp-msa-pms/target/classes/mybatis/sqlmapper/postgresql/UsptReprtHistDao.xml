@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptReprtHistDao">
+
+	<insert id="insert">
+		/** UsptReprtHistDao.insert */
+		insert into usp_api.uspt_reprt_hist
+			(
+				hist_id
+				, reprt_id
+				, opetr_id
+				, reprt_sttus_code
+				, process_cn
+				, creatr_id
+				, creat_dt
+			) values (
+				#{histId}
+				, #{reprtId}
+				, #{opetrId}
+				, #{reprtSttusCd}
+				, #{processCn}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptReprtHist">
+		/** UsptReprtHistDao.selectList */
+		select
+			urh.hist_id
+			, urh.reprt_id
+			, urh.opetr_id
+			, urh.reprt_sttus_code																				as reprt_sttus_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@REPRT_CODE_GROUP}', urh.reprt_sttus_code)	as reprt_sttus
+			, urh.process_cn
+			, urh.creatr_id																						as creator_id
+			, urh.creat_dt																						as created_dt
+			, ci.mber_nm																						as opetr_nm
+			, ci.login_id
+			, row_number() over (order by urh.creat_dt desc)													as rn
+		from usp_api.uspt_reprt_hist urh
+			left outer join auth_api.cmmt_emp_info ci
+				on ci.mber_id = urh.opetr_id
+		where
+			urh.reprt_id = #{reprtId}
+		order by urh.creat_dt desc
+	</select>
+</mapper>

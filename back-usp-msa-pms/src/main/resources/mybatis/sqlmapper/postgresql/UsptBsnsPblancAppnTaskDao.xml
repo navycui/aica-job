@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancAppnTaskDao">
+
+	<insert id="insert">
+		/** UsptBsnsPblancAppnTaskDao.insert */
+		insert into usp_api.uspt_bsns_pblanc_appn_task
+			(
+				pblanc_id
+				, appn_task_id
+				, creatr_id
+				, creat_dt
+			) values (
+				#{pblancId}
+				, #{appnTaskId}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<delete id="deleteAll">
+		/** UsptBsnsPblancAppnTaskDao.deleteAlll */
+		delete from usp_api.uspt_bsns_pblanc_appn_task
+		where
+			ubpat.pblanc_id = #{pblancId}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsPblancAppnTask">
+		/** UsptBsnsPblancAppnTaskDao.selectList */
+		select
+			ubpat.pblanc_id
+			, ubpat.appn_task_id
+			, ubat.appn_task_nm
+		from usp_api.uspt_bsns_pblanc_appn_task ubpat
+				inner join usp_api.uspt_bsns_appn_task ubat
+					on ubat.appn_task_id = ubpat.appn_task_id
+		where
+			ubpat.pblanc_id = #{pblancId}
+	</select>
+
+	<select id="selectAppnTaskList" resultType="aicluster.pms.common.entity.UsptBsnsPblancAppnTask">
+		select
+			distinct ubpat.appn_task_id
+			, ubat.appn_task_nm
+		from usp_api.uspt_bsns_pblanc_appn_task ubpat
+			inner join usp_api.uspt_bsns_appn_task ubat
+				on ubat.appn_task_id = ubpat.appn_task_id
+	</select>
+</mapper>

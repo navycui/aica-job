@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancRceptDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsPblancRcept">
+		/** UsptBsnsPblancRceptDao.selectList */
+		select
+			pblanc_id
+			, rcept_ordr			as rcept_odr
+			, begin_dt
+			, end_dt
+			, to_char(begin_dt,'yyyy-mm-dd') || ' ~ ' || to_char(end_dt,'yyyy-mm-dd hh24:mi:ss')	as rcrit_pd
+			, row_number() over (order by begin_dt desc)		as rn
+		from usp_api.uspt_bsns_pblanc_rcept
+		<where>
+			<if test='pblancId != null and pblancId != ""'>
+				and pblanc_id = #{pblancId}
+			</if>
+		</where>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+	<select id="selectListCount" resultType="Long">
+		/** UsptBsnsPblancRceptDao.selectListCount */
+		select
+			count(pblanc_id) as cnt
+		from usp_api.uspt_bsns_pblanc_rcept
+		<where>
+			<if test='pblancId != null and pblancId != ""'>
+				and pblanc_id = #{pblancId}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert">
+		/** UsptBsnsPblancRceptDao.insert */
+		insert into usp_api.uspt_bsns_pblanc_rcept
+			(
+				pblanc_id
+				, rcept_ordr
+				, begin_dt
+				, end_dt
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			)
+			select
+				#{pblancId}
+				, coalesce(max(rcept_ordr), 0) + 1
+				, #{beginDt}
+				, #{endDt}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			from usp_api.uspt_bsns_pblanc_rcept
+			where
+				pblanc_id = #{pblancId}
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsPblancRceptDao.update */
+		update usp_api.uspt_bsns_pblanc_rcept
+		set
+			begin_dt = #{beginDt}
+			, end_dt = #{endDt}
+			, updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+		where
+			pblanc_id = #{pblancId}
+			and rcept_ordr = (select max(rcept_ordr) from usp_api.uspt_bsns_pblanc_rcept where pblanc_id = #{pblancId})
+	</update>
+
+</mapper>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptStdrIoeSetupDao">
+
+	<resultMap id="ioeSetupMap" type="aicluster.pms.common.dto.IoeSetupDto">
+		<collection property="taxitmList" column="{wctIoeId = wct_ioe_id, stdrBsnsCd = stdr_bsns_cd}"
+					ofType="aicluster.pms.common.dto.IoeSetupTaxitmDto"
+					select="selectTaxitmList"></collection>
+	</resultMap>
+
+	<select id="selectViewList" resultMap="ioeSetupMap">
+		/** UsptStdrIoeSetupDao.selectViewList */
+		select
+			uwi.wct_ioe_id
+			, uwi.wct_ioe_nm
+			, case when usis.stdr_bsns_code is null then false else true end		as is_checked
+			, #{stdrBsnsCd} 														as stdr_bsns_cd
+		from usp_api.uspt_wct_ioe uwi
+				left outer join usp_api.uspt_stdr_bsns_ioe_setup usis
+					on usis.wct_ioe_id = uwi.wct_ioe_id
+					and usis.stdr_bsns_code = #{stdrBsnsCd}
+	</select>
+
+	<select id="selectTaxitmList" resultType="aicluster.pms.common.dto.IoeSetupTaxitmDto">
+		/** UsptStdrIoeSetupDao.selectTaxitmList */
+		select
+			uwt.wct_taxitm_id
+			, uwt.wct_taxitm_nm
+			, case when usts.stdr_bsns_code is null then false else true end		as is_checked
+		from usp_api.uspt_wct_taxitm uwt
+				left outer join usp_api.uspt_stdr_bsns_taxitm_setup usts
+					on usts.wct_taxitm_id = uwt.wct_taxitm_id
+					and usts.stdr_bsns_code = #{stdrBsnsCd}
+		where
+			uwt.wct_ioe_id = #{wctIoeId}
+		order by uwt.wct_ioe_id
+	</select>
+
+	<insert id="insert">
+		/** UsptStdrIoeSetupDao.insert */
+		insert into usp_api.uspt_stdr_bsns_ioe_setup
+			(
+				stdr_bsns_code
+				, wct_ioe_id
+				, creatr_id
+				, creat_dt
+			) values (
+				#{stdrBsnsCd}
+				, #{wctIoeId}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<delete id="deleteAll">
+		/** UsptStdrIoeSetupDao.deleteAll */
+		delete from usp_api.uspt_stdr_bsns_ioe_setup
+		where
+			stdr_bsns_code = #{stdrBsnsCd}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptStdrIoeSetup">
+		/** UsptStdrIoeSetupDao.selectList */
+		select
+			stdr_bsns_code					as stdr_bsns_cd
+			, wct_ioe_id
+		from usp_api.uspt_stdr_bsns_ioe_setup
+		where
+			stdr_bsns_code = #{stdrBsnsCd}
+	</select>
+</mapper>

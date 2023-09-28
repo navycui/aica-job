@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptExpertClMapngDao">
+
+	<select id="selectMapngList" resultType="aicluster.pms.common.entity.UsptExpertClMapng">
+		/** UsptExpertClMapngDao.selectMapngList */
+		select  a.expert_nm 	/**전문가명**/
+			  , a.wrc_nm 		/**부서명**/
+			  , a.ofcps_nm 		/**직위명**/
+			  , b.expert_id		/**전문가ID**/
+			  , b.expert_cl_id	/**전문가분류ID**/
+			  , b.creatr_id as creator_id
+			  , b.creat_dt  as created_dt
+	      from  usp_api.uspt_expert a			/**전문가**/
+   inner join  usp_api.uspt_expert_cl_mapng b	/**전문가분류매핑**/
+	        on a.expert_id = b.expert_id
+	  	   and b.expert_cl_id = #{expertClId}
+	</select>
+
+
+	<insert id="insertExpertClMapng">
+		/** UsptExpertClMapngDao.insertExpertClMapng */
+		insert into usp_api.uspt_expert_cl_mapng
+			(
+				  expert_id
+				, expert_cl_id
+				, creatr_id
+				, creat_dt
+			)
+			values
+			(
+				  #{expertId}
+				, #{expertClId}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<!-- 전문가단 담당자 추가 목록 조회(팝업) 전체 건수 확인-->
+	<select id="selectExpertCount" resultType="int">
+		/** UsptExpertClMapngDao.selectExpertCount */
+		 select count(1) as cnt
+	      from  usp_api.uspt_expert /**전문가**/
+		 where 1=1
+		 <if test='wrcNm != null and wrcNm != ""'>
+		   	and wrc_nm like '%' || #{wrcNm} || '%'
+	   	   </if>
+		 <if test='expertNm != null and expertNm != ""'>
+		   	and expert_nm like '%' || #{expertNm} || '%'
+	   	   </if>
+	</select>
+
+	<!-- 전문가단 담당자 추가 목록 조회(팝업) -->
+	<select id="selectExpertList" resultType="aicluster.pms.common.entity.UsptExpertClMapng">
+		/** UsptExpertClMapngDao.selectExpertList */
+		select  expert_id 	/**전문가ID**/
+		      , expert_nm 	/**전문가명**/
+			  , wrc_nm 		/**부서명**/
+			  , ofcps_nm 	/**직위명**/
+	      from  usp_api.uspt_expert /**전문가**/
+		 where 1=1
+		 <if test='wrcNm != null and wrcNm != ""'>
+		   	and wrc_nm like '%' || #{wrcNm} || '%'
+	   	   </if>
+		 <if test='expertNm != null and expertNm != ""'>
+		   	and expert_nm like '%' || #{expertNm} || '%'
+	   	   </if>
+	   	   offset #{beginRowNum} -1
+		   limit #{itemsPerPage}
+	</select>
+
+	<!--전문가단 담당자 분류조회-->
+	<select id="selectMyExpertClList" resultType="aicluster.pms.common.entity.UsptExpertClMapng">
+		/** UsptExpertClMapngDao.selectMyExpertClList */
+			select  b.parnts_expert_cl_id
+	         from  usp_api.uspt_expert_cl_mapng a	/**전문가분류매핑**/
+	  inner join  usp_api.uspt_expert_cl b
+	         on  a.expert_cl_id = b.expert_cl_id
+		    and b.use_at = true
+		 where  1=1
+	   	   <if test='memberId != null and memberId != ""'>
+		   	and  b.member_id = #{memberId}
+	   	   </if>
+	</select>
+
+	<!--전문가 신청 상세정보 전문분야-->
+	<select id="selectExpertReqsList" resultType="aicluster.pms.common.entity.UsptExpertClMapng">
+		/** UsptExpertClMapngDao.selectExpertReqsList */
+			select   a.expert_id		/**전문가ID**/
+					 , a.expert_cl_id	/**전문가분류ID**/
+					 , b.expert_cl_nm
+			  		 , b.parnts_expert_cl_id
+	         from  usp_api.uspt_expert_cl_mapng a	/**전문가분류매핑**/
+		     inner join  usp_api.uspt_expert_cl b
+	         on  a.expert_cl_id = b.expert_cl_id
+		    and b.use_at = true
+		 where   a.expert_id = #{expertId}
+	</select>
+
+	<update id="update">
+	/** UsptExpertClMapngDao.update */
+		update usp_api.uspt_expert_cl_mapng
+			 set  expert_cl_id      = #{expertClId}
+		where   expert_id 		= #{expertId}
+	</update>
+
+	<delete id="deleteExpertClMapng">
+		/** UsptExpertClMapngDao.deleteExpertClMapng */
+		delete from usp_api.uspt_expert_cl_mapng
+		where expert_id 	= #{expertId}
+		  and expert_cl_id 	= #{expertClId}
+	</delete>
+
+	<delete id="deleteExpert">
+		/** UsptExpertClMapngDao.deleteExpert*/
+		delete from usp_api.uspt_expert_cl_mapng
+		where expert_id = #{expertId}
+	</delete>
+
+	<!--전문분야 등록 여부-->
+	<select id="selectCheckCnt" resultType="int">
+		/** UsptExpertClMapngDao.selectCheckCnt */
+		select count(1)  as cnt
+		from usp_api.uspt_expert_cl_mapng
+		where expert_id 	= #{expertId}
+		  and expert_cl_id 	= #{expertClId}
+	</select>
+
+	<!--전문분야로 사용 여부-->
+	<select id="selectCheckMapngCnt" resultType="int">
+		/** UsptExpertClMapngDao.selectCheckMapngCnt */
+		select count(1)  as cnt
+		from usp_api.uspt_expert_cl_mapng
+		where  expert_cl_id 	= #{expertClId}
+	</select>
+
+</mapper>

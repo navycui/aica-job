@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancDetailDao">
+
+	<insert id="insert">
+		/** UsptBsnsPblancDetailDao.insert */
+		insert into usp_api.uspt_bsns_pblanc_detail
+			(
+				pblanc_detail_id
+				, pblanc_id
+				, sj
+				, detail_cn
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{pblancDetailId}
+				, #{pblancId}
+				, #{sj}
+				, #{detailCn}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsPblancDetailDao.update */
+		update usp_api.uspt_bsns_pblanc_detail
+		set
+			updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+			, sj		= #{sj}
+			, detail_cn	= #{detailCn}
+		where
+			pblanc_id = #{pblancId}
+			and pblanc_detail_id = #{pblancDetailId}
+	</update>
+
+	<delete id="delete">
+		/** UsptBsnsPblancDetailDao.delete */
+		delete from usp_api.uspt_bsns_pblanc_detail
+		where
+			pblanc_id = #{pblancId}
+			and pblanc_detail_id = #{pblancDetailId}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsPblancDetail">
+		/** UsptBsnsPblancDetailDao.selectList */
+		select
+			pblanc_detail_id
+			, pblanc_id
+			, sj
+			, detail_cn
+		from usp_api.uspt_bsns_pblanc_detail
+		where
+			pblanc_id = #{pblancId}
+	</select>
+
+</mapper>

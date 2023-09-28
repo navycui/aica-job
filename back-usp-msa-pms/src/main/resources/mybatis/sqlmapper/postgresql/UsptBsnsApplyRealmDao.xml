@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsApplyRealmDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsApplyRealm">
+		/** UsptBsnsApplyRealmDao.selectList */
+		select
+			bsns_code
+			, apply_realm_id
+			, apply_realm_nm
+		from usp_api.uspt_bsns_apply_realm
+		where
+			bsns_code = #{bsnsCd}
+	</select>
+
+
+	<insert id="insert">
+		/** UsptBsnsApplyRealmDao.insert */
+		insert into usp_api.uspt_bsns_apply_realm
+			(
+				apply_realm_id
+				, bsns_code
+				, apply_realm_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{applyRealmId}
+				, #{bsnsCd}
+				, #{applyRealmNm}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsApplyRealmDao.insertList */
+		insert into usp_api.uspt_bsns_apply_realm
+			(
+				apply_realm_id
+				, bsns_code
+				, apply_realm_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.applyRealmId}
+				, #{item.bsnsCd}
+				, #{item.applyRealmNm}
+				, #{item.creatorId}
+				, #{item.createdDt}
+				, #{item.updaterId}
+				, #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+
+	<update id="update">
+		/** UsptBsnsApplyRealmDao.update */
+		update usp_api.uspt_bsns_apply_realm
+		set
+			apply_realm_nm = #{applyRealmNm}
+			, updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+		where
+			apply_realm_id = #{applyRealmId}
+			and bsns_code = #{bsnsCd}
+	</update>
+
+
+	<delete id="delete">
+		/** UsptBsnsApplyRealmDao.delete */
+		delete from usp_api.uspt_bsns_apply_realm
+		where
+			apply_realm_id = #{applyRealmId}
+			and bsns_code = #{bsnsCd}
+	</delete>
+
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.TsptEqpmnResultDao">
+
+	<select id="selectStatsList" resultType="aicluster.pms.common.dto.EqpmnResultDto">
+		/** TsptEqpmnUseReqstDao.selectStatsList */
+		select
+			stats_de
+			, estmt_reqst
+			, use_reqst
+			, confm
+			, use
+			, use_end
+			, use_eqpmn_co
+			, tkout_eqpmn_co
+			, tkin_eqpmn_co
+			, use_totamt
+			, npy
+			, creat_dt
+		from tsp_api.tspt_eqpmn_result
+		where
+			stats_de between #{bgnde} and #{endde}
+		order by stats_de
+	</select>
+
+
+	<select id="selectStatsYmList" resultType="aicluster.pms.common.dto.EqpmnResultDto">
+		/** TsptEqpmnUseReqstDao.selectStatsYmList */
+		select
+			substring(stats_de, 1, 6)	as stats_de
+			, sum(estmt_reqst)			as estmt_reqst
+			, sum(use_reqst)			as use_reqst
+			, sum(confm)				as confm
+			, sum(use)					as use
+			, sum(use_end)				as use_end
+			, sum(use_eqpmn_co)			as use_eqpmn_co
+			, sum(tkout_eqpmn_co)		as tkout_eqpmn_co
+			, sum(tkin_eqpmn_co)		as tkin_eqpmn_co
+			, sum(use_totamt)			as use_totamt
+			, sum(npy)					as npy
+		from tsp_api.tspt_eqpmn_result
+		where
+			substring(stats_de, 1, 6) between #{bgnde} and #{endde}
+		group by substring(stats_de, 1, 6)
+		order by substring(stats_de, 1, 6)
+	</select>
+
+</mapper>

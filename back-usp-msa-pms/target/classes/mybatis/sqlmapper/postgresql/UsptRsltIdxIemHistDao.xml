@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptRsltIdxIemHistDao">
+
+	<insert id="insert">
+		/** UsptRsltIdxIemHistDao.insert */
+		insert into usp_api.uspt_pfmc_idx_iem_hist
+			(
+				pfmc_hist_id
+				, pfmc_idx_iem_id
+				, pruf_atchmnfl_id
+				, creatr_id
+				, creat_dt
+			) values (
+				#{rsltHistId}
+				, #{rsltIdxIemId}
+				, #{prufAttachmentId}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptRsltIdxIemHist">
+		/** UsptRsltIdxIemHistDao.selectList */
+		select
+			uriih.pfmc_hist_id									as rslt_hist_id
+			, uriih.pfmc_idx_iem_id								as rslt_idx_iem_id
+			, uriih.pruf_atchmnfl_id							as pruf_attachment_id
+			, ubri.pfmc_idx_nm									as rslt_idx_nm
+			, ubri.pfmc_idx_ty_code								as rslt_idx_type_cd
+		from usp_api.uspt_pfmc_idx_iem_hist uriih
+			inner join usp_api.uspt_pfmc_idx_iem urii
+				on urii.pfmc_idx_iem_id = uriih.pfmc_idx_iem_id
+			inner join usp_api.uspt_bsns_pfmc_idx ubri
+				on ubri.pfmc_idx_id = urii.pfmc_idx_id
+		where
+			uriih.pfmc_hist_id = #{rsltHistId}
+		order by ubri.creat_dt
+	</select>
+</mapper>

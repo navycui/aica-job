@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptTaskTaxitmWctHistDao">
+
+
+	<!-- ******************************************************************* 과제세목별사업비변경이력 ********************************************************************** -->
+
+	<insert id="insert">
+		/** UsptTaskTaxitmWctHistDao.insert */
+		insert into usp_api.uspt_task_taxitm_wct_change_hist (
+					 task_taxitm_wct_change_hist_id
+					,cnvn_change_reqst_id
+					,confm_task_taxitm_wct_change_hist_id
+					,bsns_year
+					,wct_taxitm_id
+					,comput_basis_cn
+					,alotm_cash
+					,sport_budget
+					,alotm_acthng
+					,creatr_id
+					,creat_dt
+				) values (
+					 #{taskTaxitmWctHistId}
+					,#{cnvnChangeReqId}
+					,#{confmTaskTaxitmWctHistId}
+					,#{bsnsYear}
+					,#{wctTaxitmId}
+					,#{computBasisCn}
+					,#{sportBudget}
+					,#{alotmCash}
+					,#{alotmActhng}
+					,#{creatorId}
+					,#{createdDt}
+				)
+	</insert>
+
+		<!-- 과제세목별사업비변경이력 조회 -->
+	<select id="selectMaxHistList" resultType="aicluster.pms.common.entity.UsptTaskTaxitmWctHist">
+		/** UsptTaskTaxitmWctHistDao.selectMaxHistList */
+		 	select  c.task_taxitm_wct_change_hist_id as task_taxitm_wct_hist_id         /*과제세목별사업비ID */
+			            , c.bsns_year					/*사업년도*/
+				  		, a.wct_ioe_id					/*사업비비목ID*/
+				        , a.wct_ioe_nm					/*사업비비목명*/
+				        , b.wct_taxitm_id				/*사업비세목ID*/
+				        , b.wct_taxitm_nm				/*사업비세목명*/
+				        , c.comput_basis_cn			/*산출근거내용*/
+				        , coalesce(c.sport_budget,0)	as sport_budget	/*지원예산*/
+				        , coalesce(c.alotm_cash,0)		as alotm_cash		/*부담금현금*/
+				        , coalesce(c.alotm_acthng,0)	as alotm_acthng   /*부담금현물*/
+				        , coalesce(c.sport_budget + c.alotm_cash + c.alotm_acthng,0) as alotm_sum_tot	/*합계*/
+				        , c.confm_task_taxitm_wct_change_hist_id as confm_task_taxitm_wct_hist_id
+				from usp_api.uspt_wct_ioe    a						/*사업비 비목*/
+		inner join usp_api.uspt_wct_taxitm b						/*사업비 세목*/
+			      on a.wct_ioe_id = b.wct_ioe_id
+	     inner join  usp_api.usp_api.uspt_task_taxitm_wct_change_hist  c 			/*과제세목별사업비*/
+			      on b.wct_taxitm_id = c.wct_taxitm_id
+		         and c.cnvn_change_reqst_id= #{cnvnChangeReqId}
+		          <if test='bsnsYear != null and bsnsYear != ""'>
+		       		  and c.bsns_year = #{bsnsYear}
+		         </if>
+		         and c.creat_dt   = ( select max(creat_dt  )
+		  	                               from usp_api.uspt_task_taxitm_wct_change_hist
+		  	                              where cnvn_change_reqst_id =  #{cnvnChangeReqId}
+			  	                                <if test='bsnsYear != null and bsnsYear != ""'>
+										       		  and c.bsns_year = #{bsnsYear}
+										         </if>
+		  	                                 and (confm_task_taxitm_wct_change_hist_id   is null or confm_task_taxitm_wct_change_hist_id   = ''))
+	</select>
+
+	<!--  과제세목별사업비변경이력 변경날자 목록-->
+	<select id="selectUsptTaskTaxitmWctHistChangeDe" resultType="aicluster.pms.common.entity.UsptCnvnChangeReqHistDt">
+		/** UsptTaskTaxitmWctHistDao.selectUsptTaskTaxitmWctHistChangeDe */
+			select	  cnvn_change_reqst_id
+					, to_char(creat_dt  ,'yyyymmdd') as change_de
+					, to_char(creat_dt  ,'yyyymmddhh24miss') as change_dt
+		 	 from usp_api.uspt_task_taxitm_wct_change_hist
+			where cnvn_change_reqst_id = #{cnvnChangeReqId}
+			and (confm_task_taxitm_wct_change_hist_id   is null or confm_task_taxitm_wct_change_hist_id   = '')
+			group by cnvn_change_reqst_id, creat_dt
+			order by creat_dt   desc
+	</select>
+
+	<!-- 과제세목별사업비변경이력 조회 -->
+	<select id="selectUsptTaskTaxitmWctHistByDt" resultType="aicluster.pms.common.entity.UsptTaskTaxitmWctHist">
+		/** UsptTaskTaxitmWctHistDao.selectUsptTaskTaxitmWctHistByDt */
+			 	 select    'before' 												as change_be_af
+					        , c.task_taxitm_wct_change_hist_id 			as task_taxitm_wct_hist_id         /*과제세목별사업비ID */
+					        , c.cnvn_change_reqst_id 						as cnvn_change_req_id
+					        , c.confm_task_taxitm_wct_change_hist_id as confm_task_taxitm_wct_hist_id
+				            , c.bsns_year					/*사업년도*/
+					  		, a.wct_ioe_id					/*사업비비목ID*/
+					        , a.wct_ioe_nm					/*사업비비목명*/
+					        , b.wct_taxitm_id				/*사업비세목ID*/
+					        , b.wct_taxitm_nm				/*사업비세목명*/
+					        , c.comput_basis_cn			/*산출근거내용*/
+					        , coalesce(c.sport_budget,0)	as sport_budget	/*지원예산*/
+					        , coalesce(c.alotm_cash,0)		as alotm_cash		/*부담금현금*/
+					        , coalesce(c.alotm_acthng,0)	as alotm_acthng   /*부담금현물*/
+					        , coalesce(c.sport_budget + c.alotm_cash + c.alotm_acthng,0) as alotm_sum_tot	/*합계*/
+					        ,to_char(c.creat_dt  ,'yyyy-mm-dd') as change_de
+					from usp_api.uspt_wct_ioe    a						/*사업비 비목*/
+			inner join usp_api.uspt_wct_taxitm b						/*사업비 세목*/
+				      on a.wct_ioe_id = b.wct_ioe_id
+		     inner join  usp_api.uspt_task_taxitm_wct_change_hist  c 			/*과제세목별사업비*/
+				      on b.wct_taxitm_id = c.wct_taxitm_id
+			        and c.cnvn_change_reqst_id= #{cnvnChangeReqId}
+				    and c.confm_task_taxitm_wct_change_hist_id   is not null
+					and c.confm_task_taxitm_wct_change_hist_id   !=''
+		union all
+				select   'after' 					as change_be_af
+				            , c.task_taxitm_wct_change_hist_id as task_taxitm_wct_hist_id         /*과제세목별사업비ID */
+					        , c.confm_task_taxitm_wct_change_hist_id as confm_task_taxitm_wct_hist_id
+					        , c.cnvn_change_reqst_id
+				            , c.bsns_year					/*사업년도*/
+					  		, a.wct_ioe_id					/*사업비비목ID*/
+					        , a.wct_ioe_nm					/*사업비비목명*/
+					        , b.wct_taxitm_id				/*사업비세목ID*/
+					        , b.wct_taxitm_nm				/*사업비세목명*/
+					        , c.comput_basis_cn			/*산출근거내용*/
+					        , coalesce(c.sport_budget,0)	as sport_budget	/*지원예산*/
+					        , coalesce(c.alotm_cash,0)		as alotm_cash		/*부담금현금*/
+					        , coalesce(c.alotm_acthng,0)	as alotm_acthng   /*부담금현물*/
+					        , coalesce(c.sport_budget + c.alotm_cash + c.alotm_acthng,0) as alotm_sum_tot	/*합계*/
+					        ,to_char(c.creat_dt  ,'yyyy-mm-dd') as change_de
+					from usp_api.uspt_wct_ioe    a						/*사업비 비목*/
+			inner join usp_api.uspt_wct_taxitm b						/*사업비 세목*/
+				      on a.wct_ioe_id = b.wct_ioe_id
+		     inner join  usp_api.uspt_task_taxitm_wct_change_hist  c 			/*과제세목별사업비*/
+				      on b.wct_taxitm_id = c.wct_taxitm_id
+			        and c.cnvn_change_reqst_id= #{cnvnChangeReqId}
+				   and ( c.confm_task_taxitm_wct_change_hist_id   is null or c.confm_task_taxitm_wct_change_hist_id   = '')
+				   and to_char(c.creat_dt  ,'yyyymmddhh24miss') = #{changeDt}
+	</select>
+
+</mapper>

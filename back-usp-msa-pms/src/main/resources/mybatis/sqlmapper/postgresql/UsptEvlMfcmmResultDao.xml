@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlMfcmmResultDao">
+
+	<insert id="insert">
+		/*UsptEvlMfcmmResultDao.insert*/
+		insert into usp_api.uspt_evl_mfcmm_result (
+				    evl_result_id
+				  , evl_mfcmm_id
+				  , evl_trget_id
+				  , mfcmm_evl_sttus_code
+				  , mfcmm_evl_sttus_change_dt
+				  , evl_opinion
+				  , creatr_id
+				  , creat_dt
+				  , updusr_id
+				  , updt_dt
+			) values (
+				    #{evlResultId}
+				  , #{evlMfcmmId}
+				  , #{evlTrgetId}
+				  , #{mfcmmEvlSttusCd}
+				  , #{mfcmmEvlSttusDt}
+				  , #{evlOpinion}
+				  , #{creatorId}
+				  , #{createdDt}
+				  , #{updaterId}
+				  , #{updatedDt}
+			)
+	</insert>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptEvlMfcmmResult">
+		/** UsptEvlMfcmmResultDao.selectList */
+		select evl_result_id
+			,evl_mfcmm_id
+			,evl_trget_id
+			,mfcmm_evl_sttus_code as mfcmm_evl_sttus_cd
+			,mfcmm_evl_sttus_change_dt as mfcmm_evl_sttus_dt
+			,evl_opinion
+			,creatr_id as creator_id
+			,creat_dt as created_dt
+			,updusr_id as updater_id
+			,updt_dt as updated_dt
+		from usp_api.uspt_evl_mfcmm_result
+		where 1 = 1
+
+		<if test='evlResultId != null and evlResultId != ""'>
+			and evl_result_id = #{evlResultId}
+		</if>
+
+		<if test='evlMfcmmId != null and evlMfcmmId != ""'>
+			and evl_mfcmm_id = #{evlMfcmmId}
+		</if>
+
+		<if test='evlTrgetId != null and evlTrgetId != ""'>
+			and evl_trget_id = #{evlTrgetId}
+		</if>
+	</select>
+
+	<update id="update">
+		/*UsptEvlMfcmmResultDao.update*/
+		update usp_api.uspt_evl_mfcmm_result
+		   set mfcmm_evl_sttus_code        = #{mfcmmEvlSttusCd}
+			 , mfcmm_evl_sttus_change_dt        = #{mfcmmEvlSttusDt}
+			 , evl_opinion               = #{evlOpinion}
+			 , updusr_id                = #{updaterId}
+			 , updt_dt                = #{updatedDt}
+		where evl_result_id = #{evlResultId}
+	</update>
+
+	<update id="updateMfcmmEvlSttusAll">
+		/*UsptEvlMfcmmResultDao.updateMfcmmEvlSttusAll*/
+		update usp_api.uspt_evl_mfcmm_result
+		   set mfcmm_evl_sttus_code        = #{mfcmmEvlSttusCd}
+			 , mfcmm_evl_sttus_change_dt        = #{mfcmmEvlSttusDt}
+			 , updusr_id                = #{updaterId}
+			 , updt_dt                = #{updatedDt}
+		where evl_mfcmm_id = #{evlMfcmmId}
+	</update>
+
+
+</mapper>

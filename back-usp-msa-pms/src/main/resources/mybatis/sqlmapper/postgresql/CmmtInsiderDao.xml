@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.CmmtInsiderDao">
+
+	<select id="selectListCnt" resultType="int">
+		/** CmmtInsiderDao.selectListCnt */
+		select
+			count(mber_id) cnt
+		from auth_api.cmmt_emp_info ci
+		<where>
+			<if test='deptNm != null and deptNm != ""'>
+				and fn_cmm_get_code_nm('DEPT_CD', dept_code) like concat('%', #{deptNm}, '%')
+			</if>
+			<if test='memberNm != null and memberNm != ""'>
+				and mber_nm like concat('%', #{memberNm}, '%')
+			</if>
+		</where>
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.CmmtInsider">
+		/** CmmtInsiderDao.selectList */
+		select
+			mber_id											as member_id
+			, mber_nm										as member_nm
+			, fn_cmm_get_code_nm('DEPT_CD', dept_code)		as dept_nm
+			, clsf_nm										as position_nm
+		from auth_api.cmmt_emp_info ci
+		<where>
+			<if test='deptNm != null and deptNm != ""'>
+				and fn_cmm_get_code_nm('DEPT_CD', dept_code) like  concat('%', #{deptNm}, '%')
+			</if>
+			<if test='memberNm != null and memberNm != ""'>
+				and mber_nm like  CONCAT('%', #{memberNm}, '%')
+			</if>
+		</where>
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+</mapper>

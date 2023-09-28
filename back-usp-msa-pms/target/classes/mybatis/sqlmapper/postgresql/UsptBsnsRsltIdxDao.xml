@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsRsltIdxDao">
+
+	<insert id="insert">
+		/** UsptBsnsRsltIdxDao.insert */
+		insert into usp_api.uspt_bsns_pfmc_idx
+			(
+				pfmc_idx_id
+				, bsns_code
+				, pfmc_idx_nm
+				, stdr_idx_at
+				, pfmc_idx_ty_code
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{rsltIdxId}
+				, #{bsnsCd}
+				, #{rsltIdxNm}
+				, #{stdIdx}
+				, #{rsltIdxTypeCd}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsRsltIdxDao.insertList */
+		insert into usp_api.uspt_bsns_pfmc_idx
+			(
+				pfmc_idx_id
+				, bsns_code
+				, pfmc_idx_nm
+				, stdr_idx_at
+				, pfmc_idx_ty_code
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.rsltIdxId}
+				, #{item.bsnsCd}
+				, #{item.rsltIdxNm}
+				, #{item.stdIdx}
+				, #{item.rsltIdxTypeCd}
+				, #{item.creatorId}
+				, #{item.createdDt}
+				, #{item.updaterId}
+				, #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsRsltIdxDao.update */
+		update usp_api.uspt_bsns_pfmc_idx
+		set
+			updusr_id		= #{updaterId}
+			, updt_dt		= #{updatedDt}
+			, stdr_idx_at		= #{stdIdx}
+			, pfmc_idx_nm	= #{rsltIdxNm}
+		where
+			pfmc_idx_id = #{rsltIdxId}
+			and bsns_code = #{bsnsCd}
+	</update>
+
+	<delete id="delete">
+		/** UsptBsnsRsltIdxDao.delete */
+		delete from usp_api.uspt_bsns_pfmc_idx
+		where
+			pfmc_idx_id = #{rsltIdxId}
+			and bsns_code = #{bsnsCd}
+	</delete>
+
+	<resultMap id="rsltIdxMap" type="aicluster.pms.common.entity.UsptBsnsRsltIdx">
+		<collection property="detailIemList" column="{rsltIdxId = rslt_idx_id}"
+					ofType="aicluster.pms.common.entity.UsptBsnsRsltIdxDetailIem"
+					select="selectRsltIdxDetailIemList"></collection>
+		<collection property="stdIemList" column="{rsltIdxId = rslt_idx_id}"
+					ofType="aicluster.pms.common.entity.UsptBsnsRsltIdxStdIem"
+					select="selectRsltIdxStdIemList"></collection>
+	</resultMap>
+
+
+	<select id="selectList" resultMap="rsltIdxMap">
+		/** UsptBsnsRsltIdxDao.selectList */
+		select
+			bsns_code					as bsns_cd
+			, pfmc_idx_id				as rslt_idx_id
+			, pfmc_idx_nm				as rslt_idx_nm
+			, stdr_idx_at				as std_idx
+			, pfmc_idx_ty_code			as rslt_idx_type_cd
+		from usp_api.uspt_bsns_pfmc_idx
+		where
+			bsns_code = #{bsnsCd}
+		order by creat_dt
+	</select>
+
+	<select id="selectRsltIdxDetailIemList" resultType="aicluster.pms.common.entity.UsptBsnsRsltIdxDetailIem">
+		/** UsptBsnsRsltIdxDao.selectRsltIdxIemList */
+		select
+			pfmc_idx_detail_iem_id			as rslt_idx_detail_iem_id
+			, detail_iem_nm
+			, iem_unit_code					as iem_unit_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@UNIT_CODE_GROUP}', iem_unit_code)	as iem_unit
+		from usp_api.uspt_bsns_pfmc_idx_detail_iem
+		where
+			pfmc_idx_id = #{rsltIdxId}
+		order by creat_dt
+	</select>
+
+	<select id="selectRsltIdxStdIemList" resultType="aicluster.pms.common.entity.UsptBsnsRsltIdxStdIem">
+		/** UsptBsnsRsltIdxDao.selectStdIdxIemList */
+		select
+			pfmc_idx_stdr_iem_id			as rslt_idx_std_iem_id
+			, stdr_iem_nm					as std_iem_nm
+			, iem_unit_code					as iem_unit_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@UNIT_CODE_GROUP}', iem_unit_code)	as iem_unit
+		from usp_api.uspt_bsns_pfmc_idx_stdr_iem
+		where
+			pfmc_idx_id = #{rsltIdxId}
+		order by creat_dt
+	</select>
+</mapper>

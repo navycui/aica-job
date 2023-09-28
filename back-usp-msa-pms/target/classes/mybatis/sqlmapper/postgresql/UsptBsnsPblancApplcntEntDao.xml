@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancApplcntEntDao">
+
+	<insert id="insert">
+		/** UsptBsnsPblancApplcntEntDao.insert */
+		insert into usp_api.uspt_bsns_pblanc_applcnt_entrprs
+			(
+				apply_id
+				, entrprs_ty_code
+				, indust_realm_code
+				, fond_de
+				, emp_co
+				, resdng_nmpr_co
+				, empmn_prearnge_nmpr_co
+				, induty
+				, main_induty
+				, main_tchnlgy_nd_product
+				, zip
+				, adres
+				, encpt_fxnum
+				, encpt_reprsnt_telno
+				, encpt_ceo_telno
+				, encpt_ceo_email
+				, new_fond_plan_code
+				, transr_nd_fond_plan_code
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{applyId}
+				, #{cmpnyTypeCd}
+				, #{industRealmCd}
+				, #{fondDay}
+				, #{emplyCnt}
+				, #{resdngNmpr}
+				, #{empmnPrearngeNmpr}
+				, #{induty}
+				, #{mainInduty}
+				, #{mainTchnlgyProduct}
+				, #{zip}
+				, #{adres}
+				, #{encFxnum}
+				, #{encReprsntTelno}
+				, #{encCeoTelno}
+				, #{encCeoEmail}
+				, #{newFntnPlanCd}
+				, #{fondPlanCd}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+
+
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsPblancApplcntEntDao.update */
+		update usp_api.uspt_bsns_pblanc_applcnt_entrprs
+		set
+			entrprs_ty_code				= #{cmpnyTypeCd}
+			, indust_realm_code			= #{industRealmCd}
+			, fond_de					= #{fondDay}
+			, emp_co					= #{emplyCnt}
+			, resdng_nmpr_co			= #{resdngNmpr}
+			, empmn_prearnge_nmpr_co	= #{empmnPrearngeNmpr}
+			, induty					= #{induty}
+			, main_induty				= #{mainInduty}
+			, main_tchnlgy_nd_product	= #{mainTchnlgyProduct}
+			, zip						= #{zip}
+			, adres						= #{adres}
+			, encpt_fxnum				= #{encFxnum}
+			, encpt_reprsnt_telno		= #{encReprsntTelno}
+			, encpt_ceo_telno			= #{encCeoTelno}
+			, encpt_ceo_email			= #{encCeoEmail}
+			, new_fond_plan_code		= #{newFntnPlanCd}
+			, transr_nd_fond_plan_code	= #{fondPlanCd}
+			, updusr_id			= #{updaterId}
+			, updt_dt			= #{updatedDt}
+		where
+			apply_id = #{applyId}
+	</update>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptBsnsPblancApplcntEnt">
+		/** UsptBsnsPblancApplcntEntDao.select */
+		select
+			apply_id
+			, entrprs_ty_code				as cmpny_type_cd
+			, indust_realm_code				as indust_realm_cd
+			, fond_de						as fond_day
+			, emp_co						as emply_cnt
+			, resdng_nmpr_co				as resdng_nmpr
+			, empmn_prearnge_nmpr_co		as empmn_prearnge_nmpr
+			, induty						as induty
+			, main_induty					as main_induty
+			, main_tchnlgy_nd_product		as main_tchnlgy_product
+			, zip							as zip
+			, adres							as adres
+			, encpt_fxnum					as enc_fxnum
+			, encpt_reprsnt_telno			as enc_reprsnt_telno
+			, encpt_ceo_telno				as enc_ceo_telno
+			, encpt_ceo_email				as enc_ceo_email
+			, new_fond_plan_code			as new_fntn_plan_cd
+			, transr_nd_fond_plan_code		as fond_plan_cd
+			, creatr_id						as creator_id
+			, creat_dt						as created_dt
+			, updusr_id						as updater_id
+			, updt_dt						as updated_dt
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@CT_CODE_GROUP}', entrprs_ty_code)			as cmpny_type
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@IR_CODE_GROUP}', indust_realm_code)			as indust_realm
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@NFP_CODE_GROUP}', new_fond_plan_code)		as new_fntn_plan
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@FP_CODE_GROUP}', transr_nd_fond_plan_code)	as fond_plan
+		from usp_api.uspt_bsns_pblanc_applcnt_entrprs
+		where
+			apply_id = #{applyId}
+	</select>
+
+</mapper>

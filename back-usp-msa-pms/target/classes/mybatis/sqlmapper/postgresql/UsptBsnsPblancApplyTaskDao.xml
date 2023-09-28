@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsPblancApplyTaskDao">
+
+	<insert id="insert">
+		/** UsptBsnsPblancApplyTaskDao.insert */
+		insert into usp_api.uspt_bsns_pblanc_apply_task
+			(
+				apply_id
+				, task_korean_nm
+				, task_eng_nm
+				, task_ty_code
+				, apply_realm_id
+				, rspnber_nm
+				, encpt_brthdy
+				, encpt_mbtlnum
+				, encpt_email
+				, dept_nm
+				, ofcps_nm
+				, adres
+				, encpt_telno
+				, encpt_fxnum
+				, nrno
+				, hope_job_code
+				, now_adres
+				, recent_sndng_dt
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{applyId}
+				, #{taskNmKo}
+				, #{taskNmEn}
+				, #{taskTypeCd}
+				, #{applyRealmId}
+				, #{rspnberNm}
+				, #{encBrthdy}
+				, #{encMbtlnum}
+				, #{encEmail}
+				, #{deptNm}
+				, #{ofcpsNm}
+				, #{adres}
+				, #{encTelno}
+				, #{encFxnum}
+				, #{sctecrno}
+				, #{hopeDtyCd}
+				, #{nowAdres}
+				, #{recentSendDate}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsPblancApplyTaskDao.update */
+		update usp_api.uspt_bsns_pblanc_apply_task
+		set
+			task_korean_nm		= #{taskNmKo}
+			, task_eng_nm		= #{taskNmEn}
+			, task_ty_code		= #{taskTypeCd}
+			, apply_realm_id	= #{applyRealmId}
+			, rspnber_nm		= #{rspnberNm}
+			, encpt_brthdy		= #{encBrthdy}
+			, encpt_mbtlnum		= #{encMbtlnum}
+			, encpt_email		= #{encEmail}
+			, dept_nm			= #{deptNm}
+			, ofcps_nm			= #{ofcpsNm}
+			, adres				= #{adres}
+			, encpt_telno		= #{encTelno}
+			, encpt_fxnum		= #{encFxnum}
+			, nrno				= #{sctecrno}
+			, hope_job_code		= #{hopeDtyCd}
+			, now_adres			= #{nowAdres}
+			, recent_sndng_dt	= #{recentSendDate}
+			, updusr_id			= #{updaterId}
+			, updt_dt			= #{updatedDt}
+		where
+			apply_id = #{applyId}
+	</update>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptBsnsPblancApplyTask">
+		/** UsptBsnsPblancApplyTaskDao.select */
+		select
+			ubpat.apply_id
+			, ubpat.task_korean_nm						as task_nm_ko
+			, ubpat.task_eng_nm							as task_nm_en
+			, ubpat.task_ty_code						as task_type_cd
+			, ubpat.apply_realm_id						as apply_realm_id
+			, ubpat.rspnber_nm							as rspnber_nm
+			, ubpat.encpt_brthdy						as enc_brthdy
+			, ubpat.encpt_mbtlnum						as enc_mbtlnum
+			, ubpat.encpt_email							as enc_email
+			, ubpat.dept_nm								as dept_nm
+			, ubpat.ofcps_nm							as ofcps_nm
+			, ubpat.adres								as adres
+			, ubpat.encpt_telno							as enc_telno
+			, ubpat.encpt_fxnum							as enc_fxnum
+			, ubpat.nrno								as sctecrno
+			, ubpat.hope_job_code						as hope_dty_cd
+			, ubpat.now_adres							as now_adres
+			, ubpat.recent_sndng_dt						as recent_send_date
+			, ubpat.creatr_id							as creator_id
+			, ubpat.creat_dt							as created_dt
+			, ubpat.updusr_id							as updater_id
+			, ubpat.updt_dt								as updated_dt
+			, (select apply_realm_nm from usp_api.uspt_bsns_apply_realm ubar where apply_realm_id = ubpat.apply_realm_id)		as apply_realm_nm
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@HOPE_CODE_GROUP}', ubpat.hope_job_code)						as hope_dty
+		from usp_api.uspt_bsns_pblanc_apply_task ubpat
+		where
+			ubpat.apply_id = #{applyId}
+	</select>
+
+	<update id="updateRecentSendDate">
+		/** UsptBsnsPblancApplyTaskDao.updateRecentSendDate */
+		update usp_api.uspt_bsns_pblanc_apply_task
+		set
+			recent_sndng_dt = #{recentSendDate}
+		where
+			apply_id = #{applyId}
+	</update>
+
+</mapper>

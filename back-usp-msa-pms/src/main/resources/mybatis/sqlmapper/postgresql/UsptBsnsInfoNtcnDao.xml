@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsInfoNtcnDao">
+
+	<insert id="insert">
+		/** UsptBsnsInfoNtcnDao.insert */
+		insert into usp_api.uspt_bsns_info_ntcn
+			(
+				mber_id
+				, recomend_cl_ty_code
+				, recomend_cl_code
+				, creatr_id
+				, creat_dt
+			) values (
+				#{memberId}
+				, #{recomendClTypeCd}
+				, #{recomendClCd}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+	<delete id="deleteAll">
+		/** UsptBsnsInfoNtcnDao.deleteAll */
+		delete from usp_api.uspt_bsns_info_ntcn
+		where
+			mber_id = #{memberId}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.InfoNtcnDto">
+		/** UsptBsnsInfoNtcnDao.selectList */
+		select
+			cc.code				as recomend_cl_cd
+			, cc.code_nm		as recomend_cl_nm
+			, cc.code_ty_nm		as recomend_cl_type_cd
+			, (
+				select code_nm
+				from com_api.cmmt_code
+				where code_group_id = '${@aicluster.pms.common.util.Code@RCT_CODE_GROUP}'
+				and code = cc.code_ty_nm
+			) as recomend_cl_type_nm
+			, case when ubin.recomend_cl_code is null then 'N' else 'Y' end as is_check
+		from com_api.cmmt_code cc
+				left outer join usp_api.uspt_bsns_info_ntcn ubin
+					on ubin.recomend_cl_ty_code = cc.code_ty_nm
+					and ubin.recomend_cl_code = cc.code
+					and ubin.mber_id = #{memberId}
+		where cc.code_group_id = '${@aicluster.pms.common.util.Code@RC_CODE_GROUP}'
+		and cc.code_ty_nm in ('${@aicluster.pms.common.util.Code@RC_BSR}', '${@aicluster.pms.common.util.Code@RC_EDU}')
+		order by cc.code_ty_nm, cc.sort_ordr
+	</select>
+
+
+	<select id="selectBsnsPblancList" resultType="aicluster.pms.common.dto.FrontInfoNtcnPblancListDto">
+		/** UsptBsnsInfoNtcnDao.selectBsnsPblancList */
+		select
+			sub.*
+			, lag(sub.pblanc_id, 1) over(order by sub.creat_dt desc) as pre_pblanc_id
+			, lead(sub.pblanc_id, 1) over(order by sub.creat_dt desc) as next_pblanc_id
+		from	(
+					select
+						ubp.pblanc_id
+						, ubp.pblanc_nm
+						, ubp.pblanc_sumry
+						, ubp.creat_dt
+						, (ubp.rcept_endde::date - to_char(now(), 'YYYYMMDD')::date) 																				as rmndr_day
+						, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@PS_CODE_GROUP}', ubp.pblanc_sttus_code)												as pblanc_sttus
+						, array_to_string(array_agg(distinct fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@RC_CODE_GROUP}', ubrc.recomend_cl_code)), ',')	as recomend_cl
+					from usp_api.uspt_bsns_pblanc ubp
+						inner join usp_api.uspt_bsns_recomend_cl ubrc
+							on ubrc.bsns_code = ubp.bsns_code
+						inner join usp_api.uspt_bsns_info_ntcn ubin
+							on ubin.recomend_cl_code = ubrc.recomend_cl_code
+					where
+						ubp.ntce_at = true
+						and ubp.use_at = true
+						and ubin.mber_id = #{memberId}
+					group by ubp.pblanc_id
+					order by ubp.creat_dt desc
+					limit 5
+				) sub
+	</select>
+
+
+	<select id="selectEduList" resultType="aicluster.pms.common.dto.FrontInfoNtcnEduListDto">
+		/** UsptBsnsInfoNtcnDao.selectBsnsPblancList */
+		select
+			elt.olec_id
+			, elt.lec_nm
+			, elt.lec_intro
+			, elt.apy_from
+			, elt.apy_to
+			, elt.lec_time
+			, elt.lec_type
+			, elt.chp_cnt
+			, CONCAT(path.dtl_nm, file.file_path, '/', file.file_uninm)		as img_file
+		from lms.edu_lec_t elt
+			inner join usp_api.uspt_bsns_info_ntcn ubin
+				on ubin.recomend_cl_ty_code = 'EDU'
+				and (ubin.recomend_cl_code = elt.lec_mca or ubin.recomend_cl_code = elt.lec_sca)
+			left join lms.edu_file_t file
+				on elt.img_id = file.file_id
+			left join (
+						select
+							dtl_nm
+						from lms.cmn_code_dtl_t
+						where
+							grp_cd = 'EDU_FPH'
+							and dtl_cd = 'r02'
+			) path
+				on 1 = 1
+		where elt.lec_type = 'OK'
+			and lms.ISSTARTYN(elt.apy_from) = 'Y'
+			and lms.ISENDYN(elt.apy_to) = 'N'
+			and ubin.mber_id = #{memberId}
+		group by elt.olec_id, path.dtl_nm, file.file_id
+	</select>
+</mapper>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>본인인증 완료</title>
+    <script>
+      (function () {
+        function validator(value) {
+          return !!value;
+        }
+
+        var qs = new URLSearchParams(window.location.search);
+        var variables = ['rec_cert', 'certNum'];
+        if (variables.every(validator)) {
+          var body = variables.reduce(function (a, b) {
+            var value = a;
+            value[b] = qs.get(b);
+            return value;
+          }, {});
+
+          fetch('http://pc.bnet.com:8082/member/api/yym/phone-cert', {
+            method: 'post',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+          })
+            // TODO: 성공, 실패 처리
+            .then(function (res) {
+              return res;
+            })
+            .catch(function (error) {
+              return Promise.reject(error);
+            });
+        } else {
+        }
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>

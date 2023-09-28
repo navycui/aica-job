@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptLastSlctnObjcReqstDao">
+	<insert id="insert">
+		/** UsptLastSlctnObjcReqstDao.insert */
+		insert into usp_api.uspt_last_slctn_objc_reqst
+			(
+				last_slctn_objc_reqst_id
+				, last_slctn_trget_id
+				, objc_reqst_cn
+				, objc_reqst_dt
+				, objc_applcnt_id
+				, last_slctn_objc_process_sttus_code
+				, dlbrt_de
+				, dlbrt_cn
+				, dlbrt_opetr_id
+				, applcnt_atchmnfl_group_id
+				, dlbrt_result_atchmnfl_group_id
+				, return_resn_cn
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{lastSlctnObjcReqstId}
+				, #{lastSlctnTrgetId}
+				, #{objcReqstCn}
+				, #{objcReqstDt}
+				, #{objcApplcntId}
+				, #{lastSlctnObjcProcessSttusCd}
+				, #{dlbrtDe}
+				, #{dlbrtCn}
+				, #{dlbrtOpetrId}
+				, #{applcntAttachmentGroupId}
+				, #{dlbrtAttachmentGroupId}
+				, #{rejectReasonCn}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptLastSlctnObjcReqstDao.update */
+		update usp_api.uspt_last_slctn_objc_reqst
+		set
+			objc_reqst_cn		= #{objcReqstCn}
+			, objc_reqst_dt		= #{objcReqstDt}
+			, objc_applcnt_id	= #{objcApplcntId}
+			, dlbrt_de			= #{dlbrtDe}
+			, dlbrt_cn			= #{dlbrtCn}
+			, dlbrt_opetr_id	= #{dlbrtOpetrId}
+			, return_resn_cn	= #{rejectReasonCn}
+			, last_slctn_objc_process_sttus_code	= #{lastSlctnObjcProcessSttusCd}
+			, applcnt_atchmnfl_group_id				= #{applcntAttachmentGroupId}
+			, dlbrt_result_atchmnfl_group_id		= #{dlbrtAttachmentGroupId}
+			, updusr_id			= #{updaterId}
+			, updt_dt			= #{updatedDt}
+		where
+			last_slctn_objc_reqst_id = #{lastSlctnObjcReqstId}
+	</update>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptLastSlctnObjcReqst">
+		/** UsptLastSlctnObjcReqstDao.select */
+		select
+			last_slctn_objc_reqst_id
+			, last_slctn_trget_id
+			, objc_reqst_cn
+			, objc_reqst_dt
+			, objc_applcnt_id
+			, last_slctn_objc_process_sttus_code	as last_slctn_objc_process_sttus_cd
+			, dlbrt_de
+			, dlbrt_cn
+			, dlbrt_opetr_id
+			, applcnt_atchmnfl_group_id				as applcnt_attachment_group_id
+			, dlbrt_result_atchmnfl_group_id		as dlbrt_attachment_group_id
+			, return_resn_cn						as reject_reason_cn
+			, creatr_id								as creator_id
+			, creat_dt								as created_dt
+			, updusr_id								as updater_id
+			, updt_dt								as updated_dt
+		from usp_api.uspt_last_slctn_objc_reqst
+		where
+			last_slctn_objc_reqst_id = #{lastSlctnObjcReqstId}
+	</select>
+
+	<select id="selectCountByTrgetId" resultType="Long">
+		/** UsptLastSlctnObjcReqstDao.selectCountByTrgetId */
+		select
+			count(last_slctn_objc_reqst_id)
+		from usp_api.uspt_last_slctn_objc_reqst
+		where
+			last_slctn_trget_id = #{trgetId}
+	</select>
+</mapper>

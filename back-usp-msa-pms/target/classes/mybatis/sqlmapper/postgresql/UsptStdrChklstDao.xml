@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptStdrChklstDao">
+
+	<insert id="insert">
+		/** UsptStdrChklstDao.insert */
+		insert into usp_api.uspt_stdr_bsns_chklst
+			(
+				chklst_id
+				, stdr_bsns_code
+				, chklst_cn
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{chklstId}
+				, #{stdrBsnsCd}
+				, #{chklstCn}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptStdrChklstDao.update */
+		update usp_api.uspt_stdr_bsns_chklst
+		set
+			chklst_cn = #{chklstCn}
+			, updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+		where
+			chklst_id = #{chklstId}
+			and stdr_bsns_code = #{stdrBsnsCd}
+	</update>
+
+	<delete id="delete">
+		/** UsptStdrChklstDao.delete */
+		delete from usp_api.uspt_stdr_bsns_chklst
+		where
+			chklst_id = #{chklstId}
+			and stdr_bsns_code = #{stdrBsnsCd}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptStdrChklst">
+		/** UsptStdrChklstDao.selectList */
+		select
+			chklst_id
+			, chklst_cn
+		from usp_api.uspt_stdr_bsns_chklst
+		where
+			stdr_bsns_code = #{stdrBsnsCd}
+	</select>
+
+</mapper>

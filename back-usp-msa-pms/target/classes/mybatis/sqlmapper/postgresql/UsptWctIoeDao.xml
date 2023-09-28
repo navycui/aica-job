@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptWctIoeDao">
+
+	<insert id="insert">
+		/** UsptWctIoeDao.insert */
+		insert into usp_api.uspt_wct_ioe
+			(
+				wct_ioe_id
+				, wct_ioe_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{wctIoeId}
+				, #{wctIoeNm}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptWctIoeDao.update */
+		update usp_api.uspt_wct_ioe
+		set
+			wct_ioe_nm	= #{wctIoeNm}
+			, updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+		where
+			wct_ioe_id = #{wctIoeId}
+	</update>
+
+	<delete id="delete">
+		/** UsptWctIoeDao.delete */
+		delete from usp_api.uspt_wct_ioe
+		where
+			wct_ioe_id = #{wctIoeId}
+	</delete>
+
+	<resultMap id="ioeMap" type="aicluster.pms.common.dto.WctIoeDto">
+		<collection property="taxitmList" column="{wctIoeId = wct_ioe_id}"
+					ofType="aicluster.pms.common.entity.UsptWctTaxitm"
+					select="selectTaxitmList"></collection>
+	</resultMap>
+
+	<select id="selectList" resultMap="ioeMap">
+		/** UsptWctIoeDao.selectList */
+		select
+			wct_ioe_id
+			, wct_ioe_nm
+		from usp_api.uspt_wct_ioe
+		order by creat_dt
+	</select>
+
+	<select id="selectTaxitmList" resultType="aicluster.pms.common.entity.UsptWctTaxitm">
+		/** UsptWctIoeDao.selectTaxitmList */
+		select
+			wct_ioe_id
+			, wct_taxitm_id
+			, wct_taxitm_nm
+		from usp_api.uspt_wct_taxitm
+		where
+			wct_ioe_id = #{wctIoeId}
+		order by creat_dt
+	</select>
+
+
+	<select id="checkIsUse" resultType="Integer">
+		/** UsptWctIoeDao.checkIsUse */
+		select
+			count(distinct ubis.bsns_code) + count(distinct usis.stdr_bsns_code)
+		from usp_api.uspt_wct_ioe uwi
+			left outer join usp_api.uspt_bsns_ioe_setup ubis
+				on ubis.wct_ioe_id = uwi.wct_ioe_id
+			left outer join usp_api.uspt_stdr_bsns_ioe_setup usis
+				on usis.wct_ioe_id = uwi.wct_ioe_id
+		where
+			uwi.wct_ioe_id = #{wctIoeId}
+	</select>
+
+</mapper>

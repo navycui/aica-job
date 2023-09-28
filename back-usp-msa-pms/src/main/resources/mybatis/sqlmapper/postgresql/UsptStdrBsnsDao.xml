@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptStdrBsnsDao">
+
+	<sql id="selectList_where">
+		<where>
+			and usb.use_at = true
+			<if test='parentBsnsClId != null and parentBsnsClId != ""'>
+				and ubc.parnts_bsns_cl_id = #{parentBsnsClId}
+			</if>
+			<if test='bsnsClId != null and bsnsClId != ""'>
+				and ubc.bsns_cl_id = #{bsnsClId}
+			</if>
+			<if test='stdrBsnsCd != null and stdrBsnsCd != ""'>
+				and usb.stdr_bsns_code like concat('%', #{stdrBsnsCd}, '%')
+			</if>
+			<if test='stdrBsnsNm != null and stdrBsnsNm != ""'>
+				and usb.stdr_bsns_nm like concat('%', #{stdrBsnsNm}, '%')
+			</if>
+			<if test='chargerNm != null and chargerNm != ""'>
+				and ci.mber_nm like concat('%', #{chargerNm}, '%')
+			</if>
+			<if test='chrgDeptNm != null and chrgDeptNm != ""'>
+				and usb.chrg_dept_nm like concat('%', #{chrgDeptNm}, '%')
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectListCount" resultType="Long">
+		/** UsptStdrBsnsDao.selectListCount */
+		select
+			count(usb.stdr_bsns_code) as cnt
+		from usp_api.uspt_stdr_bsns usb
+				inner join usp_api.uspt_bsns_cl ubc
+					on ubc.bsns_cl_id = usb.bsns_cl_id
+				left outer join usp_api.uspt_stdr_bsns_charger usc
+					on usc.stdr_bsns_code  = usb.stdr_bsns_code
+					and usc.reprsnt_charger_at = true
+				left outer join auth_api.cmmt_emp_info ci
+					on ci.mber_id = usc.insider_id
+		<include refid="selectList_where" />
+	</select>
+
+	<select id="selectList" resultType="aicluster.pms.common.dto.StdrBsnsListDto">
+		/** UsptStdrBsnsDao.selectList */
+		select
+			usb.stdr_bsns_code										as stdr_bsns_cd
+			, usb.stdr_bsns_nm
+			, usb.begin_year
+			, usc.insider_id
+			, ci.mber_nm											as charger_nm
+			, usb.chrg_dept_nm
+			, to_char(usb.creat_dt, 'yyyy-mm-dd')					as reg_dt
+			, row_number() over (order by usb.creat_dt desc)		as rn
+			, coalesce((select bsns_cl_nm || ' > '  from usp_api.uspt_bsns_cl where bsns_cl_id = ubc.parnts_bsns_cl_id), '') || ubc.bsns_cl_nm		as bsns_cl_nm
+		from usp_api.uspt_stdr_bsns usb
+				inner join usp_api.uspt_bsns_cl ubc
+					on ubc.bsns_cl_id = usb.bsns_cl_id
+				left outer join usp_api.uspt_stdr_bsns_charger usc
+					on usc.stdr_bsns_code  = usb.stdr_bsns_code
+					and usc.reprsnt_charger_at = true
+				left outer join auth_api.cmmt_emp_info ci
+					on ci.mber_id = usc.insider_id
+		<include refid="selectList_where" />
+		<if test="!isExcel">
+			offset #{beginRowNum} -1
+			limit #{itemsPerPage}
+		</if>
+	</select>
+
+
+	<select id="selectListCountForBsns" resultType="Long">
+		/** UsptStdrBsnsDao.selectListCount */
+		select
+			count(distinct 	usb.stdr_bsns_code)
+		from usp_api.uspt_stdr_bsns usb
+			inner join usp_api.uspt_stdr_bsns_job_step usjs
+				on usjs.stdr_bsns_code = usb.stdr_bsns_code
+			inner join usp_api.uspt_stdr_bsns_apply_posbl_mber usamt
+				on usamt.stdr_bsns_code = usb.stdr_bsns_code
+			inner join usp_api.uspt_bsns_cl ubc
+				on ubc.bsns_cl_id = usb.bsns_cl_id
+			inner join usp_api.uspt_stdr_bsns_charger usc
+				on usc.stdr_bsns_code  = usb.stdr_bsns_code
+				and usc.reprsnt_charger_at = true
+			inner join auth_api.cmmt_emp_info ci
+				on ci.mber_id = usc.insider_id
+		where
+			usb.use_at = true
+			and task_ty_code is not null
+			<if test='stdrBsnsNm != null and stdrBsnsNm != ""'>
+				and usb.stdr_bsns_nm like concat('%', #{stdrBsnsNm}, '%')
+			</if>
+	</select>
+
+	<select id="selectListForBsns" resultType="aicluster.pms.common.dto.StdrBsnsListDto">
+		/** UsptStdrBsnsDao.selectListForBsns */
+		select
+			usb.stdr_bsns_code									as stdr_bsns_cd
+			, usb.stdr_bsns_nm
+			, usb.begin_year
+			, usc.insider_id
+			, ci.mber_nm										as charger_nm
+			, usb.chrg_dept_nm
+			, coalesce((select bsns_cl_nm || ' > '  from usp_api.uspt_bsns_cl where bsns_cl_id = ubc.parnts_bsns_cl_id), '') || ubc.bsns_cl_nm		as bsns_cl_nm
+			, to_char(usb.creat_dt, 'yyyy-mm-dd')				as reg_dt
+			, row_number() over (order by usb.creat_dt desc)	as rn
+		from usp_api.uspt_stdr_bsns usb
+			inner join usp_api.uspt_stdr_bsns_job_step usjs
+				on usjs.stdr_bsns_code = usb.stdr_bsns_code
+			inner join usp_api.uspt_stdr_bsns_apply_posbl_mber usamt
+				on usamt.stdr_bsns_code = usb.stdr_bsns_code
+			inner join usp_api.uspt_bsns_cl ubc
+				on ubc.bsns_cl_id = usb.bsns_cl_id
+			inner join usp_api.uspt_stdr_bsns_charger usc
+				on usc.stdr_bsns_code  = usb.stdr_bsns_code
+				and usc.reprsnt_charger_at = true
+			inner join auth_api.cmmt_emp_info ci
+				on ci.mber_id = usc.insider_id
+		where
+			usb.use_at = true
+			and task_ty_code is not null
+			<if test='stdrBsnsNm != null and stdrBsnsNm != ""'>
+				and usb.stdr_bsns_nm like concat('%', #{stdrBsnsNm}, '%')
+			</if>
+		group by usb.stdr_bsns_code, usc.insider_id, ci.mber_nm, ubc.bsns_cl_id
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+
+	<insert id="insert">
+		<selectKey keyProperty="stdrBsnsCd" order="BEFORE" resultType="String">
+			select
+				'SB' || lpad(CAST(coalesce(max(CAST(substring(stdr_bsns_code, 3) AS INTEGER)), 0) + 1 AS VARCHAR), 8, '0')
+			from usp_api.uspt_stdr_bsns
+		</selectKey>
+		/** UsptStdrBsnsDao.insert */
+		insert into usp_api.uspt_stdr_bsns
+			(
+				stdr_bsns_code
+				, bsns_cl_id
+				, stdr_bsns_nm
+				, begin_year
+				, tot_bsns_pd
+				, bsns_ty_code
+				, cnsrtm_at
+				, chrg_dept_nm
+				, bsns_sumry
+				, ecshg_instt_nm
+				, ecshg_instt_code
+				, erp_code
+				, task_ty_code
+				, use_at
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{stdrBsnsCd}
+				, #{bsnsClId}
+				, #{stdrBsnsNm}
+				, #{beginYear}
+				, #{totBsnsPd}
+				, #{bsnsTypeCd}
+				, #{cnsrtm}
+				, #{chrgDeptNm}
+				, #{bsnsSumry}
+				, #{ecshgInsttNm}
+				, #{ecshgInsttCd}
+				, #{erpCd}
+				, #{taskTypeCd}
+				, true
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<update id="update">
+		/** UsptStdrBsnsDao.update */
+		update usp_api.uspt_stdr_bsns
+		set
+			updusr_id			= #{updaterId}
+			, updt_dt			= #{updatedDt}
+			, bsns_cl_id		= #{bsnsClId}
+			, stdr_bsns_nm		= #{stdrBsnsNm}
+			, begin_year		= #{beginYear}
+			, tot_bsns_pd		= #{totBsnsPd}
+			, bsns_ty_code		= #{bsnsTypeCd}
+			, cnsrtm_at			= #{cnsrtm}
+			, chrg_dept_nm		= #{chrgDeptNm}
+			, bsns_sumry		= #{bsnsSumry}
+			, ecshg_instt_nm	= #{ecshgInsttNm}
+			, ecshg_instt_code	= #{ecshgInsttCd}
+			, erp_code			= #{erpCd}
+		where
+			stdr_bsns_code = #{stdrBsnsCd}
+	</update>
+
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptStdrBsns">
+		/** UsptStdrBsnsDao.select */
+		select
+			usb.stdr_bsns_code								as stdr_bsns_cd
+			, usb.bsns_cl_id
+			, (select parnts_bsns_cl_id from usp_api.uspt_bsns_cl where bsns_cl_id = usb.bsns_cl_id )			as parent_bsns_cl_id
+			, usb.stdr_bsns_nm
+			, usb.begin_year
+			, usb.tot_bsns_pd
+			, usb.bsns_ty_code								as bsns_type_cd
+			, fn_cmm_get_code_nm('${@aicluster.pms.common.util.Code@BT_CODE_GROUP}', usb.bsns_ty_code)	as bsns_type_nm
+			, usb.cnsrtm_at									as cnsrtm
+			, usb.chrg_dept_nm
+			, usb.bsns_sumry
+			, usb.ecshg_instt_nm
+			, usb.ecshg_instt_code							as ecshg_instt_cd
+			, usb.erp_code									as erp_cd
+			, usb.task_ty_code								as task_type_cd
+			, usb.creatr_id									as creator_id
+		from usp_api.uspt_stdr_bsns usb
+		where
+			usb.stdr_bsns_code = #{stdrBsnsCd}
+	</select>
+
+	<select id="selectBsnsCount" resultType="Integer">
+		/** UsptStdrBsnsDao.selectBsnsCount */
+		select
+			count(*)
+		from usp_api.uspt_stdr_bsns usb
+			inner join usp_api.uspt_bsns ub
+				on ub.stdr_bsns_code = usb.stdr_bsns_code
+				and ub.use_at = true
+		where
+			usb.stdr_bsns_code = #{stdrBsnsCd}
+	</select>
+
+	<update id="updateTaskType">
+		/** UsptStdrBsnsDao.updateTaskType */
+		update usp_api.uspt_stdr_bsns
+		set
+			updusr_id		= #{updaterId}
+			, updt_dt		= #{updatedDt}
+			, task_ty_code	= #{taskTypeCd}
+		where
+			stdr_bsns_code = #{stdrBsnsCd}
+	</update>
+
+	<update id="updateUnable">
+		/** UsptStdrBsnsDao.updateUnable */
+		update usp_api.uspt_stdr_bsns
+		set
+			updusr_id	= #{updaterId}
+			, updt_dt	= #{updatedDt}
+			, use_at	= false
+		where
+			stdr_bsns_code = #{stdrBsnsCd}
+	</update>
+
+</mapper>

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptExpertClDao">
+
+
+		<!--       나의 tree -->
+	<select id="selectExpertClfcMyTreeList" resultType="aicluster.pms.common.entity.UsptExpertCl">
+	/** UsptExpertClDao.selectExpertClfcTreeList */
+	 with recursive uspt_expert_cl_tree
+ 		as (
+           select  g.expert_cl_id
+           			 , g.parnts_expert_cl_id
+           			 , g.expert_cl_nm
+           			 , g.sort_ordr
+           			 , 0 AS level
+           			 ,  array['1'||LPAD(CAST(g.sort_ordr AS TEXT), 3, '0')] as path
+           			 , false	AS cycle
+           			 , g.use_at
+           	 from  usp_api.uspt_expert_cl g
+          	where 1=1
+        	  <choose>
+				<when test='expertClId != null and expertClId != ""'>
+					and g.expert_cl_id= #{expertClId}
+				</when>
+				<otherwise>
+					and g.parnts_expert_cl_id is null
+				</otherwise>
+			</choose>
+          	-- and g.use_at = true
+          union all
+           select e.expert_cl_id
+          		  , e.parnts_expert_cl_id
+          		  , e.expert_cl_nm
+          		  , e.sort_ordr
+          		   , ut.level + 1 AS level
+          		  , ut.path||cast((ut.level + 1) as text)||lpad(cast(e.sort_ordr as text), 3, '0') as path
+		          , cast((ut.level + 1) as text)||lpad(cast(e.sort_ordr as text), 3, '0') = any(path) as cycle
+		          , e.use_at
+         	 from uspt_expert_cl_tree ut
+              inner join usp_api.uspt_expert_cl e
+                 on ut.expert_cl_id = e.parnts_expert_cl_id
+                -- and e.use_at = true
+        )
+        select expert_cl_id
+             , parnts_expert_cl_id
+             , lpad('', level) || expert_cl_nm as expert_cl_nm
+             , sort_ordr as sort_ordr_no
+             , level
+             , path
+             , cycle
+             , use_at as enabled
+         from uspt_expert_cl_tree
+         order by path, expert_cl_id
+	</select>
+
+<!-- 트리 메뉴 0depth -->
+	<select id="selectExpertClfcOneTree" resultType="String">
+		/** UsptExpertClDao.selectExpertClfcOneTree */
+			select expert_cl_id
+			       , expert_cl_nm
+			       , sort_ordr as sort_ordr_no
+			       , use_at as enabled
+			from usp_api.uspt_expert_cl
+			where parnts_expert_cl_id is null
+			  and use_at = true
+			order by  sort_ordr
+	</select>
+
+	<!-- 트리 메뉴 1depth -->
+	<select id="selectExpertClfcTwoTreeList" resultType="aicluster.pms.common.entity.UsptExpertCl">
+		/** UsptExpertClDao.selectExpertClfcTwoTreeList */
+			select expert_cl_id
+			       , expert_cl_nm
+			       , sort_ordr as sort_ordr_no
+			       , use_at as enabled
+			from usp_api.uspt_expert_cl
+			where parnts_expert_cl_id  = 'TEAM-MANAGE'
+			  and use_at = true
+			order by  sort_ordr_no
+	</select>
+
+	<!-- 트리 메뉴 1depth sort_ordr as sort_ordr_no max -->
+	<select id="selectExpertClfcSortOrderMax" resultType="int">
+		/** UsptExpertClDao.selectExpertClfcSortOrderMax */
+			select max(sort_ordr)
+			from usp_api.uspt_expert_cl
+			where parnts_expert_cl_id  = 'TEAM-MANAGE'
+			  and use_at = true
+	</select>
+
+	<!-- 트리 메뉴 다름단계 조회 -->
+	<select id="selectExpertClIdList" resultType="aicluster.pms.common.entity.UsptExpertCl">
+		/** UsptExpertClDao.selectExpertClIdList */
+		select
+		  	  expert_cl_id
+			, parnts_expert_cl_id
+			, expert_cl_nm
+			, sort_ordr as sort_ordr_no
+			, use_at as enabled
+		from usp_api.uspt_expert_cl
+	  where parnts_expert_cl_id is not null
+	     and parnts_expert_cl_id = #{expertClId}
+		 and use_at= true
+		order by sort_ordr
+	</select>
+
+	<!-- 전문가 분류 조회 -->
+	<select id="selectExpertClIdInfoList" resultType="aicluster.pms.common.entity.UsptExpertCl">
+		/** UsptExpertClDao.selectExpertClIdInfoList */
+		select
+		  	  expert_cl_id
+			, parnts_expert_cl_id
+			, expert_cl_nm
+			, sort_ordr as sort_ordr_no
+			, use_at as enabled
+		from usp_api.uspt_expert_cl
+	  where parnts_expert_cl_id is not null
+	     and parnts_expert_cl_id = #{expertClId}
+		 and use_at = true
+		order by sort_ordr
+	</select>
+
+
+		<!-- 전문가 분류ID로 1depth 조회 -->
+	<select id="selectExpertClOneDepth" resultType="String">
+		/** UsptExpertClDao.selectExpertClOneDepth */
+		select a.parnts_expert_cl_id
+		  from usp_api.uspt_expert_cl a
+	inner join (
+					   select parnts_expert_cl_id
+					   	from usp_api.uspt_expert_cl
+					   	where expert_cl_id  = #{expertClId}
+				   ) b
+			on  a.expert_cl_id = b.parnts_expert_cl_id
+	</select>
+
+	<insert id="insertExpertCl">
+		/** UsptExpertClDao.insert */
+		insert into usp_api.uspt_expert_cl
+			(
+				  expert_cl_id
+				, parnts_expert_cl_id
+				, expert_cl_nm
+				, sort_ordr
+				, use_at
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			)
+			values
+			(
+				  #{expertClId}
+				, #{parntsExpertClId}
+				, #{expertClNm}
+				, #{sortOrdrNo}
+				, #{enabled}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+				)
+	</insert>
+
+	<update id="updateExpertCl">
+		/** UsptExpertClDao.updateExpertCl */
+		update usp_api.uspt_expert_cl
+		set   parnts_expert_cl_id 	= #{parntsExpertClId}
+			, expert_cl_nm		  	= #{expertClNm}
+			, sort_ordr				= #{sortOrdrNo}
+			, use_at 				= #{enabled}
+			, updusr_id			= #{updaterId}
+			, updt_dt			= #{updatedDt}
+		where expert_cl_id = #{expertClId}
+	</update>
+
+	<!--  전문가 분류명 수정 -->
+	<update id="updateExpertClNm">
+		/** UsptExpertClDao.updateExpertCl */
+		update usp_api.uspt_expert_cl
+		set  expert_cl_nm		  	= #{expertClNm}
+			, updusr_id			= #{updaterId}
+			, updt_dt			= #{updatedDt}
+		where expert_cl_id = #{expertClId}
+	</update>
+
+	<delete id="deleteExpertCl">
+		/** UsptExpertClDao.deleteExpertCl */
+		delete from usp_api.uspt_expert_cl
+		where expert_cl_id = #{expertClId}
+	</delete>
+
+	<delete id="deleteExpertClParnts">
+		/** UsptExpertClDao.deleteExpertClParnts */
+		delete from usp_api.uspt_expert_cl
+		where parnts_expert_cl_id = #{expertClId}
+	</delete>
+
+</mapper>

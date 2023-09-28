@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptEvlTableDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptEvlTable">
+		/** EvlTableDao.selectList */
+		select
+			  evl_table_id
+			, evl_table_nm
+			, evl_mth_code as evl_mthd_cd
+			, usp_api.fn_cmm_get_code_nm('EVL_MTHD',evl_mth_code) as evl_mthd_nm
+			, indvdlz_opinion_writng_at as indvdlz_opinion_writng
+			, case when indvdlz_opinion_writng_at = true
+			       then '작성'
+			       when indvdlz_opinion_writng_at = false
+			       then '작성안함'
+			   else '-' end as indvdlz_opinion_writng_nm
+			, use_at as enabled
+			, case when use_at = true
+			       then '사용'
+			       when use_at = false
+			       then '사용안함'
+			   else '-' end as enabled_nm
+			, to_char(creat_dt,'yyyy-mm-dd') as rgsde
+			, row_number() over (order by creat_dt desc) as rn
+			, creatr_id as creator_id
+			, creat_dt as created_dt
+			, updusr_id as updater_id
+			, updt_dt as updated_dt
+		from
+			usp_api.uspt_evl_table
+		where
+			1=1
+			<if test="enabled != null">
+				and use_at = #{enabled}
+			</if>
+
+			<if test='evlMthdCd != null and evlMthdCd != ""'>
+				and evl_mth_code = #{evlMthdCd}
+			</if>
+
+			<if test='evlTableNm != null and evlTableNm != ""'>
+				and evl_table_nm like '%' || #{evlTableNm} || '%'
+			</if>
+
+			<if test="!isExcel">
+				offset #{beginRowNum} -1
+				limit #{itemsPerPage}
+			</if>
+	</select>
+
+	<select id="selectListCount" resultType="Long">
+		/** EvlTableDao.selectListCount */
+		select count(evl_table_id) as cnt
+		  from usp_api.uspt_evl_table
+	 	 where 1 = 1
+			<if test="enabled != null">
+				and use_at = #{enabled}
+			</if>
+			<if test='evlMthdCd != null and evlMthdCd != ""'>
+				and evl_mth_code = #{evlMthdCd}
+			</if>
+			<if test='evlTableNm != null and evlTableNm != ""'>
+				and evl_table_nm like '%' || #{evlTableNm} || '%'
+			</if>
+	</select>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptEvlTable">
+		/** EvlTableDao.select */
+		select evl_table_id
+			 , evl_table_nm
+			 , evl_mth_code as evl_mthd_cd
+			 , use_at as enabled
+			 , indvdlz_opinion_writng_at as indvdlz_opinion_writng
+			 , case when use_at is true then '사용' else '미사용' end as enabled_nm
+			 , to_char(creat_dt,'yyyy-mm-dd') as rgsde
+		  from
+			   usp_api.uspt_evl_table
+		 where
+			   evl_table_id = #{evlTableId}
+	</select>
+
+	<insert id="insert">
+		/** EvlTableDao.insert */
+		insert into usp_api.uspt_evl_table
+		(
+			   evl_table_id
+			 , evl_table_nm
+			 , evl_mth_code
+			 , indvdlz_opinion_writng_at
+			 , use_at
+			 , creatr_id
+			 , creat_dt
+			 , updusr_id
+			 , updt_dt
+		) values
+		    (
+			   #{evlTableId}
+			 , #{evlTableNm}
+			 , #{evlMthdCd}
+			 , #{indvdlzOpinionWritng}
+			 , true
+			 , #{creatorId}
+			 , #{createdDt}
+			 , #{updaterId}
+			 , #{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** EvlTableDao.update */
+		update usp_api.uspt_evl_table
+		   set
+			   evl_table_nm              = #{evlTableNm}
+			 , evl_mth_code               = #{evlMthdCd}
+			 <if test='indvdlzOpinionWritng != null and indvdlzOpinionWritng != ""'>
+			 , indvdlz_opinion_writng_at    = #{indvdlzOpinionWritng}
+			 </if>
+			 , use_at                   = #{enabled}
+			 , updusr_id                = #{updaterId}
+			 , updt_dt                = #{updatedDt}
+		 where
+			   evl_table_id = #{evlTableId}
+	</update>
+
+	<select id="selectModifyEnableCnt" resultType="Integer">
+		/** EvlTableDao.selectModifyEnableCnt */
+		select count(*) as cnt
+		  from usp_api.uspt_evl_table a
+			   inner join usp_api.uspt_evl_cmit b
+			           on a.evl_table_id = b.evl_table_id
+		 where a.evl_table_id  = #{evlTableId}
+		   and b.evl_sttus_code not in (#{evlSttusCd}, null)
+	</select>
+
+</mapper>

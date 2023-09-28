@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptAtchmnflMapngDao">
+
+	<insert id="insert">
+		/** UsptAtchmnflMapngDao.insert */
+		insert into usp_api.uspt_atchmnfl_mapng
+			(
+				mber_id
+				, atchmnfl_id
+				, regist_id
+				, sttus_nm
+				, file_stre_path
+				, compt_dt
+				, link_url
+				, creat_dt
+				, updt_dt
+			) values (
+				#{mberId}
+				, #{atchmnflId}
+				, #{registId}
+				, #{sttusNm}
+				, #{fileStrePath}
+				, #{comptDt}
+				, #{linkUrl}
+				, #{creatDt}
+				, #{updtDt}
+			)
+	</insert>
+
+	<select id="select" resultType="aicluster.pms.common.entity.UsptAtchmnflMapng">
+		/** UsptAtchmnflMapngDao.select */
+		select
+			mber_id
+			, atchmnfl_id
+			, regist_id
+			, sttus_nm
+			, file_stre_path
+			, compt_dt
+			, link_url
+			, creat_dt
+			, updt_dt
+		from usp_api.uspt_atchmnfl_mapng
+		where
+			regist_id = #{registId}
+	</select>
+
+
+	<update id="update">
+		/** UsptAtchmnflMapngDao.update */
+		update from usp_api.uspt_atchmnfl_mapng
+		set
+			updt_dt = #{updtDt}
+			, compt_dt = #{comptDt}
+			, sttus_nm = #{sttusNm}
+		where
+			regist_id = #{registId}
+	</update>
+
+
+	<update id="updateLinkUrl">
+		/** UsptAtchmnflMapngDao.updateLinkUrl */
+		update from usp_api.uspt_atchmnfl_mapng
+		set
+			updt_dt = #{updtDt}
+			, link_url = #{linkUrl}
+		where
+			regist_id = #{registId}
+	</update>
+
+</mapper>

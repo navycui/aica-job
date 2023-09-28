@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptExpertClChargerDao">
+
+
+	<!-- 나의 담당 분류 -->
+	<select id="selectListMyExpertCl" resultType="aicluster.pms.common.entity.UsptExpertClCharger">
+	/** UsptExpertClChargerDao.selectListMyExpertCl */
+		select expert_cl_id
+		  from usp_api.uspt_expert_cl_charger
+		  where 1=1
+		    and mber_id	 = #{memberId}
+		   order by expert_cl_id
+	</select>
+
+	<!-- 담당자 List -->
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptExpertClCharger">
+	/** UsptExpertClChargerDao.selectList */
+			select  expert_cl_id
+					, mber_id	as member_id
+					, (select mber_nm from auth_api.cmmt_emp_info where mber_id	 = uecc.mber_id	) as member_nm	/*회원명 */
+					, dept_nm
+					, clsf_nm
+					, creatr_id as creator_id
+					, creat_dt	 as created_dt
+					, updusr_id as updater_id
+					, updt_dt 	as updated_dt
+			  from usp_api.uspt_expert_cl_charger uecc
+			  where 1=1
+			     and expert_cl_id = #{expertClId}
+	</select>
+
+	<insert id="insert">
+	/** UsptExpertClChargerDao.insert */
+		insert into usp_api.uspt_expert_cl_charger
+				( expert_cl_id
+				, mber_id
+				, dept_nm
+				, clsf_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+				)
+		values	(
+				  #{expertClId}
+				, #{memberId}
+				, #{deptNm}
+				, #{clsfNm}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+	/** UsptExpertClChargerDao.update */
+	update usp_api.uspt_expert_cl_charger
+			set	  dept_nm = #{deptNm}
+				, clsf_nm		 = #{clsfNm}
+				, updusr_id  = #{updaterId}
+				, updt_dt 		 = #{updatedDt}
+	WHERE expert_cl_charger_id=  #{expertClChargerId}
+	      and mber_id	 = #{memberId}
+	</update>
+
+	<update id="delete">
+	/** UsptExpertClChargerDao.delete */
+	delete from usp_api.uspt_expert_cl_charger
+	WHERE expert_cl_id=  #{expertClId}
+	      and mber_id	 = #{memberId}
+	</update>
+
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsRsltIdxDetailIemDao">
+
+	<insert id="insert">
+		/** UsptBsnsRsltIdxDetailIemDao.insert*/
+		insert into usp_api.uspt_bsns_pfmc_idx_detail_iem
+			(
+				pfmc_idx_detail_iem_id
+				, pfmc_idx_id
+				, detail_iem_nm
+				, iem_unit_code
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{rsltIdxDetailIemId}
+				, #{rsltIdxId}
+				, #{detailIemNm}
+				, #{iemUnitCd}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsRsltIdxDetailIemDao.insertList*/
+		insert into usp_api.uspt_bsns_pfmc_idx_detail_iem
+			(
+				pfmc_idx_detail_iem_id
+				, pfmc_idx_id
+				, detail_iem_nm
+				, iem_unit_code
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.rsltIdxDetailIemId}
+				, #{item.rsltIdxId}
+				, #{item.detailIemNm}
+				, #{item.iemUnitCd}
+				, #{item.creatorId}
+				, #{item.createdDt}
+				, #{item.updaterId}
+				, #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		/** UsptBsnsRsltIdxDetailIemDao.update */
+		update usp_api.uspt_bsns_pfmc_idx_detail_iem
+		set
+			updusr_id		= #{updaterId}
+			, updt_dt		= #{updatedDt}
+			, detail_iem_nm = #{detailIemNm}
+			, iem_unit_code = #{iemUnitCd}
+		where
+			pfmc_idx_detail_iem_id = #{rsltIdxDetailIemId}
+			and pfmc_idx_id = #{rsltIdxId}
+	</update>
+
+	<delete id="delete">
+		/** UsptBsnsRsltIdxDetailIemDao.delete */
+		delete from usp_api.uspt_bsns_pfmc_idx_detail_iem
+		where
+			pfmc_idx_detail_iem_id = #{rsltIdxDetailIemId}
+			and pfmc_idx_id = #{rsltIdxId}
+	</delete>
+
+	<delete id="deleteAll">
+		/** UsptBsnsRsltIdxDetailIemDao.deleteAll */
+		delete from usp_api.uspt_bsns_pfmc_idx_detail_iem
+		where
+			pfmc_idx_id = #{rsltIdxId}
+	</delete>
+
+</mapper>

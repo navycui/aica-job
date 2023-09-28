@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsAppnTaskDao">
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsAppnTask">
+		/** UsptBsnsAppnTaskDao.selectList */
+		select
+			bsns_code
+			, appn_task_id
+			, appn_task_nm
+		from usp_api.uspt_bsns_appn_task
+		where
+			bsns_code = #{bsnsCd}
+	</select>
+
+
+	<insert id="insert">
+		/** UsptBsnsAppnTaskDao.insert */
+		insert into usp_api.uspt_bsns_appn_task
+		(
+			appn_task_id
+			, bsns_code
+			, appn_task_nm
+			, creatr_id
+			, creat_dt
+			, updusr_id
+			, updt_dt
+		) values (
+			#{appnTaskId}
+			, #{bsnsCd}
+			, #{appnTaskNm}
+			, #{creatorId}
+			, #{createdDt}
+			, #{updaterId}
+			, #{updatedDt}
+		)
+	</insert>
+
+	<insert id="insertList">
+		/** UsptBsnsAppnTaskDao.insertList */
+		insert into usp_api.uspt_bsns_appn_task
+			(
+				appn_task_id
+				, bsns_code
+				, appn_task_nm
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				#{item.appnTaskId}
+				, #{item.bsnsCd}
+				, #{item.appnTaskNm}
+				, #{item.creatorId}
+				, #{item.createdDt}
+				, #{item.updaterId}
+				, #{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+
+	<update id="update">
+		/** UsptBsnsAppnTaskDao.update */
+		update usp_api.uspt_bsns_appn_task
+		set
+			appn_task_nm = #{appnTaskNm}
+			, updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+		where
+			appn_task_id = #{appnTaskId}
+			and bsns_code = #{bsnsCd}
+	</update>
+
+
+	<delete id="delete">
+		/** UsptBsnsAppnTaskDao.delete */
+		delete from usp_api.uspt_bsns_appn_task
+		where
+			appn_task_id = #{appnTaskId}
+			and bsns_code = #{bsnsCd}
+	</delete>
+</mapper>

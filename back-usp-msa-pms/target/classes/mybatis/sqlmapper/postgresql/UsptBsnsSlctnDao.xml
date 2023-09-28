@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.pms.common.dao.UsptBsnsSlctnDao">
+
+	<insert id="insert">
+		/** UsptBsnsSlctnDao.insert */
+		insert into usp_api.uspt_bsns_slctn_trget
+			(
+				bsns_slctn_trget_id
+				, last_slctn_trget_id
+				, tot_wct
+				, sport_budget
+				, alotm_cash
+				, alotm_acthng
+				, creatr_id
+				, creat_dt
+			) values (
+				#{bsnsSlctnId}
+				, #{lastSlctnTrgetId}
+				, #{totalWct}
+				, #{sportBudget}
+				, #{alotmCash}
+				, #{alotmActhng}
+				, #{creatorId}
+				, #{createdDt}
+			)
+	</insert>
+
+
+	<select id="selectList" resultType="aicluster.pms.common.entity.UsptBsnsSlctn">
+		/** UsptBsnsSlctnDao.selectList */
+		select
+			bsns_slctn_trget_id						as bsns_slctn_id
+			, last_slctn_trget_id
+			, coalesce(tot_wct,0) 					as 	total_wct
+			, coalesce(sport_budget,0)				as sport_budget
+			, coalesce(alotm_cash,0)				as alotm_cash
+			, coalesce(alotm_acthng,0)				as alotm_acthng
+			, coalesce(alotm_cash + alotm_acthng,0) as alotm_sum
+			, creatr_id
+			, creat_dt
+		from usp_api.uspt_bsns_slctn_trget
+		where
+			bsns_slctn_trget_id = #{bsnsSlctnId}
+	</select>
+
+
+</mapper>
