@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptStatisticsDao">
+
+	<resultMap id="StatisticsDto" type="aicluster.tsp.common.dto.StatisticsDto"></resultMap>
+	<select id="selectStatistics" resultType="aicluster.tsp.common.dto.StatisticsDto">
+
+		-- 장비 가용률
+		select
+		    '장비가용률' as title,
+			COALESCE(round(avg((usgtm / expect_usgtm::numeric * 100)), 1), 0) as rate
+		from
+		    tsp_api.tspt_eqpmn_use_reqst
+		where
+			reqst_sttus = 'APPROVE'
+		  	and (use_begin_dt::date between #{beginDt} and #{endDt}
+		   		or use_end_dt::date between #{beginDt} and #{endDt})
+		union all
+		-- 장비 사용율
+		select
+			'장비사용률' as title,
+			COALESCE(round(count(*) /
+			(select count(disuse_at) from tsp_api.tspt_eqpmn_detail where disuse_at = false ):: numeric * 100, 1), 0) as rate
+		from
+			(
+				select
+				    a.eqpmn_id
+				from
+				    tsp_api.tspt_eqpmn_use_reqst a
+				inner join
+				    tsp_api.tspt_eqpmn_detail b
+					on a.eqpmn_id = b.eqpmn_id
+				where
+				    b.disuse_at = false
+					and a.reqst_sttus = 'APPROVE'
+				  	and (use_begin_dt::date between #{beginDt} and #{endDt}
+						or use_end_dt::date between #{beginDt} and #{endDt})
+				group by a.eqpmn_id
+			) a
+
+	</select>
+
+	<select id="selectEntrprsCount" resultType="Integer">
+		select count(*) from
+			(
+				select mber_nm
+				from
+				    tsp_api.tspt_eqpmn_use_reqst a
+					left join auth_api.cmmt_mber_info b
+						on a.applcnt_id = b.mber_id
+				where
+					reqst_sttus = 'APPROVE'
+				  	and (use_begin_dt::date between #{beginDt} and #{endDt}
+						or use_end_dt::date between #{beginDt} and #{endDt})
+				group by b.mber_nm ) a
+	</select>
+
+</mapper>

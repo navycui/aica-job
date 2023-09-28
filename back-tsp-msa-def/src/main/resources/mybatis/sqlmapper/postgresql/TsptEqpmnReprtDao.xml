@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptEqpmnReprtDao">
+
+    <sql id="selectList_where">
+        1=1
+        <if test='param.reprtSttus != null and param.reprtSttus != ""'>
+            and reprt_sttus = #{param.reprtSttus}
+        </if>
+        <if test='param.eqpmnNmKorean != null and param.eqpmnNmKorean != ""'>
+            and eqpmn_nm_korean like '%' || #{param.eqpmnNmKorean} || '%'
+        </if>
+        <if test='param.assetsNo != null and param.assetsNo != ""'>
+            and assets_no like '%' || #{param.assetsNo} || '%'
+        </if>
+        <if test='param.entrprsNm != null and param.entrprsNm != ""'>
+            and mber_nm like '%' || #{param.entrprsNm} || '%'
+        </if>
+        <if test='param.rceptNo != null and param.rceptNo != ""'>
+            and rcept_no like '%' || #{param.rceptNo} || '%'
+        </if>
+        <if test='param.creatBeginDt != null and param.creatEndDt != null'>
+            and a.creat_dt <![CDATA[>=]]> #{param.creatBeginDt}::date
+            and a.creat_dt::date <![CDATA[<=]]> #{param.creatEndDt}
+        </if>
+    </sql>
+
+    <select id="selectEqpmnReprtCount" resultType="Long">
+        select
+            count(a.reqst_id)
+        from
+            tsp_api.tspt_eqpmn_reprt a
+        inner join tsp_api.tspt_eqpmn_use_reqst b
+            on a.reqst_id = b.reqst_id
+        inner join auth_api.cmmt_mber_info c
+            on a.creatr_id = c.mber_id
+        inner join tsp_api.tspt_eqpmn d
+            on a.trget_eqpmn = d.eqpmn_id
+        where
+        <include refid="selectList_where" />
+    </select>
+
+    <select id="selectEqpmnReprtList" resultType="aicluster.tsp.common.dto.EqpmnReprtDto">
+        select
+            row_number() over (order by a.creat_dt) as number,
+            reprt_id,
+            reprt_sttus,
+            c.mber_ty_code as mber_div,
+            c.mber_nm as entrprs_nm,
+            assets_no,
+            eqpmn_nm_korean,
+            use_begin_dt,
+            use_end_dt,
+            a.creat_dt
+        from
+            tsp_api.tspt_eqpmn_reprt a
+        inner join tsp_api.tspt_eqpmn_use_reqst b
+            on a.reqst_id = b.reqst_id
+        inner join auth_api.cmmt_mber_info c
+            on a.creatr_id = c.mber_id
+        inner join tsp_api.tspt_eqpmn d
+            on b.eqpmn_id = d.eqpmn_id
+        where
+        <include refid="selectList_where" />
+            and reprt_sttus != 'TEMP'
+        order by a.creat_dt
+        <if test="!isExcel">
+            offset #{beginRowNum} -1 limit #{itemsPerPage}
+        </if>
+    </select>
+
+    <select id="selectEqpmnReprtDetail" resultType="aicluster.tsp.common.dto.EqpmnReprtDetailDto">
+        select
+            a.creat_dt,
+            reprt_sttus,
+            a.prcuse_realm,
+            d.eqpmn_nm_korean,
+            d.eqpmn_nm_engl,
+            d.model_nm,
+            d.assets_no,
+            e.rntfee_hour,
+            b.pymnt_mth,
+            b.use_begin_dt,
+            b.use_end_dt,
+            round(b.usgtm / 60) as usgtm,
+            f.dscnt_rate,
+            f.dscnt_resn,
+            a.prcuse_purps,
+            a.prcuse_need,
+            a.mnnst,
+            a.trget_eqpmn,
+            a.detail_prcuse,
+            a.prcuse_prpos,
+            a.prcuse_plan,
+            a.prcuse_dtls,
+            a.dffrnc,
+            a.atchmnfl_group_id,
+            a.achiv,
+            a.expc_effect,
+            a.cmt_expect_era,
+            a.expect_salamt,
+            a.strength,
+            a.weakness,
+            b.applcnt_id
+        from
+            tsp_api.tspt_eqpmn_reprt a
+                left join tsp_api.tspt_eqpmn_use_reqst b
+                    on a.reqst_id = b.reqst_id
+                left join tsp_api.tspt_eqpmn d
+                    on a.trget_eqpmn = d.eqpmn_id
+                left join tsp_api.tspt_eqpmn_detail e
+                    on a.trget_eqpmn = e.eqpmn_id
+                left join tsp_api.tspt_eqpmn_dscnt f
+                    on b.dscnt_id = f.dscnt_id
+        where
+            a.reprt_id = #{reprtId}
+    </select>
+
+    <select id="selectEqpmnReprtHistList" resultType="aicluster.tsp.common.entity.TsptEqpmnReprtHist">
+<!--        select-->
+<!--        a.creat_dt,-->
+<!--        a.process_knd,-->
+<!--        a.process_resn,-->
+<!--        b.mber_nm,-->
+<!--        b.nickname-->
+<!--        from-->
+<!--        tsp_api.tspt_eqpmn_reprt_hist a-->
+<!--        left join auth_api.cmmt_mber_info b-->
+<!--        on a.opetr_id = b.mber_id-->
+<!--        where reprt_id = #{reprtId}-->
+<!--        <if test="!isExcel">-->
+<!--            offset #{beginRowNum} -1-->
+<!--            limit #{itemsPerPage}-->
+<!--        </if>-->
+        SELECT
+        hist_id,
+        creat_dt,
+        process_knd,
+        COALESCE(process_resn,'') AS process_resn,
+        mber_nm,
+        opetr_id
+        FROM tsp_api.tspt_eqpmn_reprt_hist
+        WHERE reprt_id = #{reprtId}
+        ORDER BY creat_dt DESC
+        offset #{beginRowNum} -1
+        limit #{itemsPerPage}
+    </select>
+
+    <update id="updateReprtProcess">
+        update
+            tsp_api.tspt_eqpmn_reprt
+        set
+            reprt_sttus = #{reprtSttus},
+            rsndqf = #{rsndqf},
+            updusr_id = #{updusrId},
+            updt_dt = now()
+        where
+            reprt_id = #{reprtId}
+    </update>
+
+    <insert id="insertReprtHist">
+        insert into
+            tsp_api.tspt_eqpmn_reprt_hist(
+            hist_id,
+            reprt_id,
+            opetr_id,
+            process_knd,
+            process_resn,
+            mber_id,
+            mber_nm
+        )
+        values(
+                  #{histId},
+                  #{reprtId},
+                  #{opetrId},
+                  #{processKnd},
+                  #{processResn},
+                  #{mberId},
+                  #{mberNm}
+              )
+    </insert>
+
+</mapper>

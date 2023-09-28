@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptFrontMyEstmtDao">
+    <sql id="selectList_where">
+        1=1
+        <if test='param.reqstSttus != null and param.reqstSttus != ""'>
+            AND teer.reqst_sttus IN (SELECT UNNEST (#{param.reqstSttus}))
+        </if>
+        <if test='param.eqpmnNmKorean != null and param.eqpmnNmKorean != ""'>
+            AND te.eqpmn_nm_korean like '%' || #{param.eqpmnNmKorean} || '%'
+        </if>
+        <if test='param.creatBeginDt != null and param.creatEndDt != null'>
+            AND teer.creat_dt between #{param.creatBeginDt} and #{param.creatEndDt}
+        </if>
+        <if test='param.mberId != null and param.mberId != null'>
+            AND teer.applcnt_id = #{param.mberId}
+        </if>
+    </sql>
+
+    <select id="selectMyEstmtCnt" resultType="Long">
+        /** Long.selectMyEstmtCnt */
+        SELECT
+        count(*)
+        FROM tsp_api.tspt_eqpmn_estmt_reqst AS teer
+        INNER JOIN tsp_api.tspt_eqpmn AS te
+        ON teer.eqpmn_id = te.eqpmn_id
+        WHERE
+        <include refid="selectList_where"/>
+    </select>
+
+    <select id="selectMyEstmtList" resultType="aicluster.tsp.common.dto.FrontMyEstmtListDto">
+        /** FrontEstmtListDto.selectMyEstmtList */
+        SELECT
+        teer.estmt_id,
+        te.eqpmn_nm_korean,
+        teer.creat_dt,
+        teer.use_begin_dt,
+        teer.use_end_dt,
+        teer.reqst_sttus,
+        teer.rsndqf,
+        teer.updt_dt
+        FROM tsp_api.tspt_eqpmn_estmt_reqst AS teer
+        INNER JOIN tsp_api.tspt_eqpmn AS te
+        ON teer.eqpmn_id = te.eqpmn_id
+        WHERE
+        <include refid="selectList_where"/>
+        ORDER BY teer.creat_dt desc
+        offset #{beginRowNum} -1
+        limit #{itemsPerPage}
+    </select>
+
+    <select id="selectMyEstmtDetail" resultType="aicluster.tsp.api.front.mypage.estmt.param.MyEstmtDetailParam">
+        /** MyEstmtDetailParam.selectMyEstmtDetail */
+        SELECT teer.eqpmn_id,
+               teer.rcept_no,
+               teer.creat_dt,
+               teer.reqst_sttus,
+               teer.partcptn_div,
+               te.eqpmn_nm_korean,
+               te.eqpmn_nm_engl,
+               te.model_nm,
+               te.assets_no,
+               teer.useprps,
+               teer.tkout_at,
+               teer.tkout_adres,
+               teer.tkout_resn,
+               teer.use_begin_dt,
+               teer.use_end_dt,
+               ted.rntfee_hour,
+               ted.useful_begin_hour,
+               ted.useful_end_hour,
+               teer.expect_rntfee,
+               teer.rntfee,
+               teer.pymnt_mth,
+               teer.atchmnfl_group_id,
+               teer.rsndqf
+        FROM tsp_api.tspt_eqpmn_estmt_reqst AS teer
+                 --             INNER JOIN tsp_api.tspt_applcnt AS ta
+--                 ON teer.applcnt_id = ta.applcnt_id
+                 INNER JOIN tsp_api.tspt_eqpmn AS te
+                            ON teer.eqpmn_id = te.eqpmn_id
+                 INNER JOIN tsp_api.tspt_eqpmn_detail AS ted
+                            ON te.eqpmn_id = ted.eqpmn_id
+        WHERE 1 = 1
+          AND estmt_id = #{estmtId}
+    </select>
+
+    <select id="selectMyEstmtDetailAttachMentParam"
+            resultType="aicluster.tsp.api.front.mypage.estmt.param.MyEstmtDetailParam$MyAttachMentParam">
+        /*MyEstmtDetailParam$MyAttachMentParam.selectMyEstmtDetailAttachMentParam*/
+        SELECT ca.atchmnfl_id  as attachment_id
+             , ca.file_nm
+             , ca.file_size
+             , ca.cntnts_ty_nm as content_type
+        FROM com_api.cmmt_atchmnfl AS ca
+        WHERE 1 = 1
+          AND atchmnfl_group_id = #{atchmnflGroupId}
+    </select>
+
+    <update id="updateMyEstmtDetailCancel">
+        /*updateMyEstmtDetailCancel*/
+        UPDATE tsp_api.tspt_eqpmn_estmt_reqst
+        SET reqst_sttus = 'CANCEL'
+        WHERE estmt_id = #{estmtId}
+    </update>
+
+    <select id="selectMyEstmtId" resultType="String">
+        /*String.selectMyEstmtId*/
+        SELECT estmt_id
+        FROM tsp_api.tspt_eqpmn_estmt_reqst
+        WHERE 1 = 1
+          AND eqpmn_id = #{eqpmnId}
+          AND applcnt_id = #{mberId}
+          AND use_end_dt > now()
+          AND reqst_sttus='EST_APPROVE'
+--           AND reqst_sttus NOT IN ('CANCEL', 'REJECT')
+--         ORDER BY updt_dt DESC limit 1
+    </select>
+
+    <select id="checkMyEstmtId" resultType="Long">
+        /*Long.checkMyEstmtId*/
+        SELECT count(*)
+        FROM tsp_api.tspt_eqpmn_estmt_reqst teer
+        WHERE 1 = 1
+          AND teer.eqpmn_id = #{eqpmnId}
+          AND teer.applcnt_id = #{mberId}
+          AND teer.use_end_dt > now()
+          AND teer.reqst_sttus NOT IN ('CANCEL', 'REJECT')
+    </select>
+
+    <select id="selectEstApprove"
+            resultType="aicluster.tsp.api.front.mypage.estmt.param.MyEstmtDetailParam$EstApproveDt">
+        /*MyEstmtDetailParam$EstApproveDt.selectEstApprove*/
+        SELECT process_knd
+             , process_resn
+             , creat_dt
+        FROM tsp_api.tspt_eqpmn_estmt_reqst_hist
+        WHERE 1 = 1
+          AND estmt_id = #{estmtId}
+          AND process_knd = #{reqstSttus}
+        ORDER BY creat_dt DESC LIMIT 1
+    </select>
+
+    <select id="selectEstmtAdminInfo" resultType="aicluster.tsp.api.front.mypage.estmt.param.MyEstmtDwldInfoParam">
+        /*MyEstmtDwldInfoParam.selectEstmtAdminInfo*/
+        SELECT
+            mber_id
+            , login_id
+            , mber_nm
+            , encpt_telno
+            , encpt_email
+            , clsf_nm
+        FROM auth_api.cmmt_emp_info
+        WHERE 1=1
+            AND mber_id = (
+                               SELECT
+                                   mber_id
+                               FROM tsp_api.tspt_eqpmn_estmt_reqst_hist
+                               WHERE 1 = 1
+                                   AND estmt_id = #{estmtId}
+                                   AND process_knd = 'EST_APPROVE'
+                           )
+
+    </select>
+
+
+</mapper>

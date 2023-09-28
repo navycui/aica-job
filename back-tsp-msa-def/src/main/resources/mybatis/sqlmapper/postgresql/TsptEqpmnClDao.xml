@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptEqpmnClDao">
+
+	<!-- 하위 레벨 장비분류 찾기 -->
+	<sql id="tsptEqpmnClfc-hierarchy">
+		WITH RECURSIVE tspt_eqpmn_clfc_hierarchy
+			AS (
+				SELECT
+					tec.eqpmn_cl_id
+					, tec.eqpmn_cl_nm
+					, tec.eqpmn_lclas_id
+					, tec.ordr
+				    , tec.use_at
+					, 1 AS DEPTH
+					, ARRAY['1'||LPAD(CAST(tec.ordr AS TEXT), 3, '0')] AS PATH
+					, false AS CYCLE
+				FROM tsp_api.tspt_eqpmn_cl tec
+				WHERE 1=1
+				  AND tec.eqpmn_lclas_id = #{eqpmnClId}
+				UNION ALL
+				SELECT
+					tec2.eqpmn_cl_id
+					, tec2.eqpmn_cl_nm
+					, tec2.eqpmn_lclas_id
+					, tec2.ordr
+				    , tec2.use_at
+					, tec1.DEPTH + 1 AS DEPTH
+					, tec1.PATH||CAST((tec1.DEPTH + 1) AS TEXT)||LPAD(CAST(tec2.ordr AS TEXT), 3, '0') AS PATH
+					, CAST((tec1.DEPTH + 1) AS TEXT)||LPAD(CAST(tec2.ordr AS TEXT), 3, '0') = ANY(PATH) AS CYCLE
+				FROM tspt_eqpmn_clfc_hierarchy tec1
+				JOIN tsp_api.tspt_eqpmn_cl tec2
+				on 1=1
+				AND tec2.eqpmn_lclas_id = tec1.eqpmn_cl_id
+				WHERE 1=1
+				AND NOT CYCLE
+			)
+	</sql>
+	<sql id="tsptEqpmnClfc-hierarchy-root">
+		WITH RECURSIVE tspt_eqpmn_clfc_hierarchy
+			AS (
+				SELECT
+					tec.eqpmn_cl_id
+					, tec.eqpmn_cl_nm
+					, tec.eqpmn_lclas_id
+					, tec.ordr
+				    , tec.use_at
+					, 1 AS DEPTH
+					, ARRAY['1'||LPAD(CAST(tec.ordr AS TEXT), 3, '0')] AS PATH
+					, false AS CYCLE
+				FROM tsp_api.tspt_eqpmn_cl tec
+				WHERE 1=1
+				  AND tec.eqpmn_lclas_id = 'ROOT'
+				UNION ALL
+				SELECT
+					tec2.eqpmn_cl_id
+					, tec2.eqpmn_cl_nm
+					, tec2.eqpmn_lclas_id
+					, tec2.ordr
+				    , tec2.use_at
+					, tec1.DEPTH + 1 AS DEPTH
+					, tec1.PATH||CAST((tec1.DEPTH + 1) AS TEXT)||LPAD(CAST(tec2.ordr AS TEXT), 3, '0') AS PATH
+					, CAST((tec1.DEPTH + 1) AS TEXT)||LPAD(CAST(tec2.ordr AS TEXT), 3, '0') = ANY(PATH) AS CYCLE
+				FROM tspt_eqpmn_clfc_hierarchy tec1
+				JOIN tsp_api.tspt_eqpmn_cl tec2
+				on 1=1
+				AND tec2.eqpmn_lclas_id = tec1.eqpmn_cl_id
+				WHERE 1=1
+				AND NOT CYCLE
+			)
+	</sql>
+
+	<!-- 하위 레벨 장비분류 찾기 ( 여러 장비분류 id로 찾기) -->
+	<sql id="tsptEqpmnClfc-childParamHierarchy">
+		WITH RECURSIVE tspt_eqpmn_clfc_hierarchy
+		AS (
+			SELECT
+				tec.eqpmn_cl_id
+				, tec.eqpmn_cl_nm
+				, tec.eqpmn_lclas_id
+				, tec.ordr
+			    , tec.use_at
+				, 1 AS DEPTH
+				, ARRAY['1'||LPAD(CAST(tec.ordr AS TEXT), 3, '0')] AS PATH
+				, false AS CYCLE
+			FROM tsp_api.tspt_eqpmn_cl tec
+			WHERE 1=1
+			AND tec.eqpmn_cl_id = #{eqpmnClId}
+			UNION ALL
+			SELECT
+				tec2.eqpmn_cl_id
+				, tec2.eqpmn_cl_nm
+				, tec2.eqpmn_lclas_id
+				, tec2.ordr
+			    , tec2.use_at
+				, tec1.DEPTH + 1 AS DEPTH
+				, tec1.PATH||CAST((tec1.DEPTH + 1) AS TEXT)||LPAD(CAST(tec2.ordr AS TEXT), 3, '0') AS PATH
+				, CAST((tec1.DEPTH + 1) AS TEXT)||LPAD(CAST(tec2.ordr AS TEXT), 3, '0') = ANY(PATH) AS CYCLE
+			FROM tspt_eqpmn_clfc_hierarchy tec1
+				JOIN tsp_api.tspt_eqpmn_cl tec2
+			on 1=1
+			AND tec2.eqpmn_lclas_id = tec1.eqpmn_cl_id
+			WHERE 1=1
+			AND NOT CYCLE
+		)
+	</sql>
+
+	<!-- 선택한 장비분류의 한레벨 아레에 장비분류를 조회 -->
+	<select id="selectCatrgoryList" resultType="aicluster.tsp.common.entity.TsptEqpmnCl">
+		SELECT
+			eqpmn_cl_id
+		    , eqpmn_lclas_id
+			, eqpmn_cl_nm
+			, eqpmn_cl_id
+			, ordr
+			, use_at
+		FROM tsp_api.tspt_eqpmn_cl
+		where eqpmn_lclas_id = #{eqpmnClId}
+		order by ordr
+	</select>
+
+	<!-- 모든 장비분류를 조회  -->
+	<select id="selectCatrgoryAllList" resultType="aicluster.tsp.common.entity.TsptEqpmnCl">
+		<include refid="tsptEqpmnClfc-hierarchy-root">
+		</include>
+		SELECT
+		    eqpmn_cl_id
+			, eqpmn_cl_nm
+			, eqpmn_lclas_id
+			, ordr
+		    , use_at
+		, depth
+		FROM tspt_eqpmn_clfc_hierarchy
+		ORDER BY path
+	</select>
+
+	<!-- 장비분류 ID로 하위 장비분류들을 가지고 있는 장비들의 개수를 조회 -->
+	<select id="selectEqpmnCount" resultType="Integer">
+		<include refid="tsptEqpmnClfc-hierarchy">
+		</include>
+		SELECT count(*)
+		FROM tspt_eqpmn_clfc_hierarchy tec3
+		INNER JOIN tsp_api.tspt_eqpmn eqpmn
+		ON eqpmn.eqpmn_cl_id  = tec3.eqpmn_cl_id
+		where tec3.eqpmn_lclas_id = #{eqpmnClId}
+	</select>
+
+	<!-- 삭제할 자기 자신과 하위 장비분류의 정보를 조회 -->
+	<select id="selectChildParamList" resultType="aicluster.tsp.common.entity.TsptEqpmnCl">
+		<include refid="tsptEqpmnClfc-childParamHierarchy">
+		</include>
+		SELECT
+		eqpmn_cl_id
+		, eqpmn_cl_nm
+		, eqpmn_lclas_id
+		, ordr
+		, use_at
+		, depth
+		FROM tspt_eqpmn_clfc_hierarchy
+		ORDER BY path
+	</select>
+
+	<!-- 장비 분류 ID로 현재 장비분류의 레벨 조회 -->
+	<select id="selectCategoryLevel" resultType="Integer">
+		<include refid="tsptEqpmnClfc-hierarchy-root">
+		</include>
+		SELECT depth
+		FROM tspt_eqpmn_clfc_hierarchy
+		where eqpmn_cl_id = #{eqpmnClId}
+	</select>
+
+	<!-- 장비 분류 저장 -->
+	<update id="insertCategory" >
+		<foreach item="item" collection="list" separator=";">
+			insert into tsp_api.tspt_eqpmn_cl (
+				eqpmn_cl_id
+				, eqpmn_cl_nm
+				, eqpmn_lclas_id
+				, ordr
+				, use_at
+				, creatr_id
+				, updusr_id
+			)
+			VALUES (
+				#{item.eqpmnClId},
+				#{item.eqpmnClNm},
+				#{item.eqpmnLclasId},
+				#{item.ordr},
+				#{item.useAt},
+			    #{item.creatrId},
+				#{item.creatrId}
+			) on conflict (eqpmn_cl_id)
+			do update set
+				eqpmn_cl_nm = #{item.eqpmnClNm},
+				ordr = #{item.ordr},
+				use_at = #{item.useAt},
+				updusr_id = #{item.creatrId},
+				updt_dt = now()
+		</foreach>
+	</update>
+
+	<update id="updateSoreOrder">
+		UPDATE tsp_api.tspt_eqpmn_cl old
+		SET
+			ordr = new_ordr
+		FROM
+			(
+				SELECT
+					A.eqpmn_cl_id
+					 , row_number() OVER (ORDER BY ordr) AS new_ordr
+				FROM
+					(
+						SELECT eqpmn_cl_id, ordr
+						FROM tsp_api.tspt_eqpmn_cl
+						where eqpmn_lclas_id = #{eqpmnLclasId}
+						ORDER BY ordr
+					)A
+			) NEW
+		WHERE old.eqpmn_cl_id = new.eqpmn_cl_id
+
+	</update>
+
+	<!-- 장비 분류 삭제 -->
+	<delete id="deleteCategory">
+		delete from tsp_api.tspt_eqpmn_cl
+		where eqpmn_cl_id = #{eqpmnClId} or eqpmn_lclas_id = #{eqpmnClId}
+	</delete>
+
+	<select id="selectCategoryCheck" resultType="String">
+		select eqpmn_cl_nm
+		from tsp_api.tspt_eqpmn_cl
+		where eqpmn_cl_nm = #{eqpmnClNm} and eqpmn_lclas_id = #{eqpmnLclasId}
+	</select>
+
+	<!-- 장비 분류 ID 연관성 체크 -->
+	<select id="selectEqpmnClIdCount" resultType="Integer">
+		select count(*)
+		from tsp_api.tspt_eqpmn
+		where eqpmn_cl_id = #{eqpmnClId}
+	</select>
+</mapper>

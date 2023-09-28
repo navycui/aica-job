@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptFrontEqpmnDao">
+    <sql id="tsptEqpmnClfc-hierarchy">
+        WITH RECURSIVE tspt_eqpmn_clfc_hierarchy
+                           AS (
+                SELECT
+                    tec.eqpmn_cl_id
+                     , tec.eqpmn_cl_nm
+                     , tec.eqpmn_lclas_id
+                     , tec.ordr
+                     , tec.use_at
+                     , 1 AS DEPTH
+                     , ARRAY['1'||LPAD(CAST(tec.ordr AS TEXT), 3, '0')] AS PATH
+                     , false AS CYCLE
+                FROM tsp_api.tspt_eqpmn_cl tec
+                WHERE 1=1
+                  and tec.eqpmn_lclas_id = 'ROOT'
+                UNION ALL
+                SELECT
+                    tec2.eqpmn_cl_id
+                     , tec2.eqpmn_cl_nm
+                     , tec2.eqpmn_lclas_id
+                     , tec2.ordr
+                     , tec2.use_at
+                     , tec1.DEPTH + 1 AS DEPTH
+                     , tec1.PATH||CAST((tec1.DEPTH + 1) AS TEXT)||LPAD(CAST(tec2.ordr AS TEXT), 3, '0') AS PATH
+                     , CAST((tec1.DEPTH + 1) AS TEXT)||LPAD(CAST(tec2.ordr AS TEXT), 3, '0') = ANY(PATH) AS CYCLE
+                FROM tspt_eqpmn_clfc_hierarchy tec1
+                         JOIN tsp_api.tspt_eqpmn_cl tec2
+                              on 1=1
+                                  AND tec2.eqpmn_lclas_id = tec1.eqpmn_cl_id
+                WHERE 1=1
+                  AND NOT CYCLE
+            )
+    </sql>
+
+    <sql id="selectEqpmnList_where">
+        1=1
+        <if test='search.eqpmnClNm != null and search.eqpmnClNm != ""'>
+            and d.eqpmn_cl_nm = #{search.eqpmnClNm}
+        </if>
+        <if test='search.modelNm != null and search.modelNm != ""'>
+            and b.model_nm like '%' || #{search.modelNm} || '%'
+        </if>
+        <if test='search.eqpmnNmKorean != null and search.eqpmnNmKorean != ""'>
+            and b.eqpmn_nm_korean like '%' || #{search.eqpmnNmKorean} || '%'
+        </if>
+    </sql>
+
+    <select id="selectEqpmnInfoCount" resultType="Long">
+        <include refid="tsptEqpmnClfc-hierarchy">
+        </include>
+        select
+            count(b.eqpmn_nm_korean)
+        FROM tspt_eqpmn_clfc_hierarchy a
+        inner join tsp_api.tspt_eqpmn b
+        on a.eqpmn_cl_id = b.eqpmn_cl_id
+        inner join tsp_api.tspt_eqpmn_cl d
+        on d.eqpmn_cl_id = a.eqpmn_lclas_id
+        where
+            <include refid="selectEqpmnList_where"/>
+            and
+            d.eqpmn_cl_nm != 'ROOT'
+    </select>
+
+    <select id="selectEqpmnInfoList" resultType="aicluster.tsp.api.front.svcintro.param.EqpmnIntroParam">
+        <include refid="tsptEqpmnClfc-hierarchy">
+        </include>
+        select distinct
+        b.eqpmn_nm_korean
+        , b.eqpmn_nm_engl
+        , b.eqpmn_id
+        , b.model_nm
+        , a.eqpmn_cl_id
+        , b.image_id
+        , a.eqpmn_cl_nm as eqpmn_sm_nm
+        , d.eqpmn_cl_nm
+        FROM tspt_eqpmn_clfc_hierarchy a
+        inner join tsp_api.tspt_eqpmn b
+        on a.eqpmn_cl_id = b.eqpmn_cl_id
+        inner join tsp_api.tspt_eqpmn_cl d
+        on d.eqpmn_cl_id = a.eqpmn_lclas_id
+        where
+            <include refid="selectEqpmnList_where"/>
+            and
+            d.eqpmn_cl_nm != 'ROOT'
+        <if test="!isExcel">
+            offset #{beginRowNum} -1
+            limit #{itemsPerPage}
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptResrceUseReqstDao">
+
+    <sql id="selectResrceUseList_where">
+        1=1
+        <if test='search.reqstSttus != null and search.reqstSttus != ""'>
+            and trur.reqst_sttus = #{search.reqstSttus}
+        </if>
+        <if test='search.useSttus != null and search.useSttus != ""'>
+            and trur.use_sttus = #{search.useSttus}
+        </if>
+        <if test='search.entrprsNm != null and search.entrprsNm != ""'>
+            and cm.mber_nm like '%' || #{search.entrprsNm} || '%'
+        </if>
+        <if test='search.userNm != null and search.userNm != ""'>
+            and cm.mber_nm like '%' || #{search.userNm} || '%'
+        </if>
+        <if test='search.rceptNo != null and search.rceptNo != ""'>
+            and trur.rcept_no like '%' || #{search.rceptNo} || '%'
+        </if>
+        <if test='search.useBeginDt != null and search.useEndDt != null'>
+            and (use_begin_dt between #{search.useBeginDt} and #{search.useEndDt} or use_end_dt between #{search.useBeginDt} and #{search.useEndDt})
+        </if>
+        <if test='search.creatBeginDt != null and search.creatEndDt != null'>
+            and trur.creat_dt between #{search.creatBeginDt} and #{search.creatEndDt}
+        </if>
+    </sql>
+
+    <select id="selectResrceApplyCount" resultType="Long">
+        select
+        count(trur.reqst_id)
+        from tsp_api.tspt_resrce_use_reqst as trur
+            inner join tsp_api.tspt_applcnt as ta
+            on trur.applcnt_id = ta.applcnt_id
+            inner join auth_api.cmmt_mber_info as cm
+            on trur.applcnt_id = cm.mber_id
+        where
+        <include refid="selectResrceUseList_where"/>
+    </select>
+
+    <select id="selectResrceApplyList" resultType="aicluster.tsp.common.dto.ResrceUseReqstDto">
+        select
+            row_number() over (order by trur.creat_dt) as number,
+            trur.reqst_id,
+            trur.reqst_sttus,
+            cm.mber_ty_code as mber_div,
+            cm.mber_nm as entrprs_nm,
+            cm.mber_nm as user_nm,
+            trur.use_begin_dt,
+            trur.use_end_dt,
+            trur.rcept_no,
+            trur.creat_dt
+        from tsp_api.tspt_resrce_use_reqst as trur
+            inner join tsp_api.tspt_applcnt as ta
+                on trur.applcnt_id = ta.applcnt_id
+            inner join auth_api.cmmt_mber_info as cm
+                on trur.applcnt_id = cm.mber_id
+        where
+            <include refid="selectResrceUseList_where" />
+            order by trur.creat_dt desc
+        <if test="!isExcel">
+            offset #{beginRowNum} -1
+            limit #{itemsPerPage}
+        </if>
+    </select>
+
+    <select id="selectResrceDetail" resultType="aicluster.tsp.api.admin.resrce.param.ResrceDetailParam">
+        select
+            trur.reqst_sttus,
+            trur.creat_dt,
+            trur.rcept_no,
+            trur.applcnt_id,
+            ta.ofcps,
+            trur.partcptn_div,
+            trur.gpu_at,
+            trur.cpu_co,
+            trur.data_storge_at,
+            trur.useprps,
+            trur.atchmnfl_group_id
+        from
+            tsp_api.tspt_resrce_use_reqst as trur
+            inner join tsp_api.tspt_applcnt as ta
+                on trur.applcnt_id = ta.applcnt_id
+            inner join auth_api.cmmt_mber_info as cm
+                on cm.mber_id = trur.applcnt_id
+        where
+            trur.reqst_id = #{reqstId}
+    </select>
+
+    <update id="putApprove">
+        update tsp_api.tspt_resrce_use_reqst
+        set reqst_sttus = 'APPROVE', use_sttus = 'WAITING'
+        where reqst_id = #{reqstId}
+    </update>
+
+    <update id="putSpmRequest">
+        update tsp_api.tspt_resrce_use_reqst
+        set reqst_sttus = 'SPM_REQUEST', rsndqf = #{rsndqf}
+        where reqst_id = #{reqstId}
+    </update>
+
+    <update id="putReject">
+        update tsp_api.tspt_resrce_use_reqst
+        set reqst_sttus = 'REJECT'
+        where reqst_id = #{reqstId}
+    </update>
+
+    <select id="selectResrceUseCount" resultType="Long">
+        select
+        count(trur.reqst_id)
+        from tsp_api.tspt_resrce_use_reqst as trur
+        inner join tsp_api.tspt_applcnt as ta
+        on trur.applcnt_id = ta.applcnt_id
+        inner join auth_api.cmmt_mber_info as cm
+        on trur.applcnt_id = cm.mber_id
+        where
+        <include refid="selectResrceUseList_where"/>
+            and trur.reqst_sttus = 'APPROVE'
+            and trur.use_sttus != 'APPROVE_CANCEL'
+    </select>
+
+    <select id="selectResrceUseList" resultType="aicluster.tsp.common.dto.ResrceUseReqstDto">
+        select
+        row_number() over (order by trur.creat_dt) as number,
+        trur.reqst_id,
+        trur.reqst_sttus,
+        trur.use_sttus,
+        cm.mber_ty_code as mber_div,
+        cm.mber_nm as entrprs_nm,
+        cm.mber_nm as user_nm,
+        trur.use_begin_dt,
+        trur.use_end_dt,
+        trur.rcept_no,
+        trur.creat_dt
+        from tsp_api.tspt_resrce_use_reqst as trur
+        inner join tsp_api.tspt_applcnt as ta
+        on trur.applcnt_id = ta.applcnt_id
+        inner join auth_api.cmmt_mber_info as cm
+        on trur.applcnt_id = cm.mber_id
+        where
+        <include refid="selectResrceUseList_where" />
+            and trur.reqst_sttus = 'APPROVE'
+            and trur.use_sttus != 'APPROVE_CANCEL'
+        order by trur.creat_dt desc
+        <if test="!isExcel">
+            offset #{beginRowNum} -1
+            limit #{itemsPerPage}
+        </if>
+    </select>
+
+    <select id="selectResrceUseDetail" resultType="aicluster.tsp.api.admin.resrce.param.ResrceDetailParam">
+        select
+        trur.rcept_no,
+            trur.creat_dt,
+            trur.use_sttus,
+            trur.use_rturn_dt,
+            trur.applcnt_id,
+            ta.ofcps,
+            trur.partcptn_div,
+            trur.gpu_at,
+            trur.cpu_co,
+            trur.data_storge_at,
+            trur.useprps,
+            trur.atchmnfl_group_id
+        from
+            tsp_api.tspt_resrce_use_reqst as trur
+            inner join tsp_api.tspt_applcnt as ta
+                on trur.applcnt_id = ta.applcnt_id
+            inner join auth_api.cmmt_mber_info as cm
+                on trur.applcnt_id = cm.mber_id
+        where
+            trur.reqst_id = #{reqstId}
+    </select>
+
+    <update id="putCancel">
+        update tsp_api.tspt_resrce_use_reqst
+        set use_sttus = 'APPROVE_CANCEL'
+        where reqst_id = #{reqstId}
+    </update>
+
+    <update id="putReturn">
+        update tsp_api.tspt_resrce_use_reqst
+        set use_sttus = 'REQ_COMPLETE'
+        where reqst_id = #{reqstId}
+    </update>
+
+    <update id="putReqreturn">
+        update tsp_api.tspt_resrce_use_reqst
+        set use_sttus = 'REQ_RETURN' , use_rturn_dt = now()
+        where reqst_id = #{reqstId}
+    </update>
+</mapper>

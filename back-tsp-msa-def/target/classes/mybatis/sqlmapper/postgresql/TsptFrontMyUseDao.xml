@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptFrontMyUseDao">
+    <sql id="selectList_where">
+        1=1
+        <if test='(param.reqstSttus != null and param.reqstSttus != "") or (param.useSttus != null and param.useSttus != "")'>
+            AND (teur.reqst_sttus IN (SELECT UNNEST (#{param.reqstSttus})) or teur.use_sttus IN (SELECT UNNEST (#{param.useSttus})))
+        </if>
+        <if test='param.eqpmnNmKorean != null and param.eqpmnNmKorean != ""'>
+            AND te.eqpmn_nm_korean like '%' || #{param.eqpmnNmKorean} || '%'
+        </if>
+        <if test='param.creatBeginDt != null and param.creatEndDt != null'>
+            AND teur.creat_dt between #{param.creatBeginDt} and #{param.creatEndDt}
+        </if>
+        <if test='param.mberId != null and param.mberId != null'>
+            AND teur.applcnt_id = #{param.mberId}
+        </if>
+    </sql>
+
+    <select id="selectMyUseCnt" resultType="Long">
+        /** Long.selectMyUseCnt */
+        SELECT
+            count(*)
+        FROM tsp_api.tspt_eqpmn_use_reqst AS teur
+            INNER JOIN tsp_api.tspt_eqpmn AS te
+                ON teur.eqpmn_id = te.eqpmn_id
+        WHERE
+        <include refid="selectList_where" />
+    </select>
+
+    <select id="selectMyUseList" resultType="aicluster.tsp.common.dto.FrontMyUseListDto">
+        /** FrontMyUseListDto.selectMyUseList */
+        SELECT
+            teur.reqst_id,
+            te.eqpmn_nm_korean,
+            teur.creat_dt,
+            teur.use_begin_dt,
+            teur.use_end_dt,
+            teur.reqst_sttus,
+            teur.use_sttus,
+            teur.rsndqf,
+            teur.updt_dt
+        FROM tsp_api.tspt_eqpmn_use_reqst AS teur
+            INNER JOIN tsp_api.tspt_eqpmn AS te
+                ON teur.eqpmn_id = te.eqpmn_id
+        WHERE
+        <include refid="selectList_where" />
+        ORDER BY teur.creat_dt desc
+        offset #{beginRowNum} -1
+        limit #{itemsPerPage}
+    </select>
+
+    <select id="selectMyUseDetail" resultType="aicluster.tsp.api.front.mypage.use.param.MyUseDetailParam">
+        /** MyUseDetailParam.selectMyUseDetail */
+        SELECT
+            teur.reqst_id
+            , teur.rcept_no
+            , teur.creat_dt
+            , teur.reqst_sttus
+--             , ta.mber_div
+--             , ta.entrprs_nm
+--             , ta.user_nm
+--             , ta.ofcps
+--             , ta.cttpc
+--             , ta.email
+            , teur.partcptn_div
+            , te.eqpmn_id
+            , te.eqpmn_nm_korean
+            , te.eqpmn_nm_engl
+            , te.model_nm
+            , te.assets_no
+            , teur.useprps
+            , teur.tkout_at
+            , teur.tkout_adres
+            , teur.tkout_resn
+            , teur.proms_atchmnfl_id
+            , teur.use_begin_dt
+            , teur.use_end_dt
+            , ted.rntfee_hour
+            , ted.useful_begin_hour
+            , ted.useful_end_hour
+            , teur.pymnt_mth
+            , teur.atchmnfl_group_id
+            , teur.expect_rntfee
+            , teur.usgtm
+            , teur.expect_usgtm
+            , teur.use_sttus
+        FROM tsp_api.tspt_eqpmn_use_reqst AS teur
+--             INNER JOIN tsp_api.tspt_applcnt AS ta
+--                 ON teur.applcnt_id = ta.applcnt_id
+            INNER JOIN tsp_api.tspt_eqpmn AS te
+                ON teur.eqpmn_id = te.eqpmn_id
+            INNER JOIN tsp_api.tspt_eqpmn_detail AS ted
+                       ON te.eqpmn_id = ted.eqpmn_id
+
+        WHERE 1=1
+            AND reqst_id        = #{reqstId}
+    </select>
+
+    <select id="selectPromsFileInfo" resultType="aicluster.tsp.api.common.param.CommonAttachmentParam">
+        SELECT
+            atchmnfl_id as attachment_id
+             ,file_nm
+             ,file_size
+             ,cntnts_ty_nm as content_type
+        FROM com_api.cmmt_atchmnfl
+        WHERE 1=1
+          AND atchmnfl_group_id = #{atchmnflGroupId}
+    </select>
+
+    <select id="selectMyUseDetailAttachMentParam" resultType="aicluster.tsp.api.front.mypage.use.param.MyUseDetailParam$MyAttachMentParam">
+        /** MyUseDetailParam$MyAttachMentParam.selectMyUseDetailAttachMentParam */
+        SELECT
+            ca.atchmnfl_id as attachment_id
+            , ca.file_nm
+            , ca.file_size
+            , ca.cntnts_ty_nm as content_type
+        FROM com_api.cmmt_atchmnfl AS ca
+        WHERE 1=1
+            AND atchmnfl_group_id = #{atchmnflGroupId}
+    </select>
+
+    <select id="selectApproveParam" resultType="aicluster.tsp.api.front.mypage.use.param.MyUseDetailParam$MyUseApproveParam">
+        /** MyUseDetailParam$MyUseApproveParam.selectApproveParam */
+        SELECT
+            teur.tkout_dlbrt_result
+            , teur.tkout_dlbrt_cn
+            , teur.dscnt_id
+            , ted.dscnt_resn
+            , ted.dscnt_rate
+            , teur.adit_rntfee
+            , teur.rntfee
+            , teur.rqest_resn
+            , teur.tkin_at
+            , teur.dscnt_amount
+            , teur.usgtm
+            , teur.expect_usgtm
+        FROM tsp_api.tspt_eqpmn_use_reqst AS teur
+            LEFT JOIN tsp_api.tspt_eqpmn_dscnt AS ted
+                ON teur.dscnt_id = ted.dscnt_id
+        WHERE 1=1
+            AND teur.reqst_id = #{reqstId}
+    </select>
+
+    <select id="selectTkinParam" resultType="aicluster.tsp.api.front.mypage.use.param.MyUseDetailParam$MyUseApproveParam$MyUseDetailTkinAtParam">
+        /** MyUseDetailParam$MyUseApproveParam$MyUseDetailTkinAtParam.selectTkinParam */
+        SELECT
+            process_knd,
+            creat_dt
+        FROM tsp_api.tspt_eqpmn_use_reqst_hist
+        WHERE 1=1
+            AND reqst_id = #{reqstId}
+            AND process_knd like '%' || #{processKnd} || '%'
+        ORDER BY creat_dt desc limit 1
+    </select>
+
+    <update id="putUseCancel">
+        /** MyUseDetailParam.putUseCancel */
+        UPDATE tsp_api.tspt_eqpmn_use_reqst SET
+            reqst_sttus = #{reqstSttus}
+            , use_sttus = #{reqstSttus}
+        WHERE 1=1
+            AND reqst_id = #{reqstId};
+        UPDATE tsp_api.tspt_eqpmn_estmt_reqst SET
+            reqst_sttus = #{reqstSttus}
+        WHERE 1=1
+            AND rcept_no = (SELECT rcept_no FROM tsp_api.tspt_eqpmn_use_reqst WHERE reqst_id = #{reqstId})
+
+    </update>
+
+    <update id="putUseEnduse">
+        /** MyUseDetailParam.putUseEnduse */
+        UPDATE tsp_api.tspt_eqpmn_use_reqst SET
+            use_sttus = #{useSttus}
+        WHERE 1=1
+            AND reqst_id = #{reqstId}
+    </update>
+
+    <select id="getUseExtndList" resultType="aicluster.tsp.common.dto.FrontMyUseExtndListDto">
+        /** FrontMyUseExtndListDto.getUseExtndList */
+        SELECT
+            tee.reqst_sttus
+            , tee.use_begin_dt
+            , tee.use_end_dt
+            , tee.usgtm
+            , tee.expect_usgtm
+            , tee.expect_rntfee
+            , tee.rntfee
+            , (tee.expect_rntfee * (select dscnt_rate from tsp_api.tspt_eqpmn_dscnt where dscnt_id = teur.dscnt_id) / 100) as dscnt_amount
+            , teur.pymnt_mth
+            , ted.rntfee_hour
+            , teur.tkout_at
+        FROM tsp_api.tspt_eqpmn_extn AS tee
+            INNER JOIN tsp_api.tspt_eqpmn_use_reqst AS teur
+                ON tee.reqst_id = teur.reqst_id
+            INNER JOIN tsp_api.tspt_eqpmn_detail AS ted
+                ON teur.eqpmn_id = ted.eqpmn_id
+        WHERE 1=1
+            AND tee.reqst_id = #{reqstId}
+    </select>
+
+    <select id="getEqpmnId" resultType="String">
+        SELECT
+            eqpmn_id
+        FROM tsp_api.tspt_eqpmn_use_reqst
+            WHERE 1=1
+                AND reqst_id = #{reqstId}
+    </select>
+
+
+    <resultMap id="useDt" type="aicluster.tsp.common.dto.FrontMyUseExtndCalenDto$MyUseExtndReqstDt"></resultMap>
+    <resultMap id="stringListId" type="String"></resultMap>
+    <resultMap id="useMyDt" type="aicluster.tsp.common.dto.FrontMyUseExtndCalenDto$MyUseExtndReqstDt"></resultMap>
+    <select id="getUseExtndReqst" resultMap="useDt,stringListId,useMyDt">
+        /** MyUseExtndCalenParam.getUseExtndReqst */
+
+        SELECT
+            tee.use_begin_dt
+             , tee.use_end_dt
+        FROM tsp_api.tspt_eqpmn_extn AS tee
+            LEFT JOIN tsp_api.tspt_eqpmn_use_reqst AS teur
+                ON tee.reqst_id = teur.reqst_id
+        WHERE 1=1
+            AND tee.reqst_sttus = #{reqstSttus}
+            AND teur.eqpmn_id = #{eqpmnId}
+            AND (to_char(tee.use_begin_dt, 'YYYYMM') BETWEEN #{searchMonth} AND to_char(to_date(#{searchMonth},'YYYYMM') + INTERVAL '2 month','YYYYMM')
+                     OR to_char(tee.use_end_dt, 'YYYYMM') BETWEEN #{searchMonth} AND to_char(to_date(#{searchMonth},'YYYYMM') + INTERVAL '2 month','YYYYMM')
+                )
+
+        UNION ALL
+
+        SELECT
+            use_begin_dt
+            , use_end_dt
+        FROM tsp_api.tspt_eqpmn_use_reqst
+        WHERE 1=1
+            AND reqst_sttus = #{reqstSttus}
+            AND eqpmn_id = #{eqpmnId}
+            AND (to_char(use_begin_dt, 'YYYYMM') BETWEEN #{searchMonth} AND to_char(to_date(#{searchMonth},'YYYYMM') + INTERVAL '2 month','YYYYMM')
+                     OR to_char(use_end_dt, 'YYYYMM') BETWEEN #{searchMonth} AND to_char(to_date(#{searchMonth},'YYYYMM') + INTERVAL '2 month','YYYYMM')
+                )
+        ORDER BY use_end_dt desc
+        ;
+
+        SELECT
+            ymd_id
+        FROM
+			com_api.cmmt_restde
+		WHERE 1=1
+            AND LEFT(ymd_id,6) BETWEEN #{searchMonth} AND to_char(to_date(#{searchMonth},'YYYYMM') + INTERVAL '2 month','YYYYMM')
+        ;
+
+        SELECT
+            use_begin_dt
+             , use_end_dt
+        FROM tsp_api.tspt_eqpmn_extn
+        WHERE 1=1
+          AND reqst_id = #{reqstId}
+
+        UNION ALL
+
+        SELECT
+            use_begin_dt
+             , use_end_dt
+        FROM tsp_api.tspt_eqpmn_use_reqst
+        WHERE 1=1
+          AND reqst_id = #{reqstId}
+        ORDER BY use_begin_dt
+    </select>
+
+    <select id="getUseExtndReqstInfo" resultType="aicluster.tsp.api.front.mypage.use.param.MyUseExtndParam">
+        /** MyUseExtndParam.getUseExtndReqstInfo */
+        SELECT
+            teur.pymnt_mth
+            , teur.use_sttus
+            , teur.eqpmn_id
+            , teur.dscnt_id
+            , ted.dscnt_rate
+            , teur.tkout_at
+        FROM tsp_api.tspt_eqpmn_use_reqst AS teur
+            LEFT JOIN tsp_api.tspt_eqpmn_dscnt AS ted
+                ON teur.dscnt_id = ted.dscnt_id
+        WHERE 1=1
+            AND teur.reqst_id = #{reqstId}
+    </select>
+
+    <insert id="postUseExtndReqst">
+        /**postUseExtndReqst*/
+        INSERT INTO tsp_api.tspt_eqpmn_extn (
+            et_reqst_id
+            , reqst_id
+            , reqst_sttus
+            , use_begin_dt
+            , use_end_dt
+            , rntfee
+            , dscnt_id
+            , usgtm
+            , expect_rntfee
+            , dscnt_amount
+            , expect_usgtm
+            , creatr_id
+            , updusr_id
+        ) values(
+            #{etReqstId}
+            , #{reqstId}
+            , #{reqstSttus}
+            , #{useBeginDt}
+            , #{useEndDt}
+            , #{rntfee}
+            , #{dscntId}
+            , #{usgtm}
+            , #{expectRntfee}
+            , #{dscntAmount}
+            , #{expectUsgtm}
+            , #{creatrId}
+            , #{updusrId}
+            )
+
+    </insert>
+
+    <select id="getUseRntfee" resultType="aicluster.tsp.common.dto.FrontMyUseExtndRntfeeDto$MyRntfee">
+        /** FrontMyUseExtndRntfeeDto$MyRntfee.getUseRntfee */
+        SELECT
+            (SELECT code FROM com_api.cmmt_code WHERE 1=1 AND code_group_id = 'EQPMN_FEE_DIV' AND code = 'RNTFEE') AS "div"
+            , teur.use_begin_dt
+            , teur.use_end_dt
+            , teur.rntfee
+        FROM tsp_api.tspt_eqpmn_use_reqst AS teur
+        WHERE 1=1
+            AND teur.reqst_id = #{reqstId}
+            AND teur.reqst_sttus = #{reqstSttus}
+
+        UNION ALL
+
+        SELECT
+            (SELECT code FROM com_api.cmmt_code WHERE 1=1 AND code_group_id = 'EQPMN_FEE_DIV' AND code = 'EXTEND') AS "div"
+            , tee.use_begin_dt
+            , tee.use_end_dt
+            , tee.rntfee
+        FROM tsp_api.tspt_eqpmn_extn AS tee
+        WHERE 1=1
+            AND tee.reqst_id = #{reqstId}
+            AND tee.reqst_sttus = #{reqstSttus}
+    </select>
+
+    <select id="getUseAddRntfee" resultType="aicluster.tsp.common.dto.FrontMyUseExtndRntfeeDto$MyAddRntfee">
+        /** FrontMyUseExtndRntfeeDto$MyAddRntfee.getUseAddRntfee */
+        SELECT
+            (SELECT code FROM com_api.cmmt_code WHERE 1=1 AND code_group_id = 'EQPMN_FEE_DIV' AND code = 'ADD_PAYMENT') AS "div"
+             , teur.rqest_resn
+             , teur.adit_rntfee
+        FROM tsp_api.tspt_eqpmn_use_reqst AS teur
+        WHERE 1=1
+          AND teur.reqst_id = #{reqstId};
+    </select>
+
+    <select id="getUseReprtInfo" resultType="aicluster.tsp.common.dto.FrontMyUseReprtDto">
+        /** FrontMyUseReprtDto.getUseReprtInfo */
+        SELECT
+            ter.reprt_id
+            , te.eqpmn_nm_korean
+            , te.eqpmn_nm_engl
+            , te.model_nm
+            , te.assets_no
+            , teur.pymnt_mth
+            , teur.use_begin_dt
+            , teur.use_end_dt
+            , teur.usgtm
+            , teur.expect_usgtm
+            , teur.expect_rntfee
+            , teur.rntfee
+            , teur.dscnt_id
+            , ted.dscnt_resn
+            , ted.dscnt_rate
+            , teur.dscnt_amount
+            , tedd.rntfee_hour
+        FROM tsp_api.tspt_eqpmn_use_reqst AS teur
+            LEFT JOIN tsp_api.tspt_eqpmn_reprt AS ter
+                ON ter.reqst_id = teur.reqst_id
+            LEFT JOIN tsp_api.tspt_eqpmn AS te
+                ON te.eqpmn_id = teur.eqpmn_id
+            LEFT JOIN tsp_api.tspt_eqpmn_dscnt AS ted
+                ON teur.dscnt_id = ted.dscnt_id
+            LEFT JOin tsp_api.tspt_eqpmn_detail AS tedd
+                ON teur.eqpmn_id = tedd.eqpmn_id
+        WHERE 1=1
+            AND teur.reqst_id = #{reqstId}
+    </select>
+    <select id="getUseReprt" resultType="aicluster.tsp.common.dto.FrontMyUseReprtDto$MyUseReprt">
+        /** FrontMyUseReprtDto$MyUseReprt.getUseReprt */
+        SELECT
+            ter.reprt_id
+            , ter.reprt_sttus
+            , ter.creat_dt
+            , ter.prcuse_realm
+            , ter.prcuse_purps
+            , ter.prcuse_need
+            , ter.mnnst
+            , ter.trget_eqpmn
+            , ter.detail_prcuse
+            , ter.prcuse_prpos
+            , ter.prcuse_plan
+            , ter.prcuse_dtls
+            , ter.dffrnc
+            , ter.atchmnfl_group_id
+            , ter.achiv
+            , ter.expc_effect
+            , ter.cmt_expect_era
+            , ter.expect_salamt
+            , ter.strength
+            , ter.weakness
+            , ter.creatr_id
+        FROM tsp_api.tspt_eqpmn_reprt AS ter
+        WHERE 1=1
+            AND ter.reprt_id = #{reprtId}
+    </select>
+
+    <insert id="postUseReprt">
+        INSERT INTO tsp_api.tspt_eqpmn_reprt (
+            reprt_id
+            , reqst_id
+            , reprt_sttus
+            , rsndqf
+            , prcuse_purps
+            , mnnst
+            , trget_eqpmn
+            , detail_prcuse
+            , prcuse_prpos
+            , prcuse_plan
+            , prcuse_dtls
+            , dffrnc
+            , achiv
+            , expc_effect
+            , cmt_expect_era
+            , expect_salamt
+            , strength
+            , weakness
+            , atchmnfl_group_id
+            , creatr_id
+            , updusr_id
+            , prcuse_realm
+            , prcuse_need
+        ) VALUES(
+            #{param.reprtId}
+            , #{param.reqstId}
+            , #{param.reprtSttus}
+            , #{param.rsndqf}
+            , #{param.prcusePurps}
+            , #{param.mnnst}
+            , #{param.trgetEqpmn}
+            , #{param.detailPrcuse}
+            , #{param.prcusePrpos}
+            , #{param.prcusePlan}
+            , #{param.prcuseDtls}
+            , #{param.dffrnc}
+            , #{param.achiv}
+            , #{param.expcEffect}
+            , #{param.cmtExpectEra}
+            , #{param.expectSalamt}
+            , #{param.strength}
+            , #{param.weakness}
+            , #{param.atchmnflGroupId}
+            , #{param.creatrId}
+            , #{param.updusrId}
+            , #{param.prcuseRealm}
+            , #{param.prcuseNeed}
+        )
+    </insert>
+
+    <update id="putUseReprt">
+        UPDATE tsp_api.tspt_eqpmn_reprt SET
+                reprt_sttus 		= #{reprtSttus}
+            <if test='rsndqf != null and rsndqf != ""'>
+                , rsndqf 			= #{rsndqf}
+            </if>
+            <if test='prcusePurps != null and prcusePurps != ""'>
+                , prcuse_purps 		= #{prcusePurps}
+            </if>
+            <if test='mnnst != null and mnnst != ""'>
+                , mnnst 			= #{mnnst}
+            </if>
+            <if test='trgetEqpmn != null and trgetEqpmn != ""'>
+                , trget_eqpmn 		= #{trgetEqpmn}
+            </if>
+            <if test='detailPrcuse != null and detailPrcuse != ""'>
+                , detail_prcuse 	= #{detailPrcuse}
+            </if>
+            <if test='prcusePrpos != null and prcusePrpos != ""'>
+                , prcuse_prpos 		= #{prcusePrpos}
+            </if>
+            <if test='prcusePlan != null and prcusePlan != ""'>
+                , prcuse_plan 		= #{prcusePlan}
+            </if>
+            <if test='prcuseDtls != null and prcuseDtls != ""'>
+                , prcuse_dtls 		= #{prcuseDtls}
+            </if>
+            <if test='dffrnc != null and dffrnc != ""'>
+                , dffrnc 			= #{dffrnc}
+            </if>
+            <if test='achiv != null and achiv != ""'>
+                , achiv 			= #{achiv}
+            </if>
+            <if test='expcEffect != null and expcEffect != ""'>
+                , expc_effect 		= #{expcEffect}
+            </if>
+            <if test='cmtExpectEra != null and cmtExpectEra != ""'>
+                , cmt_expect_era 	= #{cmtExpectEra}
+            </if>
+            <if test='expectSalamt != null and expectSalamt != ""'>
+                , expect_salamt 	= #{expectSalamt}
+            </if>
+            <if test='strength != null and strength != ""'>
+                , strength 			= #{strength}
+            </if>
+            <if test='weakness != null and weakness != ""'>
+                , weakness 			= #{weakness}
+            </if>
+            <if test='atchmnflGroupId != null and atchmnflGroupId != ""'>
+                , atchmnfl_group_id = #{atchmnflGroupId}
+            </if>
+            <if test='prcuseRealm != null and prcuseRealm != ""'>
+                , prcuse_realm 		= #{prcuseRealm}
+            </if>
+            <if test='prcuseNeed != null and prcuseNeed != ""'>
+                , prcuse_need 		= #{prcuseNeed}
+            </if>
+            <if test='updusrId != null and updusrId != ""'>
+                , updusr_id 		= #{updusrId}
+            </if>
+            <if test='updtDt != null '>
+                , updt_dt 			= #{updtDt}
+            </if>
+        WHERE 1=1
+            AND reprt_id = #{reprtId}
+    </update>
+
+</mapper>

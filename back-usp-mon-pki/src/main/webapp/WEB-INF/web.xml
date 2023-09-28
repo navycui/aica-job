@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+	id="WebApp_ID" version="4.0">
+	<display-name>ai-pki</display-name>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+	<filter>
+		<filter-name>CorsFilter</filter-name>
+		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+		<init-param>
+			<param-name>cors.allowed.origins</param-name>
+			<param-value>http://pc.atops.or.kr:5500,http://pc.atops.or.kr,http://dev-admin.atops.or.kr,http://dev-portal.atops.or.kr,http://sso.atops.or.kr,https://sso.atops.or.kr,https://admin.atops.or.kr,https://portal.atops.or.kr,https://www.atops.or.kr,https://atops.or.kr,https://saz.atops.or.kr:9066</param-value>
+		</init-param>
+		<init-param>
+			<param-name>cors.allowed.methods</param-name>
+			<param-value>GET,POST,HEAD,OPTIONS,PUT</param-value>
+		</init-param>
+		<init-param>
+			<param-name>cors.allowed.headers</param-name>
+			<param-value>Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers</param-value>
+		</init-param>
+		<init-param>
+			<param-name>cors.exposed.headers</param-name>
+			<param-value>Access-Control-Allow-Origin,Access-Control-Allow-Credentials</param-value>
+		</init-param>
+		<init-param>
+			<param-name>cors.support.credentials</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<init-param>
+			<param-name>cors.preflight.maxage</param-name>
+			<param-value>10</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CorsFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+<!-- 	<filter> -->
+<!-- 		<filter-name>ServletCorsFilter</filter-name> -->
+<!-- 		<filter-class>pki.cors.CORSFilter</filter-class> -->
+<!-- 	</filter> -->
+<!-- 	<filter-mapping> -->
+<!-- 		<filter-name>ServletCorsFilter</filter-name> -->
+<!-- 		<url-pattern>/transkeyServlet</url-pattern> -->
+<!-- 	</filter-mapping> -->
+
+	<servlet>
+		<servlet-name>transkeyServlet</servlet-name>
+		<servlet-class>com.raonsecure.transkey.servlet.TranskeyServlet</servlet-class>
+		<init-param>
+			<param-name>iniFilePath</param-name>
+			<param-value>/WEB-INF/raonsecure/config.ini</param-value>
+		</init-param>
+		<init-param>
+			<param-name>licenseIniPath</param-name>
+			<param-value>/WEB-INF/raonsecure/transkey_license.ini</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>transkeyServlet</servlet-name>
+		<url-pattern>/transkeyServlet</url-pattern>
+	</servlet-mapping>
+</web-app>

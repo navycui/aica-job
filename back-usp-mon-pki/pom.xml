@@ -1,0 +1,211 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>aicluster</groupId>
+	<artifactId>pki</artifactId>
+	<version>1.0.0</version>
+	<packaging>war</packaging>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<bnet-library.version>1.9.10</bnet-library.version>
+	</properties>
+
+	<repositories>
+		<!-- 프로젝트 내 jar 파일 참조 -->
+		<repository>
+		    <id>local-repository</id>
+		    <name>local repository</name>
+		    <url>file://${project.basedir}/repo</url>
+		</repository>
+
+		<!-- AICA Maven Nexus repository -->
+		<repository>
+			<id>releases</id>
+			<url>http://133.186.152.147:8081/repository/maven-aica-aisp-release/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<repository>
+			<id>mvn2s</id>
+			<url>https://repo.maven.apache.org/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+			<version>1.18.24</version>
+		</dependency>
+
+		<dependency>
+			<groupId>bnet</groupId>
+			<artifactId>bnet-library</artifactId>
+			<version>${bnet-library.version}</version>
+		</dependency>
+
+		<!-- Dreamsecurity Magicline4Web -->
+		<dependency>
+		    <groupId>3rd-party</groupId>
+		    <artifactId>jcaos</artifactId>
+		    <version>1.4.11.2</version>
+		</dependency>
+		<dependency>
+		    <groupId>3rd-party</groupId>
+		    <artifactId>magice2e</artifactId>
+		    <version>1.0.1.6</version>
+		</dependency>
+		<dependency>
+		    <groupId>3rd-party</groupId>
+		    <artifactId>MagicJCrypto</artifactId>
+		    <version>v2.0.0.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>3rd-party</groupId>
+		    <artifactId>magicline-e2e</artifactId>
+		    <version>4.0.0.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>3rd-party</groupId>
+		    <artifactId>ml4web_server</artifactId>
+		    <version>4.5.0.7</version>
+		</dependency>
+
+		<!-- SSO -->
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+		<!-- RaonSecure nxKey -->
+		<dependency>
+		    <groupId>3rd-party</groupId>
+		    <artifactId>transkey</artifactId>
+		    <version>4-6-14-2_18_20210226_X</version>
+		</dependency>
+
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>local</id>
+			<properties>
+				<property.env>local</property.env>
+			</properties>
+			<dependencies>
+		        <!-- tomcat -->
+				<dependency>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-api</artifactId>
+					<version>9.0.65</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<property.env>dev</property.env>
+			</properties>
+		</profile>
+		<profile>
+			<id>prd</id>
+			<properties>
+				<property.env>prd</property.env>
+			</properties>
+		</profile>
+		<profile>
+			<id>yym</id>
+			<properties>
+				<property.env>yym</property.env>
+			</properties>
+		</profile>
+	</profiles>
+
+	<build>
+		<resources>
+			<!-- // 리소스 파일들 중 MagicLine4Web 관련 파일들은 별도 빌드 정의(하단 내용 참고) -->
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>local/</exclude>
+					<exclude>dev/</exclude>
+					<exclude>prd/</exclude>
+					<exclude>yym/</exclude>
+				</excludes>
+			</resource>
+			<!-- // 서버 환경별 빌드 -->
+			<resource>
+				<directory>src/main/resources/${property.env}</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>**/magicline/</exclude>
+				</excludes>
+				<targetPath>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</targetPath>
+			</resource>
+			<!-- // MagicLine4Web 환경설정 파일을 서버 환경별 빌드 -->
+			<resource>
+				<directory>src/main/resources/${property.env}/magicline</directory>
+				<filtering>true</filtering>
+				<targetPath>${project.build.directory}/${project.build.finalName}/WEB-INF/magicline</targetPath>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.2.3</version>
+				<configuration>
+					<!-- // 배포용 war 파일 생성 시 라온시큐리티 키보드 보안 샘플 소스 제외 처리 -->
+					<packagingExcludes>
+					transkey/demo/
+					WEB-INF/classes/dev/
+					WEB-INF/classes/local/
+					WEB-INF/classes/prd/
+					WEB-INF/classes/yym/
+					</packagingExcludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.opoo.maven</groupId>
+				<artifactId>tomcat9-maven-plugin</artifactId>
+				<version>3.0.1</version>
+				<configuration>
+					<port>80</port>
+					<ignorePackaging>true</ignorePackaging>
+					<path>/pki</path>
+					<contextReloadable>true</contextReloadable>
+					<systemProperties>
+						<JAVA_OPTS>-Xms512m -Xmx512m --XX:MaxPermSize=128m</JAVA_OPTS>
+					</systemProperties>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

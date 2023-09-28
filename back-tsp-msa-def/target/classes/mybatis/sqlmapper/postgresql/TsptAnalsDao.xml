@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptAnalsDao">
+
+    <sql id="selectList_where">
+        1=1
+        <if test='param.useSttus != null and param.useSttus != ""'>
+            and use_sttus = #{param.useSttus}
+        </if>
+        <if test='param.creatBeginDt != null and param.creatEndDt != null'>
+            and a.creat_dt <![CDATA[>=]]> #{param.creatBeginDt}::date
+            and a.creat_dt::date <![CDATA[<=]]> #{param.creatEndDt}
+        </if>
+        <if test='param.useBeginDt != null and param.useEndDt != null'>
+            AND (use_begin_dt::date between #{param.useBeginDt} and #{param.useEndDt}
+            OR use_end_dt::date between #{param.useBeginDt} and #{param.useEndDt})
+        </if>
+    </sql>
+
+    <select id="selectAnalsReqstCount" resultType="Long">
+        select
+            count(*)
+        from
+            tsp_api.tspt_anals_unt_reqst a
+        where
+        <include refid="selectList_where" />
+    </select>
+
+    <select id="selectAnalsReqstList" resultType="aicluster.tsp.common.dto.AnalsReqstDto">
+        SELECT
+        row_number() over (order by a.creat_dt) as number,
+        reqst_id,
+        use_sttus,
+        use_begin_dt,
+        use_end_dt,
+        anals_unt_div,
+        resrce_id,
+        mber_ty_code as mber_div,
+        mber_nm as entrprs_nm,
+        a.creat_dt
+        FROM
+            tsp_api.tspt_anals_unt_reqst a
+        left join
+            auth_api.cmmt_mber_info b
+        on a.creatr_id = b.mber_id
+        where
+        <include refid="selectList_where" />
+        order by a.creat_dt desc
+        <if test="!isExcel">
+            offset #{beginRowNum} -1 limit #{itemsPerPage}
+        </if>
+    </select>
+
+    <select id="selectAnalsReqstDetail" resultType="aicluster.tsp.common.dto.AnalsReqstDetailDto">
+        select
+            reqst_id,
+            use_sttus,
+            use_begin_dt,
+            use_end_dt,
+            reqst_resn,
+            anals_unt_div,
+            resrce_id,
+            creatr_id,
+            creat_dt
+        from
+            tsp_api.tspt_anals_unt_reqst
+        where
+            reqst_id = #{reqstId}
+    </select>
+
+    <select id="selectAnalsReqstHistList" resultType="aicluster.tsp.common.entity.TsptAnalsUntReqstHist">
+        select
+        a.creat_dt,
+        a.process_knd,
+        a.process_resn,
+        b.mber_nm,
+        b.ncnm as nickname
+        from
+        tsp_api.tspt_anals_unt_reqst_hist a
+        left join auth_api.cmmt_mber_info b
+        on a.opetr_id = b.mber_id
+        where
+            reqst_id = #{reqstId}
+        <if test="!isExcel">
+            offset #{beginRowNum} -1
+            limit #{itemsPerPage}
+        </if>
+    </select>
+
+    <update id="updateAnalsReqstProcess">
+        update
+            tsp_api.tspt_anals_unt_reqst
+        set
+            use_sttus = #{useSttus},
+            rsndqf = #{rsndqf},
+            updusr_id = #{updusrId},
+            updt_dt = now()
+        where
+            reqst_id = #{reqstId}
+    </update>
+
+    <update id="updateUseReqstConsent">
+        update
+            tsp_api.tspt_eqpmn_use_reqst
+        set
+            reqst_sttus = #{reqstSttus},
+            use_sttus = #{useSttus},
+            updusr_id = #{updusrId},
+            updt_dt = now()
+        where
+            reqst_id = #{reqstId}
+    </update>
+
+    <update id="updateUseReqstTkoutProcess">
+        update
+            tsp_api.tspt_eqpmn_use_reqst
+        set
+            tkout_dlbrt_result = #{tkoutDlbrtResult},
+            tkout_dlbrt_cn = #{tkoutDlbrtCn},
+            updusr_id = #{updusrId},
+            updt_dt = now()
+        where
+            reqst_id = #{reqstId}
+    </update>
+
+    <update id="updateUseReqstDscnt">
+        update
+            tsp_api.tspt_eqpmn_use_reqst
+        set
+            dscnt_id = #{dscntId},
+            rntfee = #{rntfee},
+            usgtm = #{usgtm},
+            expect_rntfee = #{expectRntfee},
+            dscnt_amount = #{dscntAmount},
+            expect_usgtm = #{expectUsgtm},
+            updusr_id = #{updusrId},
+            updt_dt = now()
+        where
+            reqst_id = #{reqstId}
+    </update>
+
+    <insert id="insertAnalsReqstHist">
+        insert into
+            tsp_api.tspt_anals_unt_reqst_hist(
+            hist_id,
+            reqst_id,
+            opetr_id,
+            process_knd,
+            process_resn,
+            mber_id,
+            mber_nm
+        )
+        values(
+                  #{histId},
+                  #{reqstId},
+                  #{opetrId},
+                  #{processKnd},
+                  #{processResn},
+                  #{mberId},
+                  #{mberNm}
+              )
+    </insert>
+
+    <select id="selectUseDscnt" resultType="aicluster.tsp.common.dto.EqpmnUseDscntDto">
+        select
+            a.eqpmn_id,
+            use_begin_dt,
+            use_end_dt,
+            tkout_at,
+            rntfee_hour,
+            COALESCE(dscnt_rate, 0) as dscnt_rate,
+            COALESCE(use_sttus, 'END_USE') as use_sttus
+        from
+            tsp_api.tspt_eqpmn_use_reqst a
+                left join tsp_api.tspt_eqpmn_detail b
+                          on a.eqpmn_id = b.eqpmn_id
+                left join tsp_api.tspt_eqpmn_dscnt c
+                          on c.dscnt_id = #{dscntId}
+        where
+            reqst_id = #{reqstId}
+    </select>
+
+</mapper>

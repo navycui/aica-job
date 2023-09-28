@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptEqpmnUseReqstDao">
+
+    <sql id="selectList_where">
+        1=1
+        --use_sttus = 'APPLY'
+        <if test='param.reqstSttus != null and param.reqstSttus != ""'>
+            and a.reqst_sttus = #{param.reqstSttus}
+        </if>
+        <if test='param.pymntMth != null and param.pymntMth != ""'>
+            and a.pymnt_mth = #{param.pymntMth}
+        </if>
+        <if test='param.tkoutAt != null'>
+            and a.tkout_at = #{param.tkoutAt}
+        </if>
+        <if test='param.eqpmnNmKorean != null and param.eqpmnNmKorean != ""'>
+            and b.eqpmn_nm_korean like '%' || #{param.eqpmnNmKorean} || '%'
+        </if>
+        <if test='param.assetsNo != null and param.assetsNo != ""'>
+            and b.assets_no like '%' || #{param.assetsNo} || '%'
+        </if>
+        <if test='param.entrprsNm != null and param.entrprsNm != ""'>
+            and c.mber_nm like '%' || #{param.entrprsNm} || '%'
+        </if>
+        <if test='param.rceptNo != null and param.rceptNo != ""'>
+            and a.rcept_no like '%' || #{param.rceptNo} || '%'
+        </if>
+        <if test='param.creatBeginDt != null and param.creatEndDt != null'>
+            and a.creat_dt <![CDATA[>=]]> #{param.creatBeginDt}::date
+            and a.creat_dt::date <![CDATA[<=]]> #{param.creatEndDt}
+        </if>
+        <if test='param.useBeginDt != null and param.useEndDt != null'>
+            AND (use_begin_dt::date between #{param.useBeginDt} and #{param.useEndDt}
+            OR use_end_dt::date between #{param.useBeginDt} and #{param.useEndDt})
+        </if>
+    </sql>
+
+    <select id="selectEqpmnReqstCount" resultType="Long">
+        select count(a.reqst_id)
+        from tsp_api.tspt_eqpmn_use_reqst a
+        inner join tsp_api.tspt_eqpmn b
+        on b.eqpmn_id = a.eqpmn_id
+        inner join auth_api.cmmt_mber_info c
+        on a.creatr_id = c.mber_id
+        where
+        <include refid="selectList_where" />
+    </select>
+
+    <select id="selectEqpmnReqstList" resultType="aicluster.tsp.common.dto.EqpmnUseReqstDto">
+        select
+        row_number() over (order by a.creat_dt) as number,
+        a.reqst_id,
+        a.reqst_sttus,
+        c.mber_ty_code as mber_div,
+        c.mber_nm as entrprs_nm,
+        b.assets_no,
+        b.eqpmn_nm_korean,
+        a.use_begin_dt,
+        a.use_end_dt,
+        a.pymnt_mth,
+        a.rcept_no,
+        a.tkout_at,
+        a.creat_dt
+        from tsp_api.tspt_eqpmn_use_reqst a
+        inner join tsp_api.tspt_eqpmn b
+        on b.eqpmn_id = a.eqpmn_id
+        inner join auth_api.cmmt_mber_info c
+        on a.creatr_id = c.mber_id
+        where
+        <include refid="selectList_where" />
+        order by a.creat_dt desc
+        <if test="!isExcel">
+            offset #{beginRowNum} -1 limit #{itemsPerPage}
+        </if>
+    </select>
+
+    <select id="selectEqpmnUseReqstDetail" resultType="aicluster.tsp.common.dto.EqpmnUseReqstDetailDto">
+        select
+            a.reqst_sttus,
+            a.creat_dt,
+            a.rcept_no,
+            a.npy_resn, --
+            a.eqpmn_id,
+            b.eqpmn_nm_korean,
+            b.eqpmn_nm_engl,
+            b.model_nm,
+            b.assets_no,
+            a.useprps,
+            a.tkout_at,
+            a.tkout_adres,
+            a.tkout_resn,
+            a.tkout_dlbrt_result,
+            a.tkout_dlbrt_cn,
+            a.use_begin_dt,
+            a.use_end_dt,
+            d.rntfee_hour,
+--             (d.useful_end_hour - d.useful_begin_hour) as useful_hour,
+            a.rntfee,
+            a.expect_rntfee,
+            a.dscnt_amount,
+            a.pymnt_mth,
+            round(a.usgtm / 60) as usgtm,    --
+            round(a.expect_usgtm / 60) as expect_usgtm,
+            a.dscnt_id,
+            e.dscnt_resn,
+            e.dscnt_rate,
+            a.atchmnfl_group_id,
+            a.proms_atchmnfl_id,
+            a.partcptn_div,
+            a.applcnt_id
+        from tsp_api.tspt_eqpmn_use_reqst a
+                 left join tsp_api.tspt_eqpmn b
+                           on b.eqpmn_id = a.eqpmn_id
+                 left join tsp_api.tspt_eqpmn_detail d
+                           on d.eqpmn_id = a.eqpmn_id
+                 left join tsp_api.tspt_eqpmn_dscnt e
+                           on a.dscnt_id = e.dscnt_id
+        where
+            a.reqst_id = #{reqstId}
+    </select>
+
+    <select id="selectUseReqstHistList" resultType="aicluster.tsp.common.entity.TsptEqpmnUseReqstHist">
+<!--        select-->
+<!--        a.creat_dt,-->
+<!--        a.process_knd,-->
+<!--        a.process_resn,-->
+<!--        b.mber_nm,-->
+<!--        b.nickname-->
+<!--        from-->
+<!--        tsp_api.tspt_eqpmn_use_reqst_hist a-->
+<!--        left join auth_api.cmmt_mber_info b-->
+<!--        on a.opetr_id = b.mber_id-->
+<!--        where-->
+<!--            reqst_id = #{reqstId}-->
+<!--        <if test="!isExcel">-->
+<!--            offset #{beginRowNum} -1-->
+<!--            limit #{itemsPerPage}-->
+<!--        </if>-->
+        SELECT
+            hist_id,
+            creat_dt,
+            process_knd,
+            COALESCE(process_resn,'') AS process_resn,
+            mber_nm,
+            opetr_id
+        FROM tsp_api.tspt_eqpmn_use_reqst_hist
+        WHERE reqst_id = #{reqstId}
+        ORDER BY creat_dt DESC
+        offset #{beginRowNum} -1
+        limit #{itemsPerPage}
+    </select>
+
+    <update id="updateUseReqstProcess">
+        update
+            tsp_api.tspt_eqpmn_use_reqst
+        set
+            reqst_sttus = #{reqstSttus},
+            rsndqf = #{rsndqf},
+            updusr_id = #{updusrId},
+            updt_dt = now()
+        where
+            reqst_id = #{reqstId}
+
+    </update>
+
+    <update id="updateUseReqstConsent">
+        update
+            tsp_api.tspt_eqpmn_use_reqst
+        set
+            reqst_sttus = #{reqstSttus},
+            use_sttus = #{useSttus},
+            updusr_id = #{updusrId},
+            updt_dt = now()
+        where
+            reqst_id = #{reqstId}
+    </update>
+
+    <update id="updateUseReqstTkoutProcess">
+        update
+            tsp_api.tspt_eqpmn_use_reqst
+        set
+            tkout_dlbrt_result = #{tkoutDlbrtResult},
+            tkout_dlbrt_cn = #{tkoutDlbrtCn},
+            updusr_id = #{updusrId},
+            updt_dt = now()
+        where
+            reqst_id = #{reqstId}
+    </update>
+
+    <update id="updateUseReqstDscnt">
+        update
+            tsp_api.tspt_eqpmn_use_reqst
+        set
+            dscnt_id = #{dscntId},
+            rntfee = #{rntfee},
+            usgtm = #{usgtm},
+            dscnt_amount = #{dscntAmount},
+            updusr_id = #{updusrId},
+            updt_dt = now()
+        where
+            reqst_id = #{reqstId}
+    </update>
+
+    <insert id="insertUseReqstHist">
+        insert into
+            tsp_api.tspt_eqpmn_use_reqst_hist(
+            hist_id,
+            reqst_id,
+            opetr_id,
+            process_knd,
+            process_resn,
+            mber_id,
+            mber_nm
+        )
+        values(
+                  #{histId},
+                  #{reqstId},
+                  #{opetrId},
+                  #{processKnd},
+                  #{processResn},
+                  #{mberId},
+                  #{mberNm}
+              )
+    </insert>
+
+    <select id="selectUseDscnt" resultType="aicluster.tsp.common.dto.EqpmnUseDscntDto">
+        select
+            a.eqpmn_id,
+            use_begin_dt,
+            use_end_dt,
+            tkout_at,
+            rntfee_hour,
+            COALESCE(dscnt_rate, 0) as dscnt_rate,
+            COALESCE(use_sttus, 'END_USE') as use_sttus
+        from
+            tsp_api.tspt_eqpmn_use_reqst a
+                left join tsp_api.tspt_eqpmn_detail b
+                          on a.eqpmn_id = b.eqpmn_id
+                left join tsp_api.tspt_eqpmn_dscnt c
+                          on c.dscnt_id = #{dscntId}
+        where
+            reqst_id = #{reqstId}
+    </select>
+    <select id="checkEstmtId" resultType="String">
+        /**String.checkEstmtId*/
+        SELECT
+            estmt_id
+        FROM tsp_api.tspt_eqpmn_estmt_reqst
+        WHERE 1=1
+            AND applcnt_id = #{applcntId}
+            AND eqpmn_id = #{eqpmnId}
+            AND reqst_sttus='EST_APPROVE'
+            AND use_begin_dt = #{useBeginDt}
+            AND use_end_dt = #{useEndDt}
+    </select>
+
+</mapper>

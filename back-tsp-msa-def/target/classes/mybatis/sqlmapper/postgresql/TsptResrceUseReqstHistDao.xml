@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptResrceUseReqstHistDao">
+    <select id="getResrceHistCount" resultType="Long">
+        select count(reqst_id)
+        from tsp_api.tspt_resrce_use_reqst_hist
+        where reqst_id = #{rsqstId}
+    </select>
+
+    <select id="getResrceHist" resultType="aicluster.tsp.api.admin.resrce.param.ResrceHistParam">
+        select
+            hist_id,
+            reqst_id,
+            opetr_id,
+            process_knd,
+            process_resn,
+            creat_dt,
+            mber_id,
+            mber_nm
+        from tsp_api.tspt_resrce_use_reqst_hist
+        where 1=1
+            and reqst_id = #{reqstId}
+        offset #{beginRowNum} -1
+            limit #{itemsPerPage}
+    </select>
+
+    <select id="getResrceHistUseCount" resultType="Long">
+        select count(reqst_id)
+        from tsp_api.tspt_resrce_use_reqst_hist
+        where reqst_id = #{reqstId} and process_knd in ('REQ_RETURN', 'REQ_COMPLETE', 'APPROVE_CANCEL')
+    </select>
+
+    <select id="getResrceUseHist" resultType="aicluster.tsp.api.admin.resrce.param.ResrceHistParam">
+        select
+            hist_id,
+            reqst_id,
+            opetr_id,
+            process_knd,
+            process_resn,
+            creat_dt,
+            mber_id,
+            mber_nm
+        from tsp_api.tspt_resrce_use_reqst_hist
+        where reqst_id = #{reqstId} and process_knd in ('REQ_RETURN', 'REQ_COMPLETE', 'APPROVE_CANCEL')
+        offset #{beginRowNum} -1
+            limit #{itemsPerPage}
+    </select>
+    
+    <insert id="putResrceHist">
+        insert into tsp_api.tspt_resrce_use_reqst_hist(
+            hist_id
+            , reqst_id
+            , opetr_id
+            , process_knd
+            , process_resn
+            , mber_id
+            , mber_nm)
+        values (
+            #{histId}
+            , #{reqstId}
+            , #{opetrId}
+            , #{processKnd}
+            , #{processResn}
+            , #{mberId}
+            , #{mberNm}
+            )
+    </insert>
+</mapper>

@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptFrontUseReqstDao">
+    <sql id="selectList_where">
+        disuse_at = false
+        <if test='param.eqpmnNmKorean != null and param.eqpmnNmKorean != ""'>
+            AND eqpmn_nm_korean like '%' || #{param.eqpmnNmKorean} || '%'
+        </if>
+        <if test='param.eqpmnClId != null and param.eqpmnClId != ""'>
+            AND b.eqpmn_lclas_id = #{param.eqpmnClId}
+        </if>
+    </sql>
+
+    <select id="selectUseReqstEqpmnListCnt" resultType="Long">
+        select count(*)
+        from
+            tsp_api.tspt_eqpmn a
+        inner join
+            tsp_api.tspt_eqpmn_cl b
+                on a.eqpmn_cl_id = b.eqpmn_cl_id
+        inner join tsp_api.tspt_eqpmn_detail c
+                on a.eqpmn_id = c.eqpmn_id
+        where
+            <include refid="selectList_where" />
+    </select>
+
+    <select id="selectUseReqstEqpmnList" resultType="aicluster.tsp.common.dto.FrontEqpmnSelectListDto">
+        select
+            a.eqpmn_id,
+            a.eqpmn_nm_korean,
+            a.image_id,
+            b.eqpmn_cl_nm
+        from
+            tsp_api.tspt_eqpmn a
+        inner join
+            tsp_api.tspt_eqpmn_cl b
+                on a.eqpmn_cl_id = b.eqpmn_cl_id
+        inner join
+            tsp_api.tspt_eqpmn_detail c
+                on a.eqpmn_id = c.eqpmn_id
+        where
+            <include refid="selectList_where" />
+            offset #{beginRowNum} -1
+            limit #{itemsPerPage}
+    </select>
+
+    <insert id="insertEstmt">
+        <if test='ofcps != null or bsnlcnsFileId != null'>
+            insert into
+            tsp_api.tspt_applcnt
+            (
+            applcnt_id
+            , ofcps
+            , bsnlcns_file_id
+            , indvdlinfo_colct_agre_at
+            , creatr_id
+            , updusr_id
+            )
+            values(
+            #{creatrId}
+            , #{ofcps}
+            , #{bsnlcnsFileId}
+            , true
+            , #{creatrId}
+            , #{creatrId}
+            ) ON conflict (applcnt_id)
+            DO UPDATE set
+            indvdlinfo_colct_agre_at = true
+            <if test='ofcps != null and ofcps != ""'>
+                , ofcps = #{ofcps}
+            </if>
+            <if test='bsnlcnsFileId != null and bsnlcnsFileId != ""'>
+                , bsnlcns_file_id = #{bsnlcnsFileId}
+            </if>
+            ,updusr_id = #{creatrId}
+            ,updt_dt = now();
+        </if>
+
+        INSERT INTO
+            tsp_api.tspt_eqpmn_estmt_reqst
+            (
+                estmt_id,
+                applcnt_id,
+                eqpmn_id,
+                pymnt_mth,
+                useprps,
+                tkout_at,
+                tkout_adres,
+                tkout_resn,
+                atchmnfl_group_id,
+                use_begin_dt,
+                use_end_dt,
+                reqst_sttus,
+                rntfee,
+                expect_rntfee,
+                dscnt_amount,
+                usgtm,
+                expect_usgtm,
+                partcptn_div,
+                creatr_id,
+                updusr_id
+             )
+        VALUES(
+                #{estmtId},
+                #{creatrId},
+                #{eqpmnId},
+                #{pymntMth},
+                #{useprps},
+                #{tkoutAt},
+                #{tkoutAdres},
+                #{tkoutResn},
+                #{atchmnflGroupId},
+                #{useBeginDt},
+                #{useEndDt},
+                #{reqstSttus},
+                #{rntfee},
+                #{expectRntfee},
+                0,
+                #{expectUsgtm},
+                #{expectUsgtm},
+                #{partcptnDiv},
+                #{creatrId},
+                #{creatrId}
+                );
+
+
+    </insert>
+
+    <insert id="insertUseReqst">
+        INSERT INTO
+            tsp_api.tspt_eqpmn_use_reqst
+            (
+                reqst_id,
+                applcnt_id,
+                eqpmn_id,
+                pymnt_mth,
+                useprps,
+                tkout_at,
+                tkout_adres,
+                tkout_resn,
+                atchmnfl_group_id,
+                proms_atchmnfl_id,
+                use_begin_dt,
+                use_end_dt,
+                reqst_sttus,
+                rcept_no,
+                rntfee,
+                expect_rntfee,
+                dscnt_amount,
+                usgtm,
+                expect_usgtm,
+                partcptn_div,
+                creatr_id,
+                updusr_id,
+                tkin_at
+            )
+        VALUES(
+                #{estmtId},
+                #{creatrId},
+                #{eqpmnId},
+                #{pymntMth},
+                #{useprps},
+                #{tkoutAt},
+                #{tkoutAdres},
+                #{tkoutResn},
+                #{atchmnflGroupId},
+                #{promsAtchmnflId},
+                #{useBeginDt},
+                #{useEndDt},
+                #{reqstSttus},
+                #{rceptNo},
+                #{rntfee},
+                #{expectRntfee},
+                0,
+                #{expectUsgtm},
+                #{expectUsgtm},
+                #{partcptnDiv},
+                #{creatrId},
+                #{creatrId},
+                #{tkinAt}
+            );
+
+        <if test='ofcps != null or bsnlcnsFileId != null'>
+            UPDATE
+                tsp_api.tspt_applcnt
+            set
+                indvdlinfo_colct_agre_at = true
+                ,updusr_id = #{creatrId}
+                ,updt_dt = now()
+            <if test='ofcps != null and ofcps != ""'>
+                , ofcps = #{ofcps}
+            </if>
+            <if test='bsnlcnsFileId != null and bsnlcnsFileId != ""'>
+                , bsnlcns_file_id = #{bsnlcnsFileId}
+            </if>
+            where
+                applcnt_id = #{creatrId}
+        </if>
+
+
+    </insert>
+
+    <select id="selectEqpmnUseDateList" resultType="aicluster.tsp.api.front.usereqst.estmt.param.UseReqstEstmtUseDateParam">
+        select
+            use_begin_dt as begin_dt,
+            use_end_dt as end_dt
+        from
+            tsp_api.tspt_eqpmn_use_reqst
+        where
+            eqpmn_id = #{eqpmnId}
+            and reqst_sttus = #{reqstSttus}
+            and ((use_end_dt <![CDATA[>=]]> #{beginDt}::date and use_end_dt::date <![CDATA[<=]]> #{endDt}) or
+            (use_begin_dt <![CDATA[>=]]> #{beginDt}::date and use_begin_dt::date <![CDATA[<=]]> #{endDt}) or
+            (use_end_dt <![CDATA[>=]]> #{beginDt}::date and use_begin_dt::date <![CDATA[<=]]> #{endDt}))
+        union all
+
+        select
+            a.use_begin_dt as begin_dt,
+            a.use_end_dt as end_dt
+        from
+            tsp_api.tspt_eqpmn_extn a
+                inner join tsp_api.tspt_eqpmn_use_reqst b
+                    on a.reqst_id = b.reqst_id
+        where
+            b.eqpmn_id = #{eqpmnId}
+            and a.reqst_sttus = #{reqstSttus}
+            and ((a.use_end_dt <![CDATA[>=]]> #{beginDt}::date and a.use_end_dt::date <![CDATA[<=]]> #{endDt}) or
+             (a.use_begin_dt <![CDATA[>=]]> #{beginDt}::date and a.use_begin_dt::date <![CDATA[<=]]> #{endDt}) or
+             (a.use_end_dt <![CDATA[>=]]> #{beginDt}::date and a.use_begin_dt::date <![CDATA[<=]]> #{endDt}))
+        union all
+
+        select
+            manage_begin_dt as begin_dt,
+            manage_end_dt as end_dt
+        from
+            tsp_api.tspt_eqpmn_manage
+        where
+            eqpmn_id = #{eqpmnId}
+            and manage_result is null
+            and ((manage_end_dt <![CDATA[>=]]> #{beginDt}::date and manage_end_dt::date <![CDATA[<=]]> #{endDt}) or
+            (manage_begin_dt <![CDATA[>=]]> #{beginDt}::date and manage_begin_dt::date <![CDATA[<=]]> #{endDt}) or
+            (manage_end_dt <![CDATA[>=]]> #{beginDt}::date and manage_begin_dt::date <![CDATA[<=]]> #{endDt}))
+    </select>
+
+    <select id="selectUseReqstEqpmnInfo" resultType="aicluster.tsp.common.dto.FrontEqpmnSelectDto">
+        select
+            a.eqpmn_id,
+            eqpmn_nm_korean,
+            eqpmn_nm_engl,
+            model_nm,
+            eqpmn_cl_nm,
+            eqpmn_stndrd,
+            srcelct,
+            mnl_at,
+            sw_at,
+            legacy_itlpc,
+            pchrg_at,
+            spcmnt,
+            sumry,
+            spec_composition,
+            asstn_mhrls,
+            realm_prpos,
+            assets_no,
+            useful_begin_hour,
+            useful_end_hour,
+            rntfee_hour,
+            tkout_at,
+            image_id
+        from
+            tsp_api.tspt_eqpmn a
+            left join tsp_api.tspt_eqpmn_cl b
+                on a.eqpmn_cl_id = b.eqpmn_cl_id
+            left join tsp_api.tspt_eqpmn_detail c
+                on a.eqpmn_id = c.eqpmn_id
+        where
+            a.eqpmn_id = #{eqpmnId}
+    </select>
+
+</mapper>

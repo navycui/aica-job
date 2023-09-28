@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptEqpmnExtndDao">
+
+	<sql id="selectList_where">
+		1=1
+		<if test='param.reqstSttus != null and param.reqstSttus != ""'>
+			and tee.reqst_sttus = #{param.reqstSttus}
+		</if>
+		<if test='param.useBeginDt != null and param.useEndDt != null'>
+			AND ((tee.use_begin_dt between #{param.useBeginDt} and #{param.useEndDt}) OR (tee.use_end_dt between #{param.useBeginDt} and #{param.useEndDt}))
+		</if>
+		<if test='param.creatBeginDt != null'>
+			AND tee.creat_dt between #{param.creatBeginDt} and #{param.creatEndDt}
+		</if>
+		<if test='param.eqpmnNmKorean != null and param.eqpmnNmKorean != ""'>
+			AND te.eqpmn_nm_korean like '%' || #{param.eqpmnNmKorean} || '%'
+		</if>
+		<if test='param.assetsNo != null and param.assetsNo != ""'>
+			AND te.assets_no like '%' || #{param.assetsNo} || '%'
+		</if>
+		<if test='param.entrprsNm != null and param.entrprsNm != ""'>
+			AND ta.mber_nm like '%' || #{param.entrprsNm} || '%'
+		</if>
+		<if test='param.rceptNo != null and param.rceptNo != ""'>
+			AND teur.rcept_no like '%' || #{param.rceptNo} || '%'
+		</if>
+	</sql>
+	<select id="selectEqpmnExtndCount" resultType="Long">
+		/** Long.selectEqpmnExtndCount */
+		SELECT
+		count(*) as cnt
+		FROM tsp_api.tspt_eqpmn_extn AS tee
+			INNER JOIN tsp_api.tspt_eqpmn_use_reqst AS teur
+				ON tee.reqst_id = teur.reqst_id
+			INNER JOIN auth_api.cmmt_mber_info AS ta
+				ON teur.applcnt_id = ta.mber_id
+			INNER JOIN tsp_api.tspt_eqpmn AS te
+				ON te.eqpmn_id = teur.eqpmn_id
+		WHERE
+		<include refid="selectList_where" />
+	</select>
+
+	<select id="selectEqpmnExtndList" resultType="aicluster.tsp.common.dto.EqpmnExtndListDto">
+		/** EqpmnExtndListDto.selectEqpmnExtndList */
+		SELECT
+			row_number() over (order by teur.creat_dt) as number,
+			tee.et_reqst_id,
+			tee.reqst_sttus,
+-- 			ta.mber_div,
+-- 			ta.entrprs_nm,
+-- 			ta.user_nm,
+			ta.mber_ty_code as mber_div,
+			ta.mber_nm as entrprs_nm,
+			ta.mber_nm as user_nm,
+			te.assets_no,
+			te.eqpmn_nm_korean,
+			tee.use_begin_dt,
+			tee.use_end_dt,
+			teur.pymnt_mth,
+			teur.rcept_no,
+			tee.creat_dt
+		FROM tsp_api.tspt_eqpmn_extn AS tee
+			INNER JOIN tsp_api.tspt_eqpmn_use_reqst AS teur
+				ON tee.reqst_id = teur.reqst_id
+			INNER JOIN auth_api.cmmt_mber_info AS ta
+				ON teur.applcnt_id = ta.mber_id
+			INNER JOIN tsp_api.tspt_eqpmn AS te
+				ON te.eqpmn_id = teur.eqpmn_id
+		WHERE
+			<include refid="selectList_where" />
+			order by teur.creat_dt desc
+		<if test="!isExcel">
+			offset #{beginRowNum} -1
+			limit #{itemsPerPage}
+		</if>
+	</select>
+
+	<select id="selectEqpmnExtndDetail" resultType="aicluster.tsp.common.dto.EqpmnExtndDetailDto">
+		/** EqpmnExtndDetailDto.selectEqpmnExtndDetail */
+		SELECT
+			tee.et_reqst_id,
+			teur.rcept_no,
+			tee.creat_dt,
+			tee.reqst_sttus,
+			tee.rcpmny_gdcc,
+			tee.rcpmny_gdcc_dt,
+			tee.npy_resn,
+-- 			COALESCE(tee.npy_resn, 'F') AS npy_resn,
+			tee.reqst_id,
+			ta.applcnt_id,
+-- 			ta.mber_div,
+-- 			ta.entrprs_nm,
+-- 			ta.user_nm,
+-- 			ta.ofcps,
+-- 			ta.cttpc,
+-- 			ta.email,
+-- 			ta.partcptn_div,
+			teur.use_begin_dt AS old_use_begin_dt,
+			teur.use_end_dt AS old_use_end_dt,
+			tee.use_begin_dt,
+			tee.use_end_dt,
+			tee.expect_usgtm,
+			tee.usgtm,
+			ted.rntfee_hour,
+			teur.pymnt_mth,
+			COALESCE(tee.dscnt_id, '') AS dscnt_id,
+			COALESCE(tedd.dscnt_resn, '') AS dscnt_resn,
+			COALESCE(tedd.dscnt_rate, 0) AS dscnt_rate,
+			teur.eqpmn_id,
+			tee.rntfee,
+			tee.expect_rntfee,
+			tee.dscnt_amount,
+			teur.partcptn_div
+		FROM tsp_api.tspt_eqpmn_extn AS tee
+			INNER JOIN tsp_api.tspt_eqpmn_use_reqst AS teur
+				ON tee.reqst_id = teur.reqst_id
+			INNER JOIN tsp_api.tspt_applcnt AS ta
+				ON teur.applcnt_id = ta.applcnt_id
+			INNER JOIN tsp_api.tspt_eqpmn_detail AS ted
+				ON teur.eqpmn_id = ted.eqpmn_id
+			LEFT JOIN tsp_api.tspt_eqpmn_dscnt AS tedd
+				ON tedd.dscnt_id = tee.dscnt_id
+		WHERE 1=1
+			AND et_reqst_id = #{etReqstId}
+
+	</select>
+
+	<select id="selectEqpmnExtndDetailDscnt" resultType="aicluster.tsp.common.dto.EqpmnExtndDetailDto$DetailDscntParam">
+		/** EqpmnExtndDetailDto$DetailDscntParam.selectEqpmnExtndDetailDscnt */
+		SELECT
+			teda.dscnt_id,
+			ted.dscnt_resn,
+			ted.dscnt_rate
+		FROM tsp_api.tspt_eqpmn_dscnt_applc AS teda
+			INNER JOIN tsp_api.tspt_eqpmn_dscnt AS ted
+				ON teda.dscnt_id = ted.dscnt_id
+		WHERE 1=1
+			AND ted.use_sttus = 'USE'
+			AND teda.eqpmn_id = #{eqpmnId}
+	</select>
+
+	<update id="updateEqpmnExtndDetail">
+		UPDATE tsp_api.tspt_eqpmn_extn set
+			reqst_sttus		=	#{param.reqstSttus}
+			<if	test="param.reqstSttus == 'APPROVE' or param.reqstSttus == 'APPLY'">
+				<if	test="pymntMth == 'AFTER_PAYMENT' or (pymntMth == 'PRE_PAYMENT' and param.reqstSttus == 'APPLY')">
+					<if test='param.usgtm != null and param.usgtm != ""'>
+						, usgtm		=	#{param.usgtm}
+					</if>
+					<if test='param.rntfee != null and param.rntfee != ""'>
+						, rntfee			=	#{param.rntfee}
+					</if>
+					<if test='param.dscntAmount != null and param.dscntAmount != ""'>
+						, dscnt_amount		=	#{param.dscntAmount}
+					</if>
+					<if test='param.dscntId != null and param.dscntId != ""'>
+						, dscnt_id		=	#{param.dscntId}
+					</if>
+				</if>
+			</if>
+			<if	test="param.reqstSttus == 'CANCEL' or param.reqstSttus == 'SPM_REQUEST'">
+				, rsndqf			=	#{param.rsndqf}
+			</if>
+			<if test='param.npyResn != null and param.npyResn != ""'>
+				, npy_resn			=	#{param.npyResn}
+			</if>
+			<if test='param.rcpmnyGdcc != null and param.rcpmnyGdcc != ""'>
+				, rcpmny_gdcc		=	#{param.rcpmnyGdcc}
+				, rcpmny_gdcc_dt	=	now()
+			</if>
+		WHERE et_reqst_id = #{etReqstId}
+	</update>
+
+	<select id="selectExtndHistCnt" resultType="Long">
+		/** Long.selectExtndHistCnt */
+		SELECT
+		    count(*)
+		FROM tsp_api.tspt_eqpmn_extn_hist
+		WHERE 1=1
+			AND et_reqst_id = #{etReqstId}
+	</select>
+
+	<select id="selectExtndHistList" resultType="aicluster.tsp.common.entity.TsptEqpmnExtnHist">
+		/** TsptEqpmnExtnHist.selectExtndHistList */
+		SELECT
+		    hist_id,
+		    creat_dt,
+			process_knd,
+			COALESCE(process_resn,'') AS process_resn,
+			mber_nm,
+			opetr_id
+		FROM tsp_api.tspt_eqpmn_extn_hist
+		WHERE 1=1
+			AND et_reqst_id = #{etReqstId}
+			ORDER BY creat_dt DESC
+			offset #{beginRowNum} -1
+			limit #{itemsPerPage}
+	</select>
+
+	<insert id="insertExtndHist">
+		INSERT INTO tsp_api.tspt_eqpmn_extn_hist (
+			hist_id
+			,et_reqst_id
+			,opetr_id
+			,process_knd
+			,process_resn
+			,mber_id
+			,mber_nm
+		)
+			VALUES (
+				#{histId}
+				, #{etReqstId}
+				, (select login_id from auth_api.cmmt_emp_info where mber_id = #{mberId})
+				, #{processKnd}
+				, #{processResn}
+				, (select mber_id from auth_api.cmmt_emp_info where mber_id = #{mberId})
+				, (select mber_nm from auth_api.cmmt_emp_info where mber_id = #{mberId})
+		   )
+	</insert>
+
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptEqpmnMngmHistDao">
+
+    <select id="selectProHistCnt" resultType="Long">
+		/** TsptEqpmnInfoHistDao.selectProHistCnt */
+        SELECT
+            count(*)
+        FROM tsp_api.tspt_eqpmn_process_hist
+        WHERE eqpmn_id = #{eqpmnId}
+    </select>
+
+    <select id="selectProHistList" resultType="aicluster.tsp.common.entity.TsptEqpmnProcessHist">
+		/** TsptEqpmnInfoHistDao.selectProHistList */
+		SELECT
+			teph.creat_dt,
+			teph.process_knd,
+			teph.process_resn,
+			teph.opetr_id,
+			teph.mber_nm
+		FROM tsp_api.tspt_eqpmn_process_hist AS teph
+        WHERE 1=1
+        	AND eqpmn_id = #{eqpmnId}
+		ORDER BY teph.creat_dt DESC
+			OFFSET #{beginRowNum} -1
+			LIMIT #{itemsPerPage}
+    </select>
+
+    <select id="selectMgtHistCount" resultType="long">
+		/** TsptEqpmnInfoHistDao.selectMgtHistCount */
+
+        SELECT
+            count(*)
+		FROM tsp_api.tspt_eqpmn_manage AS tem
+        WHERE 1=1
+        	AND tem.eqpmn_id = #{eqpmnId}
+			AND tem.manage_result NOTNULL
+		<if test='manageDiv != null and manageDiv != ""'>
+			AND tem.manage_div = #{manageDiv}
+		</if>
+    </select>
+
+    <select id="selectMgtHistList" resultType="aicluster.tsp.api.admin.eqpmn.mngm.param.MngmMgtHistParam">
+		/** TsptEqpmnInfoHistDao.selectMgtHistList */
+		SELECT
+			tem.manage_div,
+			tem.manage_begin_dt,
+			tem.manage_end_dt,
+			tem.manage_result,
+			COALESCE(tem.crrc_instt,'') AS crrc_instt,
+			tem.mber_nm,
+			tem.opetr_id
+		FROM tsp_api.tspt_eqpmn_manage AS tem
+		WHERE 1=1
+        	AND tem.eqpmn_id = #{eqpmnId}
+		<if test='manageDiv != null and manageDiv != ""'>
+			AND tem.manage_div = #{manageDiv}
+		</if>
+			AND tem.manage_result NOTNULL
+			ORDER BY tem.creat_dt DESC
+
+        <if test="!isExcel">
+			OFFSET #{beginRowNum} -1
+            LIMIT #{itemsPerPage}
+        </if>
+    </select>
+
+	<insert id="insertEqpmnHist">
+		/** TsptEqpmnInfoHistDao.insertEqpmnHist */
+		INSERT INTO tsp_api.tspt_eqpmn_process_hist (
+		hist_id
+		, eqpmn_id
+		, opetr_id
+		, process_knd
+		, process_resn
+		, mber_id
+		, mber_nm
+		)
+		VALUES(
+		#{histId}
+		, #{eqpmnId}
+		, #{opetrId}
+		, #{processKnd}
+		, #{processResn}
+		, #{mberId}
+		, #{mberNm}
+		)
+	</insert>
+
+</mapper>

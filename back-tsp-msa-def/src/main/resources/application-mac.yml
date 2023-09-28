@@ -1,0 +1,87 @@
+#################################
+# TOMCAT
+#################################
+server:
+   port: 8083
+   tomcat:
+      threads:
+         max: 10
+         min-spare: 2
+            
+#server.error.path=
+#server.servlet.session.timeout=
+
+#################################
+# DBCP
+#################################
+spring:
+   main:
+      allow-bean-definition-overriding: "true"
+   
+   datasource:
+      hikari:
+         driver-class-name: "org.postgresql.Driver"
+         #jdbc-url: "jdbc:postgresql://fw.thenet-global.com:5432/thenetdb?serverTimezone=Asia/Seoul"
+         jdbc-url: "jdbc:postgresql://125.6.40.234:5432/cmmdb0_dev00?serverTimezone=Asia/Seoul"
+         username: "thenet"
+         password: "thenet1!"
+
+         auto-commit: false
+         maximum-pool-size: 10
+         connectionTimeout: 30000
+         idleTimeout: 600000
+         maxLifetime: 1800000
+         connection-test-query: "SELECT 1"
+   mvc:
+      pathmatch:
+         matching-strategy: ant_path_matcher
+           
+#################################
+# LOGGING
+#################################
+logging:
+   pattern:
+      #default log pattern
+      #console: '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx'
+      #custom log pattern
+      console: '%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%4line]){magenta} %clr(%-40.40logger{39}){cyan} %clr(:){red} %m%n%wEx'
+   level:
+      root: info
+      aicluster: debug
+      jdbc:
+         resultset: error
+         audit: error
+      
+#################################
+# 환경설정
+#################################
+env:
+   cors:
+      origins:
+         - "http://pc.atops.or.kr:8081"
+         - "http://pc.atops.or.kr:8082"
+         - "http://pc.atops.or.kr:8083"
+         - "http://pc.atops.or.kr:8084"
+         - "http://pc.atops.or.kr:8085"
+         - "http://pc.atops.or.kr:8086"
+         - "http://pc.atops.or.kr:8087"
+         - "http://pc.atops.or.kr:8088"
+         - "http://pc.atops.or.kr:5500"
+      headers:
+         - "Content-Disposition"
+         - "Content-Language"
+         - "Content-Transfer-Encoding"
+         - "Content-Type"
+      methods:
+         - "*"
+      pattern: "/**"
+   cookie: 
+      domain: "atops.or.kr"
+      #max-age = jwt.refreshTokenExpireTime / 1000 이어야 한다.
+      max-age: 1800
+      secure: false
+      httpOnly: true
+      path: "/"
+   dir:
+      core-log: "/Users/jungjubae/core-logs"
+      upload: "/Users/jungjubae/upload"

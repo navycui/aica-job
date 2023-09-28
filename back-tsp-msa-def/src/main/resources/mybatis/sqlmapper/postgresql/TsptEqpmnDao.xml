@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptEqpmnDao">
+
+	<sql id="selectList_where">
+		1=1
+		<if test='param.eqpmnSttus != null and param.eqpmnSttus != ""'>
+			and te.eqpmn_sttus = #{param.eqpmnSttus}
+		</if>
+		<if test='param.assetsNo != null and param.assetsNo != ""'>
+			and te.assets_no like '%' || #{param.assetsNo} || '%'
+		</if>
+		<if test='param.eqpmnNmKorean != null and param.eqpmnNmKorean != ""'>
+			and te.eqpmn_nm_korean like '%' || #{param.eqpmnNmKorean} || '%'
+		</if>
+		<if test='param.modelNm != null and param.modelNm != ""'>
+			and te.model_nm like '%' || #{param.modelNm} || '%'
+		</if>
+		<if test='param.tkoutAt != null '>
+            and COALESCE((SELECT tkout_at FROM tsp_api.tspt_eqpmn_use_reqst AS teur WHERE (now() BETWEEN use_begin_dt AND use_end_dt) AND use_sttus='USE' AND reqst_sttus='APPROVE' AND eqpmn_id= te.eqpmn_id), 'F') = #{param.tkoutAt}
+		</if>
+		<if test='param.disuseAt != null '>
+			and ted.disuse_at = #{param.disuseAt}
+		</if>
+		<if test='param.beginDay != null and param.endDay != null'>
+			and te.creat_dt between #{param.beginDay} and #{param.endDay}
+		</if>
+	</sql>
+	
+	<select id="selectEquipmentCount" resultType="Long">
+		/** selectEquipmentCount.selectCount */
+		select
+			count(*) as cnt
+        FROM tsp_api.tspt_eqpmn AS te
+            INNER JOIN tsp_api.tspt_eqpmn_cl AS tec
+                ON te.eqpmn_cl_id = tec.eqpmn_cl_id
+--             LEFT JOIN tsp_api.tspt_eqpmn_use_reqst AS teur
+--                 ON te.eqpmn_id = teur.eqpmn_id
+            INNER JOIN tsp_api.tspt_eqpmn_detail AS ted
+                ON te.eqpmn_id = ted.eqpmn_id
+        WHERE
+        <include refid="selectList_where" />
+	</select>	
+
+	<select id="selectEquipmentList" resultType="aicluster.tsp.common.dto.EqpmnAllListDto">
+		/** EqpmnAllList.selectList */
+        SELECT
+            row_number() over (order by te.creat_dt) as number
+            ,te.eqpmn_id
+            ,te.eqpmn_sttus
+            ,te.assets_no
+            ,te.eqpmn_nm_korean
+            ,tec.eqpmn_cl_nm
+            ,te.model_nm
+            --	,(select tkout_at from tsp_api.tspt_eqpmn_use_reqst teur where now() between use_begin_dt and use_end_dt and use_sttus='USE' and eqpmn_id= ted.eqpmn_id) as tkout_at
+            ,COALESCE((SELECT tkout_at FROM tsp_api.tspt_eqpmn_use_reqst AS teur WHERE (now() BETWEEN use_begin_dt AND use_end_dt) AND use_sttus='USE' AND reqst_sttus='APPROVE' AND eqpmn_id= te.eqpmn_id), 'F') AS tkout_at
+            ,ted.disuse_at
+            ,te.creat_dt
+        FROM tsp_api.tspt_eqpmn AS te
+            INNER JOIN tsp_api.tspt_eqpmn_cl AS tec
+                ON te.eqpmn_cl_id = tec.eqpmn_cl_id
+            --	    INNER JOIN tsp_api.tspt_eqpmn_use_reqst AS teur
+            --	        ON te.eqpmn_id = teur.eqpmn_id
+            INNER JOIN tsp_api.tspt_eqpmn_detail AS ted
+                ON te.eqpmn_id = ted.eqpmn_id
+		WHERE
+        <include refid="selectList_where" />
+        ORDER BY te.creat_dt DESC, te.eqpmn_sttus
+			<if test="!isExcel">
+				offset #{beginRowNum} -1
+				limit #{itemsPerPage}
+			</if>
+	</select>
+
+	<insert id="insertEquipment">
+		insert into tsp_api.tspt_eqpmn
+		(
+			eqpmn_id
+			, assets_no
+			, eqpmn_nm_korean
+			, eqpmn_nm_engl
+			, model_nm
+			, eqpmn_cl_id
+			, eqpmn_stndrd
+			, sumry
+			, spec_composition
+			, asstn_mhrls
+			, realm_prpos
+			, image_id
+			, srcelct
+			, mnl_at
+			, sw_at
+			, legacy_itlpc
+			, pchrg_at
+			, spcmnt
+			, eqpmn_sttus
+			, as_entrprs_nm
+			, as_charger_nm
+			, as_charger_cttpc
+			, purchs_dt
+			, str_nm
+			, purchs_pc
+			, makr
+			, tkout_at
+			, creatr_id
+			, updusr_id
+		)
+		values	(
+			#{eqpmnId}
+		  , #{assetsNo}
+		  , #{eqpmnNmKorean}
+		  , #{eqpmnNmEngl}
+		  , #{modelNm}
+		  , #{eqpmnClId}
+		  , #{eqpmnStndrd}
+		  , #{sumry}
+		  , #{specComposition}
+		  , #{asstnMhrls}
+		  , #{realmPrpos}
+		  , #{imageId}
+		  , #{srcelct}
+		  , #{mnlAt}
+		  , #{swAt}
+		  , #{legacyItlpc}
+		  , #{pchrgAt}
+		  , #{spcmnt}
+		  , #{eqpmnSttus}
+		  , #{asEntrprsNm}
+		  , #{asChargerNm}
+		  , #{asChargerCttpc}
+		  , #{purchsDt}
+		  , #{strNm}
+		  , #{purchsPc}
+		  , #{makr}
+		  , #{tkoutAt}
+		  , #{creatrId}
+		  , #{updusrId}
+		);
+        insert into tsp_api.tspt_eqpmn_detail
+        (
+            eqpmn_id,
+            rntfee_hour,
+            useful_begin_hour,
+            useful_end_hour,
+            use_rate_inctv_setup_at,
+            hldy_incls_at,
+            tkout_hldy_incls_at,
+            nttkout_hldy_incls_at,
+            creatr_id,
+            updusr_id
+        )
+        values
+        (
+            #{eqpmnId},
+            #{rntfeeHour},
+            #{usefulBeginHour},
+            #{usefulEndHour},
+            #{useRateInctvSetupAt},
+            #{hldyInclsAt},
+            #{tkoutHldyInclsAt},
+            #{nttkoutHldyInclsAt},
+            #{creatrId},
+            #{updusrId}
+        )
+
+	</insert>
+
+
+    <select id="selectEquipmentImageId" resultType="String">
+        SELECT image_file_id
+        FROM tsp_api.tspt_eqpmn
+        WHERE eqpmn_id = #{eqpmnId}
+    </select>
+
+    <delete id="deleteEquipment">
+        delete
+        from tsp_api.tspt_eqpmn
+        where eqpmn_id = #{eqpmn_id}
+    </delete>
+
+    <update id="updateEquipment">
+        update tsp_api.tspt_eqpmn set
+        eqpmn_id = #{eqpmnId}
+        <if test='eqpmnSttus != null and eqpmnSttus != ""'>
+            , eqpmn_sttus = #{eqpmnSttus}
+        </if>
+        <if test='crrcTrget != null'>
+            , crrc_trget = #{crrcTrget}
+        </if>
+        <if test='crrcCycle != null and crrcCycle != ""'>
+            , crrc_cycle = #{crrcCycle}
+        </if>
+        <if test='lastCrrcDay != null and lastCrrcDay != ""'>
+            , last_crrc_day = #{lastCrrcDay}
+        </if>
+        <if test='lastCrrcHistId != null and lastCrrcHistId != ""'>
+            , last_crrc_hist_id = #{lastCrrcHistId}
+        </if>
+        <if test='crrcInstt != null and crrcInstt != ""'>
+            , crrc_instt = #{crrcInstt}
+        </if>
+        <if test='crrcResult != null and crrcResult != ""'>
+            , crrc_result = #{crrcResult}
+        </if>
+        <if test='rntfeeHour != null and rntfeeHour != ""'>
+            , rntfee_hour = #{rntfeeHour}
+        </if>
+        <if test='useBeginHour != null and useBeginHour != ""'>
+            , use_begin_hour = #{useBeginHour}
+        </if>
+        <if test='useEndHour != null and useEndHour != ""'>
+            , use_end_hour = #{useEndHour}
+        </if>
+        <if test='utilizationLow != null'>
+            , utilization_low = #{utilizationLow}
+        </if>
+        <if test='tkoutIncHoliday != null'>
+            , tkout_inc_holiday = #{tkoutIncHoliday}
+        </if>
+        <if test='nottkoutIncHoliday != null'>
+            , nottkout_inc_holiday = #{nottkoutIncHoliday}
+        </if>
+        <if test='assetNo != null and assetNo != ""'>
+            , assets_no = #{assetNo}
+        </if>
+        <if test='eqpmnNmKo != null and eqpmnNmKo != ""'>
+            , eqpmn_nm_ko = #{eqpmnNmKo}
+        </if>
+        <if test='eqpmnNmEn != null and eqpmnNmEn != ""'>
+            , eqpmn_nm_en = #{eqpmnNmEn}
+        </if>
+        <if test='modelNm != null and modelNm != ""'>
+            , model_nm = #{modelNm}
+        </if>
+        <if test='eqpmnClfcId != null and eqpmnClfcId != ""'>
+            , eqpmn_clfc_id = #{eqpmnClfcId}
+        </if>
+        <if test='eqpmnStndrd != null and eqpmnStndrd != ""'>
+            , eqpmn_stndrd = #{eqpmnStndrd}
+        </if>
+        <if test='sumry != null and sumry != ""'>
+            , sumry = #{sumry}
+        </if>
+        <if test='spec != null and spec != ""'>
+            , spec = #{spec}
+        </if>
+        <if test='subMhrls != null and subMhrls != ""'>
+            , sub_mhrls = #{subMhrls}
+        </if>
+        <if test='eqpmnPurpose != null and eqpmnPurpose != ""'>
+            , eqpmn_purpose = #{eqpmnPurpose}
+        </if>
+        <if test='imageFileId != null and imageFileId != ""'>
+            , image_file_id = #{imageFileId}
+        </if>
+        <if test='srcelct != null and srcelct != ""'>
+            , srcelct = #{srcelct}
+        </if>
+        <if test='hasManual != null'>
+            , has_manual = #{hasManual}
+        </if>
+        <if test='hasSw != null'>
+            , has_sw = #{hasSw}
+        </if>
+        <if test='itlpc != null and itlpc != ""'>
+            , itlpc = #{itlpc}
+        </if>
+        <if test='pchrg != null'>
+            , pchrg = #{pchrg}
+        </if>
+        <if test='spcmnt != null and spcmnt != ""'>
+            , spcmnt = #{spcmnt}
+        </if>
+        <if test='purchaseDay != null and purchaseDay != ""'>
+            , purchase_day = #{purchaseDay}
+        </if>
+        <if test='store != null and store != ""'>
+            , store = #{store}
+        </if>
+        <if test='purchasePrice != null and purchasePrice != ""'>
+            , purchase_price = #{purchasePrice}
+        </if>
+        <if test='maker != null and maker != ""'>
+            , maker = #{maker}
+        </if>
+        <if test='asCompany != null and asCompany != ""'>
+            , as_company = #{asCompany}
+        </if>
+        <if test='asCharger != null and asCharger != ""'>
+            , as_charger = #{asCharger}
+        </if>
+        <if test='asTelNo != null and asTelNo != ""'>
+            , as_tel_no = #{asTelNo}
+        </if>
+        <if test='creatorId != null and creatorId != ""'>
+            , creator_id = #{creatorId}
+        </if>
+        <if test='createdDt != null and createdDt != ""'>
+            , created_dt = #{createdDt}
+        </if>
+        <if test='updaterId != null and updaterId != ""'>
+            , updater_id = #{updaterId}
+        </if>
+        <if test='updatedDt != null and updatedDt != ""'>
+            , updated_dt = #{updatedDt}
+        </if>
+        where 1=1
+        AND eqpmn_id=#{eqpmnId}
+    </update>
+
+    <sql id="status_selectList_where">
+        1=1
+        AND use_sttus = #{status}
+--         AND now() between ter.use_begin_dt and ter.use_end_dt
+        <if test='search.assetsNo != null and search.assetsNo != ""'>
+            and assets_no like '%' || #{search.assetsNo} || '%'
+        </if>
+        <if test='search.eqpmnNmKorean != null and search.eqpmnNmKorean != ""'>
+            and eqpmn_nm_korean like '%' || #{search.eqpmnNmKorean} || '%'
+        </if>
+        <if test='search.userNm != null and search.userNm != ""'>
+            and mber_nm like '%' || #{search.userNm} || '%'
+        </if>
+        <if test='search.useBeginDt != null and search.useEndDt != null'>
+            and (use_begin_dt between #{search.useBeginDt} and #{search.useEndDt} or use_end_dt between #{search.useBeginDt} and #{search.useEndDt})
+        </if>
+        <if test='search.eqpmnClNm != null and search.eqpmnClnm != ""'>
+            and tec.eqpmn_cl_nm in (with recursive find_cl_nm
+            as(
+            select a.eqpmn_cl_nm, a.eqpmn_cl_id, a.eqpmn_lclas_id
+            from tsp_api.tspt_eqpmn_cl a
+            where a.eqpmn_cl_nm = #{search.eqpmnClNm}
+
+            union all
+
+            select a.eqpmn_cl_nm, a.eqpmn_cl_id, a.eqpmn_lclas_id
+            from tsp_api.tspt_eqpmn_cl a,find_cl_nm b
+            where a.eqpmn_lclas_id = b.eqpmn_cl_id
+            and a.eqpmn_lclas_id != 'ROOT'
+            )select eqpmn_cl_nm from find_cl_nm c where c.eqpmn_lclas_id != 'ROOT'
+            )
+        </if>
+
+    </sql>
+
+    <select id="selectEqpmnStatusList"
+            resultType="aicluster.tsp.api.admin.eqpmn.mngm.param.MngmStatusParam">
+        SELECT
+        row_number() over (order by ter.use_begin_dt) as number,
+        te.eqpmn_id,
+        te.assets_no,
+        te.eqpmn_nm_korean,
+        te.eqpmn_nm_engl,
+
+        cm.mber_ty_code as mber_div,
+        cm.mber_nm as entrprs_nm,
+        cm.mber_nm as user_nm,
+        --cm.mber_div,
+        --cm.user_nm,
+        --cm.entrprs_nm,
+
+        ter.use_begin_dt,
+        ter.use_end_dt,
+        ter.expect_usgtm,
+        tec.eqpmn_cl_nm
+
+        FROM tsp_api.tspt_eqpmn_use_reqst ter
+            INNER JOIN tsp_api.tspt_eqpmn te
+                ON te.eqpmn_id = ter.eqpmn_id
+            INNER JOIN auth_api.cmmt_mber_info cm
+                ON ter.applcnt_id = cm.mber_id
+            INNER JOIN tsp_api.tspt_eqpmn_cl tec
+                ON tec.eqpmn_cl_id = te.eqpmn_cl_id
+
+        where <include refid="status_selectList_where"></include>
+        order by ter.use_begin_dt desc
+        <if test="!isExcel">
+            offset #{beginRowNum} -1 limit #{itemsPerPage}
+        </if>
+    </select>
+
+    <select id="selectEqpmnStatusCount" resultType="Long">
+        SELECT count(te.eqpmn_id) as cnt
+        FROM tsp_api.tspt_eqpmn_use_reqst ter
+            INNER JOIN tsp_api.tspt_eqpmn te ON te.eqpmn_id = ter.eqpmn_id
+            INNER JOIN auth_api.cmmt_mber_info cm ON ter.applcnt_id = cm.mber_id
+            INNER JOIN tsp_api.tspt_eqpmn_cl tec ON tec.eqpmn_cl_id = te.eqpmn_cl_id
+        where <include refid="status_selectList_where"></include>
+    </select>
+</mapper>

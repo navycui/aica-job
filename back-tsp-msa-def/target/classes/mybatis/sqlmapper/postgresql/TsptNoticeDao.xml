@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptNoticeDao">
+    <sql id="getNoticeList_where">
+        1=1
+        <if test='param.title != null and param.title != ""'>
+            and sj_nm like '%' || #{param.title} || '%'
+        </if>
+        <if test='param.article != null and param.article != ""'>
+            and bbsctt_cn like '%' || #{param.article} || '%'
+        </if>
+    </sql>
+
+    <select id="getNoticeCount" resultType="Long">
+        select count(*)
+        from com_api.cmmt_bbsctt
+        where
+            <include refid="getNoticeList_where"/>
+            and
+            bbs_id = 'tsp-notice'
+
+    </select>
+
+    <select id="getNoticeList" resultType="aicluster.tsp.api.front.notice.param.TspNoticeListParam">
+        select
+            bbsctt_id as article_id,
+            bbs_id as board_id,
+            sj_nm as title,
+            bbsctt_cn as article,
+            notice_at as notice,
+            rdcnt as read_cnt,
+            creat_dt as created_dt
+        from com_api.cmmt_bbsctt
+        where
+        <include refid="getNoticeList_where"/>
+        and bbs_id = 'tsp-notice'
+            offset #{beginRowNum} -1
+            limit #{itemsPerPage}
+    </select>
+</mapper>

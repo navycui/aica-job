@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptFrontAnalsReqstDao">
+
+    <sql id="selectList_where">
+        1=1
+        <if test='param.useSttus != null and param.useSttus != ""'>
+            AND use_sttus IN (SELECT UNNEST (#{param.useSttus}))
+        </if>
+        <if test='param.creatBeginDt != null and param.creatEndDt != null'>
+            AND creat_dt between #{param.creatBeginDt} and #{param.creatEndDt}
+        </if>
+        <if test='param.creatrId != null and param.creatrId != null'>
+            AND creatr_id = #{param.creatrId}
+        </if>
+    </sql>
+
+    <select id="selectMyAnalsCnt" resultType="Long">
+        /** Long.selectMyEstmtCnt */
+        SELECT
+        count(*)
+        FROM tsp_api.tspt_anals_unt_reqst
+        WHERE
+        <include refid="selectList_where" />
+    </select>
+
+    <select id="selectMyAnalsList" resultType="aicluster.tsp.common.dto.FrontMyAnalsReqstDto">
+        SELECT
+            reqst_id
+            , use_sttus
+            , use_begin_dt
+            , use_end_dt
+            , anals_unt_div
+            , resrce_id
+            , creat_dt
+            , (select description from analysis.docker_container_template where template_type = tmplat_ty) AS description
+        FROM tsp_api.tspt_anals_unt_reqst
+        WHERE
+        <include refid="selectList_where" />
+        ORDER BY creat_dt desc
+        offset #{beginRowNum} -1
+        limit #{itemsPerPage}
+    </select>
+
+    <select id="selectMyAnalsDetail" resultType="aicluster.tsp.common.dto.FrontMyAnalsReqstDto">
+        SELECT
+            reqst_id
+            , use_sttus
+            , use_begin_dt
+            , use_end_dt
+            , anals_unt_div
+            , tmplat_ty
+            , (select description from analysis.docker_container_template where template_type = tmplat_ty) AS description
+            , reqst_resn
+            , rsndqf
+            , creat_dt
+        FROM tsp_api.tspt_anals_unt_reqst
+        WHERE
+            reqst_id = #{reqstId}
+    </select>
+
+    <update id="updateMyAnalsCancel">
+        UPDATE
+            tsp_api.tspt_anals_unt_reqst
+        SET
+            use_sttus = #{useSttus}
+            , updt_dt = now()
+            , updusr_id = #{memberId}
+        WHERE 1=1
+            AND reqst_id = #{reqstId}
+
+    </update>
+
+    <select id="selectAnalsReqst" resultType="Long">
+        select
+            (
+                select max_count
+                from analysis.docker_container_template
+                where
+                    template_type = #{tmplatTy}
+            ) -
+            (
+                select count(*)
+                from tsp_api.tspt_anals_unt_reqst
+                where
+                    use_sttus <![CDATA[<>]]> 'REJECT'
+                    AND tmplat_ty = #{tmplatTy}
+                    AND (use_begin_dt::date between #{useBeginDt} and #{useEndDt}
+                    OR use_end_dt::date between #{useBeginDt} and #{useEndDt})
+            ) as enabled_count
+
+    </select>
+
+    <select id="selectAnalsTmplat" resultType="aicluster.tsp.api.front.anals.param.FrontAnalsTmplatParam">
+        select
+            a.template_type as tmplat_ty,
+            a.description,
+            a.analysis_unt_div as anals_unt_div,
+            (a.max_count - COALESCE(b.count, 0)) as enabled_count
+        from
+            analysis.docker_container_template a
+            left join
+                (
+                    select
+                        tmplat_ty,
+                        count(*)
+                    from
+                        tsp_api.tspt_anals_unt_reqst
+                    where
+                        use_sttus <![CDATA[<>]]> 'REJECT'
+                        AND (use_begin_dt::date between #{useBeginDt} and #{useEndDt}
+                        OR use_end_dt::date between #{useBeginDt} and #{useEndDt})
+                    group by tmplat_ty) b
+            on a.template_type = b.tmplat_ty
+        --where (a.max_count - COALESCE(b.count, 0)) > 0
+        order by id
+
+    </select>
+
+    <insert id="insertAnalsReqst">
+        INSERT INTO
+            tsp_api.tspt_anals_unt_reqst
+            (
+                use_sttus,
+                use_begin_dt,
+                use_end_dt,
+                reqst_resn,
+                anals_unt_div,
+                resrce_id,
+                tmplat_ty,
+                creatr_id,
+                updusr_id
+            )
+        VALUES(
+                #{useSttus},
+                #{useBeginDt},
+                #{useEndDt},
+                #{reqstResn},
+                #{analsUntDiv},
+                #{resrceId},
+                #{tmplatTy},
+                #{creatrId},
+                #{creatrId}
+            )
+
+    </insert>
+
+</mapper>

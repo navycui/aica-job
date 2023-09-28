@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.sample.dao.SampleDao">
+
+	<sql id="cmmtCode-cols">
+		code_group_id as code_group
+		,code
+		,code_nm
+		,rm as remark
+		,code_ty_nm as code_type
+		,use_at as enabled
+		,sort_ordr as sort_order
+		,creatr_id as creator_id
+		,creat_dt as created_dt
+		,updusr_id as updater_id
+		,updt_dt as updated_dt
+	</sql>
+
+	<select id="selectAll" resultType="aicluster.tsp.common.sample.entity.CmmtCode">
+		select
+			<include refid="cmmtCode-cols" />
+		from com_api.cmmt_code
+		order by
+			code_group_id
+			,code
+	</select>
+</mapper>

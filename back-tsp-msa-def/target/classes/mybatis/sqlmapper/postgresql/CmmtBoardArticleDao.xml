@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.CmmtBoardArticleDao">
+
+	<select id="selectDashboardListCount" resultType="Long">
+		select
+		    count(*)
+		from com_api.cmmt_bbsctt
+	</select>
+
+
+	<select id="selectDashboardCount" resultType="aicluster.tsp.common.dto.DashboardDto">
+		SELECT
+			q.estimate_count
+			,w.use_count
+			,(q.estimate_count + w.use_count) AS rental_total
+			,e.extention_count
+			,r.report_count
+			,(e.extention_count + r.report_count) AS usage_total
+			,t.resource_count
+			,y.resource_return_count
+			,(t.resource_count + y.resource_return_count) AS resource_total
+		FROM
+			(SELECT count(teer.reqst_sttus) AS estimate_count FROM tsp_api.tspt_eqpmn_estmt_reqst teer WHERE teer.reqst_sttus = 'APPLY') q
+			,(SELECT count(teur.reqst_sttus) AS use_count FROM tsp_api.tspt_eqpmn_use_reqst teur WHERE teur.reqst_sttus='APPLY') w
+			,(SELECT count(tee.reqst_sttus) AS extention_count FROM tsp_api.tspt_eqpmn_extn tee WHERE tee.reqst_sttus='APPLY') e
+			,(SELECT count(ter.reprt_sttus) AS report_count FROM tsp_api.tspt_eqpmn_reprt ter WHERE ter.reprt_sttus='APPLY') r
+			,(SELECT count(trur.reqst_sttus) AS resource_count FROM tsp_api.tspt_resrce_use_reqst trur WHERE trur.reqst_sttus='APPLY') t
+			,(SELECT count(trur.reqst_sttus) AS resource_return_count FROM tsp_api.tspt_resrce_use_reqst trur WHERE trur.reqst_sttus='REQ_RETURN') y
+-- 		select
+-- 			a.estimate_count as estimate_count
+-- 			 , b.use_count as use_count
+-- 			 , (a.estimate_count + b.use_count)  as rental_total
+-- 			 , c.extention_count as extention_count
+-- 			 , d.report_count as report_count
+-- 			 , (c.extention_count + d.report_count)  as usage_total
+-- 			 , e.resource_count as resource_count
+-- 			 , f.resource_return_count as resource_return_count
+-- 			 , (e.resource_count + f.resource_return_count)  as resource_total
+-- 		from
+-- 			(select count(*) as estimate_count from tsp_api.tspt_eqpmn_rental where eqpmn_rental_st = 'E') a
+-- 		   ,(select count(*) as use_count from tsp_api.tspt_eqpmn_rental where eqpmn_rental_st = 'U') b
+-- 		   , (select count(*) as extention_count from tsp_api.tspt_eqpmn_rental_extn ) c
+-- 		   , (select count(*) as report_count from tsp_api.tspt_eqpmn_rental_report ) d
+-- 		   , (select count(*) as resource_count from tsp_api.tspt_resource_reqst ) e
+-- 		   , (select count(*) as resource_return_count from tsp_api.tspt_resource_reqst ) f
+	</select>
+
+	<select id="selectDashboardList" resultType="aicluster.tsp.common.entity.CmmtBoardArticle">
+		select
+			bbsctt_id as article_id
+			 , bbs_id as board_id
+			 , sj_nm as title
+			 , bbsctt_cn as article
+			 , notice_at as notice
+			 , atchmnfl_group_id as attachment_group_id
+			 , image_group_id
+			 , ctgry_code as category_cd
+			 , ntce_at as posting
+			 , web_editr_use_at as web_editor
+			 , cnrs_url as shared_url
+			 , pcom_thumb_file_id as pc_thumbnail_file_id
+			 , mobile_thumb_file_id as mobile_thumbnail_file_id
+			 , rdcnt as read_cnt
+			 , creatr_id as creator_id
+			 , creat_dt as created_dt
+			 , updusr_id as updater_id
+			 , updt_dt as updated_dt
+			,#{totalItems} + 1 - (row_number() over(order by creat_dt desc)) as rn
+		from com_api.cmmt_bbsctt
+			offset
+				#{beginRowNum} - 1
+			limit
+				#{itemsPerPage}
+	</select>
+
+</mapper>

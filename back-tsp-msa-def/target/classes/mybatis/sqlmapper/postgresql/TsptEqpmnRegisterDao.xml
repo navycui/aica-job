@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptEqpmnRegisterDao">
+
+	<sql id="selectList_where">
+		1=1
+		<if test='applicantId != null and applicantId != ""'>
+			and applicant_id like '%' || #{applicantId} || '%'
+		</if>
+		<if test='eqpmnNmKo != null and eqpmnNmKo != ""'>
+			and eqpmn_nm_ko like '%' || #{eqpmnNmKo} || '%'
+		</if>
+		<if test='modelNm != null and modelNm != ""'>
+			and mber_nm like '%' || #{mberNm} || '%'
+		</if>
+		<if test='assetNo != null and assetNo != ""'>
+			and assets_no like '%' || #{assetNo} || '%'
+		</if>
+	</sql>
+	
+	<select id="selectEquipmentRegisterCount" resultType="Long">
+		/** EqpmnRegisterAllList.selectCount */
+		SELECT
+			count(ter.eqpmn_rental_id) as cnt
+		FROM tsp_api.tspt_eqpmn_rental AS ter
+			LEFT JOIN auth_api.cmmt_mber_info AS cm
+				ON ter.creator_id = cm.mber_nm
+			LEFT JOIN tsp_api.tspt_eqpmn AS te
+				ON te.eqpmn_id = ter.eqpmn_id
+		where
+			<include refid="selectList_where" />
+	</select>	
+
+	<select id="selectEquipmentRegisterList" resultType="aicluster.tsp.common.dto.EqpmnRegisterAllList">
+		/** EqpmnRegisterAllList.selectList */
+		SELECT		
+			row_number() over (order by ter.eqpmn_rental_id) as rn, 	
+			ter.eqpmn_rental_st , 	
+			ter.begin_day , 	
+			ter.end_day , 	
+			ter.payment_method , 	
+			ter.receipt_no , 	
+			ter.created_dt , 	
+			ter.tkout , 	
+			cm.mber_ty_code ,
+			cm.mber_nm ,
+			te.assets_no ,
+			te.eqpmn_nm_ko  	
+		FROM tsp_api.tspt_eqpmn_rental AS ter
+			LEFT JOIN auth_api.cmmt_mber_info AS cm
+				ON ter.creator_id = cm.mber_nm
+			LEFT JOIN tsp_api.tspt_eqpmn AS te
+				ON te.eqpmn_id = ter.eqpmn_id
+		WHERE
+			<include refid="selectList_where" />
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+</mapper>

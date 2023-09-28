@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptFrontMyResrceDao">
+    <sql id="selectList_where">
+        1=1
+        <if test='param.sttus != null and param.sttus != ""'>
+            AND (reqst_sttus IN (SELECT UNNEST (#{param.sttus})) OR use_sttus IN (SELECT UNNEST (#{param.sttus})))
+        </if>
+        <if test='param.beginDt != null and param.endDt != null'>
+            AND use_begin_dt between #{param.beginDt} and #{param.endDt}
+        </if>
+        <if test='param.mberId != null and param.mberId != null'>
+            AND applcnt_id = #{param.mberId}
+        </if>
+    </sql>
+    <select id="getResrceCnt" resultType="Long">
+        /** Long.getResrceCnt */
+        SELECT
+            count(*)
+        FROM tsp_api.tspt_resrce_use_reqst AS trur
+        WHERE
+        <include refid="selectList_where" />
+    </select>
+
+
+    <select id="getResrceList" resultType="aicluster.tsp.common.entity.TsptResrceUseReqst">
+        /** TsptResrceUseReqst.getResrceList */
+        SELECT
+            trur.reqst_id
+             , trur.reqst_sttus
+             , trur.rcept_no
+             , trur.applcnt_id
+             , trur.gpu_at
+             , trur.cpu_co
+             , trur.data_storge_at
+             , trur.atchmnfl_group_id
+             , trur.useprps
+             , trur.rsndqf
+             , trur.use_begin_dt
+             , trur.use_end_dt
+             , trur.use_rturn_dt
+             , trur.creatr_id
+             , trur.creat_dt
+             , trur.updusr_id
+             , trur.updt_dt
+             , trur.use_sttus
+        FROM tsp_api.tspt_resrce_use_reqst AS trur
+        WHERE
+        <include refid="selectList_where" />
+            ORDER BY creat_dt desc
+        offset #{beginRowNum} -1
+        limit #{itemsPerPage}
+    </select>
+    <select id="getResrceInfo" resultType="aicluster.tsp.common.entity.TsptResrceUseReqst">
+        /** TsptResrceUseReqst.getResrceInfo */
+        SELECT
+            trur.reqst_id
+            , trur.reqst_sttus
+            , trur.rcept_no
+            , trur.applcnt_id
+            , trur.gpu_at
+            , trur.cpu_co
+            , trur.data_storge_at
+            , trur.atchmnfl_group_id
+            , trur.useprps
+            , trur.rsndqf
+            , trur.use_begin_dt
+            , trur.use_end_dt
+            , trur.use_rturn_dt
+            , trur.creatr_id
+            , trur.creat_dt
+            , trur.updusr_id
+            , trur.updt_dt
+            , trur.use_sttus
+            , trur.partcptn_div
+        FROM tsp_api.tspt_resrce_use_reqst AS trur
+        WHERE 1=1
+            AND reqst_id = #{reqstId}
+    </select>
+    <select id="getTsptApplcnt" resultType="aicluster.tsp.common.entity.TsptApplcnt">
+        /** TsptApplcnt.getTsptApplcnt */
+        SELECT
+            ta.applcnt_id
+             , ta.mber_div
+             , ta.entrprs_nm
+             , ta.user_nm
+             , ta.ofcps
+             , ta.cttpc
+             , ta.email
+             , ta.partcptn_div
+             , ta.bsnlcns_file_id
+             , ta.indvdlinfo_colct_agre_at
+             , ta.creat_dt
+             , ta.creatr_id
+             , ta.updusr_id
+             , ta.updt_dt
+        FROM tsp_api.tspt_applcnt AS ta
+        WHERE 1=1
+            AND applcnt_id = #{applcntId}
+    </select>
+
+    <select id="selectMyResrceDetailAttachMentParam" resultType="aicluster.tsp.api.front.mypage.resrce.param.MyResrceDetailParam$MyAttachMentParam">
+        /** MyResrceDetailParam$MyAttachMentParam.selectMyUseDetailAttachMentParam */
+        SELECT
+            ca.atchmnfl_id as attachment_id
+             , ca.file_nm
+             , ca.file_size
+             , ca.cntnts_ty_nm as content_type
+        FROM com_api.cmmt_atchmnfl AS ca
+        WHERE 1=1
+          AND atchmnfl_group_id = #{atchmnflGroupId}
+    </select>
+
+    <update id="putResrceDetail">
+        UPDATE tsp_api.tspt_resrce_use_reqst SET
+            reqst_sttus = #{sttus}
+            , use_sttus = #{sttus}
+        WHERE 1=1
+            AND reqst_id = #{reqstId}
+
+    </update>
+</mapper>

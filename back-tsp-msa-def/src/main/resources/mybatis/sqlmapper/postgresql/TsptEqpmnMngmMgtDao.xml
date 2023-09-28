@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptEqpmnMngmMgtDao">
+    
+    
+	<select id="selectEqpmnMgtHist" resultType="aicluster.tsp.api.admin.eqpmn.mngm.param.MngmMgtHistParam">
+		/** MngmMgtHistParam.selectEqpmnMgtHist */
+		SELECT
+			 tem.eqpmn_id
+			, tem.manage_id
+			, tem.manage_begin_dt
+			, tem.manage_end_dt
+			, tem.manage_div
+			, tem.manage_resn
+			, tem.crrc_instt
+			, tem.manage_result
+			, tem.opetr_id
+			, tem.creatr_id
+			, tem.creat_dt
+			, tem.updt_dt
+			, tem.updusr_id
+			, tem.mber_nm
+		FROM tsp_api.tspt_eqpmn_manage AS tem
+		WHERE 1=1
+			AND tem.eqpmn_id = #{eqpmnId}
+			AND tem.manage_div = split_part(#{manageDiv},'_',1)
+		<if test="manageDiv == 'REPAIR_MODIY'">
+			AND tem.manage_id = #{repairId}
+		</if>
+			order by updt_dt desc limit 1
+	</select>
+
+	<insert id="insertEqpmnMgtHist">
+		/** TsptEqpmnMgtHist.eqpmnMgtHistInsert */
+		INSERT INTO tsp_api.tspt_eqpmn_manage (
+			manage_id
+			, eqpmn_id
+			, manage_begin_dt
+			, manage_end_dt
+			, manage_div
+			, manage_resn
+			, manage_result
+			, crrc_instt
+			, opetr_id
+			, creatr_id
+			, updusr_id
+			, mber_nm
+			)
+		VALUES(
+			#{manageId}
+			, #{eqpmnId}
+			, #{manageBeginDt}
+			, #{manageEndDt}
+			, #{manageDiv}
+			, #{manageResn}
+			, #{manageResult}
+			, #{crrcInstt}
+			, #{opetrId}
+			, #{creatrId}
+			, #{creatrId}
+			, #{mberNm}
+		)
+		;
+		UPDATE tsp_api.tspt_eqpmn SET
+			eqpmn_sttus = #{manageDiv}
+		WHERE 1=1
+			AND eqpmn_id = #{eqpmnId}
+	</insert>
+
+	<update id="updateEqpmnMgtHist">
+		UPDATE tsp_api.tspt_eqpmn_manage SET
+			manage_result	=	#{manageResult}
+			, crrc_instt	=	#{crrcInstt}
+			, updusr_id		=	(SELECT mber_id FROM auth_api.cmmt_emp_info WHERE mber_id = #{updusrId})
+			, updt_dt		=	#{updtDt}
+		WHERE manage_id = #{manageId}
+		;
+		<if test="manageDiv != 'REPAIR_MODIY'">
+		UPDATE tsp_api.tspt_eqpmn_detail SET
+		<if test="manageDiv == 'CORRECTION'">
+			crrc_id			=	#{manageId}
+		</if>
+		<if test="manageDiv == 'REPAIR'">
+			repair_id		=	#{manageId}
+		</if>
+		<if test="manageDiv == 'INSPECT'">
+			chck_trget_at	=	'F'
+		</if>
+		WHERE eqpmn_id = #{eqpmnId}
+		;
+		UPDATE tsp_api.tspt_eqpmn SET
+		eqpmn_sttus = 'AVAILABLE'
+		WHERE 1=1
+			AND eqpmn_id = #{eqpmnId}
+		</if>
+	</update>
+
+	<select id="selectEqpmnDetail" resultType="aicluster.tsp.api.admin.eqpmn.mngm.param.MngmDetailParam">
+		/** MngmDetailParam.selectEqpmnDetail */
+		SELECT
+		    te.eqpmn_id,
+			te.assets_no,
+			te.eqpmn_nm_korean,
+			te.eqpmn_nm_engl,
+			te.model_nm,
+			te.eqpmn_cl_id,
+			te.eqpmn_stndrd,
+			te.sumry,
+			te.spec_composition,
+			te.asstn_mhrls,
+			te.realm_prpos,
+			te.image_id,
+			te.srcelct,
+			te.mnl_at,
+			te.sw_at,
+			te.legacy_itlpc,
+			te.pchrg_at,
+			te.spcmnt,
+			te.as_entrprs_nm,
+			te.as_charger_nm,
+			te.as_charger_cttpc,
+			te.purchs_dt,
+			te.str_nm,
+			te.purchs_pc,
+			te.makr,
+			te.tkout_at
+		FROM tsp_api.tspt_eqpmn AS te
+		WHERE 1=1
+			AND eqpmn_id = #{eqpmnId}
+	</select>
+
+	<select id="selectEqpmnCl" resultType="aicluster.tsp.api.admin.eqpmn.mngm.param.MngmDetailParam$EqpmnClParam">
+		SELECT
+			tec.eqpmn_cl_id,
+			tec.eqpmn_lclas_id,
+			tec.ordr,
+			tec.eqpmn_cl_nm,
+			CASE
+				WHEN tec.eqpmn_cl_id = 'ROOT' THEN CAST(0 AS integer)
+				WHEN tec.eqpmn_lclas_id = 'ROOT' THEN 1
+				ELSE 2 END AS depth,
+			tec.use_at
+		FROM tsp_api.tspt_eqpmn_cl AS tec
+	</select>
+
+	<update id="updateEqpmnDetail">
+		UPDATE tsp_api.tspt_eqpmn SET
+			eqpmn_id	        =	#{eqpmnId}
+		<if test='assetsNo != null and assetsNo != ""'>
+			, assets_no	        =	#{assetsNo}
+		</if>
+		<if test='eqpmnNmKorean != null and eqpmnNmKorean != ""'>
+			, eqpmn_nm_korean	=	#{eqpmnNmKorean}
+		</if>
+		<if test='eqpmnNmEngl != null and eqpmnNmEngl != ""'>
+			, eqpmn_nm_engl	    =	#{eqpmnNmEngl}
+		</if>
+		<if test='modelNm != null and modelNm != ""'>
+			, model_nm	        =	#{modelNm}
+		</if>
+		<if test='eqpmnClId != null and eqpmnClId != ""'>
+			, eqpmn_cl_id	    =	#{eqpmnClId}
+		</if>
+		<if test='eqpmnStndrd != null and eqpmnStndrd != ""'>
+			, eqpmn_stndrd	    =	#{eqpmnStndrd}
+		</if>
+		<if test='sumry != null and sumry != ""'>
+			, sumry	            =	#{sumry}
+		</if>
+		<if test='specComposition != null and specComposition != ""'>
+			, spec_composition	=	#{specComposition}
+		</if>
+		<if test='asstnMhrls != null and asstnMhrls != ""'>
+			, asstn_mhrls	    =	#{asstnMhrls}
+		</if>
+		<if test='realmPrpos != null and realmPrpos != ""'>
+			, realm_prpos	    =	#{realmPrpos}
+		</if>
+		<if test='imageId != null and imageId != ""'>
+			, image_id	        =	#{imageId}
+		</if>
+		<if test='srcelct != null and srcelct != ""'>
+			, srcelct	        =	#{srcelct}
+		</if>
+		<if test='mnlAt != null'>
+			, mnl_at	        =	#{mnlAt}
+		</if>
+		<if test='swAt != null'>
+			, sw_at	            =	#{swAt}
+		</if>
+		<if test='legacyItlpc != null and legacyItlpc != ""'>
+			, legacy_itlpc	    =	#{legacyItlpc}
+		</if>
+		<if test='pchrgAt != null'>
+			, pchrg_at	        =	#{pchrgAt}
+		</if>
+		<if test='spcmnt != null and spcmnt != ""'>
+			, spcmnt	        =	#{spcmnt}
+		</if>
+		<if test='asEntrprsNm != null and asEntrprsNm != ""'>
+			, as_entrprs_nm	    =	#{asEntrprsNm}
+		</if>
+		<if test='asChargerNm != null and asChargerNm != ""'>
+			, as_charger_nm	    =	#{asChargerNm}
+		</if>
+		<if test='asChargerCttpc != null and asChargerCttpc != ""'>
+			, as_charger_cttpc	=	#{asChargerCttpc}
+		</if>
+		<if test='purchsDt != null'>
+			, purchs_dt	        =	#{purchsDt}
+		</if>
+		<if test='strNm != null and strNm != ""'>
+			, str_nm	        =	#{strNm}
+		</if>
+		<if test='purchsPc != null'>
+			, purchs_pc	        =	#{purchsPc}
+		</if>
+		<if test='makr != null and makr != ""'>
+			, makr	            =	#{makr}
+		</if>
+		<if test='tkoutAt != null'>
+			, tkout_at	        =	#{tkoutAt}
+		</if>
+		<if test='updusrId != null and updusrId != ""'>
+			, updusr_id	        =	#{updusrId}
+		</if>
+		<if test='updtDt != null'>
+			, updt_dt	        =	#{updtDt}
+		</if>
+				WHERE 1=1
+		  AND eqpmn_id = #{eqpmnId}
+	</update>
+
+	<select id="selectEqpmnImageId" resultType="String">
+		/** String.selectEqpmnImageId */
+		SELECT
+		    image_id
+		FROM tsp_api.tspt_eqpmn
+		WHERE eqpmn_id = #{eqpmnId}
+	</select>
+	<delete id="deleteEqpmnDetailDscnt">
+		DELETE FROM tsp_api.tspt_eqpmn_dscnt_applc
+		WHERE eqpmn_id = #{eqpmnId}
+	</delete>
+
+</mapper>

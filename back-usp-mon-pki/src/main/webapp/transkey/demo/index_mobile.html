@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="ko" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,width=device-width"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<script type="text/javascript" src="../transkey_mobile/transkey.js"></script>
+
+<link rel="stylesheet" type="text/css"
+	href="../transkey_mobile/transkey.css" />
+
+</head>
+<body tabindex="0" style="margin: 0px;" onload="initmTranskey();">
+	<br> useSession mTranskey for web <br> <br>
+				<div style="position: relative; padding: 0 0 35px 0;">
+					<form id="frm" name="frm" action="validate_mobile.jsp" method="post">
+						<div style="margin: 0; auto; text-align: center">
+							<div id="layerPopup"
+								style="position: absolute; z-index: 999; background-color: gray; width: 100%; height: 100px; top: 100px; display: none;">
+							</div>
+							Qwerty<input type="text" name="pwd1" id="pwd1" data-tk-kbdType="qwerty" data-tk-bottom="true" onfocus="mtk.onKeyboard(this);"/>
+								<span id="pwd1_tk_btn"></span>
+								<input type="button" value="ajaxTest" onclick="ajaxTest('pwd1');"></input>
+								<br></br>
+							Number<input type="password" name="pwd2" id="pwd2" data-tk-kbdType="number" onfocus="mtk.onKeyboard(this);" />
+								<span id="pwd2_tk_btn"></span>
+								<input type="button" value="ajaxTest" onclick="ajaxTest('pwd2');"></input>
+								<br></br>
+								<input type="submit" onclick="mtk.fillEncData();"></input>
+								<br></br>
+						</div>
+					</form>
+				</div>
+
+<script type="text/javascript">
+function ajaxTest(id){
+	var values = mtk.inputFillEncData(document.getElementById(id));
+	var name = document.getElementById(id).name;
+	var hidden = values.hidden;
+	var hmac = values.hmac;
+	var frmId = use_form_id?"_"+document.getElementById("hidfrmId").value:"";
+	var request = new XMLHttpRequest();
+
+	request.open("POST", "ajaxTest.jsp", useAsyncTranskey);
+
+	if(useCORS)
+		request.withCredentials = true;
+	else
+		request.setRequestHeader("Cache-Control", "no-cache");
+
+	request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;");
+
+	request.onreadystatechange = function (e) {
+		  if (request.readyState == 4 && request.status == 200) {
+			  alert(request.responseText.replace(/\n/gi, ''));
+		  }
+	};
+	request.send("id=" + id + "&name=" + name + "&transkey_"+id+"_"+frmId+"=" + hidden + "&transkey_HM_"+id+"_"+frmId+"=" + hmac+ "&transkey_ExE2E_"+id+"_"+frmId+"=raon"+"&transkeyUuid_"+frmId+"=" + mtk.transkeyUuid+"&hidfrmId="+frmId+tk_origin);
+}
+
+</script>
+</body>
+</html>

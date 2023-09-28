@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptEqpmnMngmDao">
+
+	<select id="selectEqpmnMgtInfoFixSelect" resultType="aicluster.tsp.api.admin.eqpmn.mngm.param.MngmMgtParam">
+		/** EquipmentInfoMgtParam.selectEqpmnMgtInfoFixSelect */
+		SELECT
+			te.eqpmn_id,
+			te.eqpmn_nm_korean,
+			te.eqpmn_cl_id,
+			te.creat_dt,
+			te.eqpmn_sttus,
+			ted.disuse_at,
+			COALESCE(ted.chck_trget_at,'F') AS chck_trget_at,
+			ted.rntfee_hour,
+			ted.useful_begin_hour,
+			ted.useful_end_hour,
+			ted.use_rate_inctv_setup_at,
+			ted.hldy_incls_at,
+			ted.tkout_hldy_incls_at,
+			ted.nttkout_hldy_incls_at,
+			teur.applcnt_id,
+			COALESCE((SELECT tkout_at FROM tsp_api.tspt_eqpmn_use_reqst AS teur WHERE (now() BETWEEN use_begin_dt AND use_end_dt) AND use_sttus='USE' AND reqst_sttus='APPROVE' AND eqpmn_id= te.eqpmn_id), 'F') AS tkout_at,
+			COALESCE(ted.crrc_trget_at,'F') AS crrc_trget_at,
+			COALESCE(ted.crrc_cycle,0) AS crrc_cycle,
+			COALESCE(ted.crrc_id,'') AS crrc_id,
+			COALESCE(ted.repair_id,'') AS repair_id
+		FROM tsp_api.tspt_eqpmn AS te
+			INNER JOIN tsp_api.tspt_eqpmn_detail AS ted
+				ON te.eqpmn_id = ted.eqpmn_id
+			LEFT JOIN tsp_api.tspt_eqpmn_use_reqst AS teur
+			    ON te.eqpmn_id = teur.eqpmn_id
+		WHERE 1=1
+			AND te.eqpmn_id = #{eqpmnId}
+		ORDER BY ted.creat_dt, ted.updt_dt limit 1
+	</select>
+	<select id="selectEqpmnMgtInfoTkout" resultType="aicluster.tsp.api.admin.eqpmn.mngm.param.MngmMgtParam$TkoutParam">
+		/** EquipmentInfoMgtParam$TkoutParam.selectEqpmnMgtInfoTkout */
+		SELECT
+			teur.tkout_at,
+			teur.tkout_sttus,
+			ta.ofcps,
+			ta.partcptn_div
+-- 			ta.mber_div,
+-- 			ta.entrprs_nm,
+-- 			ta.user_nm,
+-- 			ta.cttpc,
+-- 			ta.email,
+		FROM tsp_api.tspt_eqpmn_use_reqst AS teur
+			INNER JOIN tsp_api.tspt_applcnt AS ta
+				ON teur.applcnt_id = ta.applcnt_id
+		WHERE 1=1
+			AND teur.eqpmn_id = #{eqpmnId}
+		  	AND now() BETWEEN teur.use_begin_dt AND teur.use_end_dt
+			AND teur.reqst_sttus = 'APPROVE'
+			AND teur.use_sttus = 'USE'
+-- 			ORDER BY teur.updt_dt DESC limit 1
+	</select>
+	<select id="selectEqpmnMgtInfoRepair" resultType="aicluster.tsp.api.admin.eqpmn.mngm.param.MngmMgtParam$RepairParam">
+		/** EquipmentInfoMgtParam$RepairParam.selectEqpmnMgtInfoRepair */
+		SELECT
+			tem.manage_begin_dt,
+			tem.manage_end_dt,
+			tem.manage_resn
+		FROM tsp_api.tspt_eqpmn_manage AS tem
+		WHERE 1=1
+			AND	tem.manage_div = 'REPAIR'
+			AND tem.eqpmn_id = #{eqpmnId}
+			AND tem.manage_result IS NULL
+		ORDER BY creat_dt DESC limit 1;
+	</select>
+	<select id="selectEqpmnMgtInfoCorrect" resultType="aicluster.tsp.api.admin.eqpmn.mngm.param.MngmMgtParam$CorrectParam">
+		/** EquipmentInfoMgtParam$CorrectParam.selectEqpmnMgtInfoCorrect */
+		SELECT
+		<if test='crrcId != null and crrcId != ""'>
+			(SELECT tem.manage_end_dt From tsp_api.tspt_eqpmn_manage AS tem WHERE tem.manage_id = #{crrcId} ) AS lastCrrcDt,
+		</if>
+			tem.manage_begin_dt,
+			tem.manage_end_dt,
+			tem.crrc_instt,
+			tem.manage_resn
+		FROM tsp_api.tspt_eqpmn_manage AS tem
+		WHERE 1=1
+			AND tem.eqpmn_id = #{eqpmnId}
+			AND tem.manage_div = 'CORRECTION'
+			AND tem.manage_result IS NULL
+		ORDER BY tem.updt_dt desc limit 1
+	</select>
+	
+	
+
+	<update id="updateEqpmnMgtInfo">
+		/** updateEqpmnMgtInfo */
+		UPDATE tsp_api.tspt_eqpmn_detail SET
+			chck_trget_at				=	#{chckTrgetAt}
+			, crrc_trget_at				=	#{crrcTrgetAt}
+			, crrc_cycle				=	#{crrcCycle}
+			, rntfee_hour				=	#{rntfeeHour}
+			, useful_begin_hour			=	#{usefulBeginHour}
+			, useful_end_hour			=	#{usefulEndHour}
+			, use_rate_inctv_setup_at	=	#{useRateInctvSetupAt}
+			, hldy_incls_at				=	#{hldyInclsAt}
+			, tkout_hldy_incls_at		=	#{tkoutHldyInclsAt}
+			, nttkout_hldy_incls_at		=	#{nttkoutHldyInclsAt}
+		WHERE 1=1
+			AND eqpmn_id = #{eqpmnId}
+	</update>
+
+	<update id="updateUnavailable">
+		/** updateUnavailable */
+		UPDATE tsp_api.tspt_eqpmn_detail SET
+			disuse_at				=	#{disuseAt}
+		WHERE 1=1
+			AND eqpmn_id = #{eqpmnId}
+	</update>
+
+	<delete id="deleteEqpmn">
+		DELETE FROM tsp_api.tspt_eqpmn_process_hist
+		WHERE eqpmn_id = #{eqpmnId};
+		DELETE FROM tsp_api.tspt_eqpmn_dscnt_applc
+		WHERE eqpmn_id = #{eqpmnId};
+		DELETE FROM tsp_api.tspt_eqpmn_manage
+		WHERE eqpmn_id = #{eqpmnId};
+		DELETE FROM tsp_api.tspt_eqpmn_detail
+		WHERE eqpmn_id = #{eqpmnId};
+		DELETE FROM tsp_api.tspt_eqpmn
+		WHERE eqpmn_id = #{eqpmnId}
+	</delete>
+
+	<select id="countEqpmnUse" resultType="Int">
+		SELECT
+		    count(*)
+		FROM tsp_api.tspt_eqpmn_use_reqst
+		WHERE 1=1
+			AND eqpmn_id = #{eqpmnId}
+	</select>
+</mapper>

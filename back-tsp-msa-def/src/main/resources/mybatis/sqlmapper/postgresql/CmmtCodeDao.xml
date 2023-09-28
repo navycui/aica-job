@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.CmmtCodeDao">
+
+	<select id="selectCodeNameList" resultType="aicluster.tsp.common.dto.EqpmnCodeDto">
+		SELECT
+			code_nm,
+			code
+		FROM com_api.cmmt_code
+			WHERE 1=1 and
+			use_at ='1' and
+			code_group_id IN (
+				SELECT 
+					code_group_id as code_group
+				FROM com_api.cmmt_code_group
+					WHERE 1=1 and
+						code_group_id = upper(#{codeGroup}) and
+						use_at ='1')
+			order by sort_ordr
+	</select>
+
+	<resultMap id="EqpmnRntfee" type="aicluster.tsp.common.dto.EqpmnRntfeeDto"></resultMap>
+	<resultMap id="StringListId" type="String"></resultMap>
+	<select id="selectWorkingRntfee" resultMap="EqpmnRntfee,StringListId">
+		select
+			rntfee_hour,
+			useful_end_hour,
+			useful_begin_hour,
+			hldy_incls_at,
+			tkout_hldy_incls_at,
+			nttkout_hldy_incls_at
+		from
+			tsp_api.tspt_eqpmn_detail
+		where
+			eqpmn_id = #{eqpmnId};
+
+		select
+			ymd_id
+		from
+			com_api.cmmt_restde
+		where
+			ymd_id <![CDATA[>=]]> #{startDt} and ymd_id <![CDATA[<=]]> #{endDt};
+	</select>
+
+<!--	<select id="imageFilePath" resultType="String">-->
+<!--		SELECT-->
+<!--			file_stre_path as saved_file_path-->
+<!--		FROM com_api.cmmt_atchmnfl-->
+<!--		WHERE 1=1-->
+<!--			AND atchmnfl_id = #{attachmentId}-->
+<!--	</select>-->
+
+	<select id="selectEqpmnClNm" resultType="aicluster.tsp.api.common.param.CommonReturnMap">
+		select
+			eqpmn_cl_id,
+		    eqpmn_cl_nm
+		from
+		    tsp_api.tspt_eqpmn_cl
+		where
+		    eqpmn_lclas_id = 'ROOT'
+		  and
+		    use_at = true
+	</select>
+
+	<select id="selectApplcnt" resultType="aicluster.tsp.common.dto.ApplcntDto">
+		select
+			--mber_div,
+			--entrprs_nm,
+			--user_nm,
+			tata.ofcps,
+			--cttpc,
+			--email,
+			tata.bsnlcns_file_id,
+			COALESCE(aacei.adres,'개인 주소라 공개가 불가능 합니다.') AS adres
+		from
+			tsp_api.tspt_applcnt AS tata
+		LEFT JOIN auth_api.cmmt_entrprs_info AS aacei
+			ON tata.applcnt_id = aacei.mber_id
+		where
+			applcnt_id = #{applcntId}
+	</select>
+
+	<insert id="insertApplcnt" >
+		INSERT INTO tsp_api.tspt_applcnt
+		(
+		 applcnt_id,
+		 mber_div,
+		 entrprs_nm,
+		 user_nm,
+		 ofcps,
+		 cttpc,
+		 email,
+		 partcptn_div,
+		 bsnlcns_file_id,
+		 indvdlinfo_colct_agre_at,
+		 creatr_id,
+		 updusr_id
+		 )
+		VALUES(
+			#{applcntId},
+			#{mberDiv},
+			#{entrprsNm},
+			#{userNm},
+			#{ofcps},
+			#{cttpc},
+			#{email},
+			#{partcptnDiv},
+			#{bsnlcnsFileId},
+			#{indvdlinfoColctAgreAt},
+			#{applcntId},
+			#{applcntId}
+		    );
+	</insert>
+
+	<update id="updateApplcnt">
+		UPDATE
+		    tsp_api.tspt_applcnt
+		SET
+		<if test='mberDiv != null and mberDiv != ""'>
+			mber_div = #{mberDiv},
+		</if>
+		<if test='entrprsNm != null and entrprsNm != ""'>
+			entrprs_nm = #{entrprsNm},
+		</if>
+		<if test='userNm != null and userNm != ""'>
+			user_nm = #{userNm},
+		</if>
+		<if test='ofcps != null and ofcps != ""'>
+			ofcps = #{ofcps},
+		</if>
+		<if test='cttpc != null and cttpc != ""'>
+			cttpc = #{cttpc},
+		</if>
+		<if test='email != null and email != ""'>
+			email = #{email},
+		</if>
+		<if test='partcptnDiv != null and partcptnDiv != ""'>
+			partcptn_div = #{partcptnDiv},
+		</if>
+		<if test='bsnlcnsFileId != null and bsnlcnsFileId != ""'>
+			bsnlcns_file_id = #{bsnlcnsFileId},
+		</if>
+		<if test='indvdlinfoColctAgreAt != null'>
+			indvdlinfo_colct_agre_at = #{indvdlinfoColctAgreAt},
+		</if>
+			updusr_id = #{updusrId},
+			updt_dt = now()
+		WHERE
+		    applcnt_id = #{applcntId};
+	</update>
+
+	<select id="getYmd" resultType="String">
+		SELECT
+			ymd_id
+		FROM
+			com_api.cmmt_restde
+		WHERE 1=1
+			AND to_char(to_date(ymd_id,'YYYYMMDD'), 'YYYYMM') BETWEEN to_char(now(), 'YYYYMM') AND to_char(now() + INTERVAL '3 month', 'YYYYMM');
+	</select>
+
+	<select id="selectAttachmentGroup" resultType="aicluster.tsp.api.common.param.CommonAttachmentParam">
+		SELECT
+			atchmnfl_id as attachment_id
+			 ,file_nm
+			 ,file_size
+			 ,cntnts_ty_nm as content_type
+		FROM com_api.cmmt_atchmnfl
+		WHERE atchmnfl_group_id = #{atchmnflGroupId}
+	</select>
+
+	<select id="selectAttachment" resultType="aicluster.tsp.api.common.param.CommonAttachmentParam">
+		SELECT
+			atchmnfl_id as attachment_id
+			 ,file_nm
+			 ,file_size
+			 ,cntnts_ty_nm as content_type
+		FROM com_api.cmmt_atchmnfl
+		WHERE atchmnfl_id = #{atchmnflId}
+	</select>
+
+	<select id="selectAttachmentInfoGroupCount" resultType="LONG">
+		SELECT
+			count(*)
+		FROM com_api.cmmt_atchmnfl
+		WHERE atchmnfl_group_id = #{atchmnflGroupId}
+	</select>
+
+	<select id="selectAttachmentInfoGroup" resultType="aicluster.tsp.api.common.param.CommonAttachmentParam">
+		SELECT
+			atchmnfl_id as attachment_id
+			 ,file_nm
+			 ,file_size
+			 ,cntnts_ty_nm as content_type
+		FROM com_api.cmmt_atchmnfl
+		WHERE atchmnfl_group_id = #{atchmnflGroupId}
+	</select>
+
+	<update id="updateEqpmnUseSttus">
+		update
+			tsp_api.tspt_eqpmn_use_reqst
+		set
+		    use_sttus = #{useSttus}
+		  , updusr_id = #{updusrId}
+		  , updt_dt = now()
+		where
+		    reqst_id = #{reqstId}
+	</update>
+</mapper>

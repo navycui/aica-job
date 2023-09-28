@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptEqpmnDscntDao">
+
+    <select id="selectDscntCount" resultType="Long">
+        select
+            count(dscnt_resn)
+        from tsp_api.tspt_eqpmn_dscnt
+        where dscnt_resn like '%' || #{search.dscntResn} || '%' and dscnt_id != '0'
+    </select>
+
+    <select id="selectDscntList" resultType="aicluster.tsp.api.admin.eqpmn.dscnt.param.DscntParam">
+        select
+            dscnt_id,
+            dscnt_resn,
+            dscnt_rate,
+            use_sttus,
+            creatr_id,
+            creat_dt,
+            updusr_id,
+            updt_dt
+        from tsp_api.tspt_eqpmn_dscnt
+        where 1=1 and dscnt_id != '0'
+            <if test='search.dscntResn != null and search.dscntResn != ""'>
+                and dscnt_resn like '%' || #{search.dscntResn} || '%'
+            </if>
+        order by updt_dt desc
+        offset #{beginRowNum} -1 limit #{itemsPerPage}
+
+    </select>
+
+    <select id="selectApplyCount" resultType="Long">
+        select
+            count(dscnt_resn)
+        from tsp_api.tspt_eqpmn_dscnt
+        where use_sttus = 'USE' and dscnt_resn like '%' || #{apply.dscntResn} || '%' and dscnt_id != '0'
+    </select>
+
+    <select id="selectApplyList" resultType="aicluster.tsp.api.admin.eqpmn.dscnt.param.DscntParam">
+        select
+            dscnt_id,
+            dscnt_resn,
+            dscnt_rate,
+        use_sttus,
+            updt_dt
+        from tsp_api.tspt_eqpmn_dscnt
+        where 1=1
+            and dscnt_id != '0'
+            and use_sttus = 'USE'
+            <if test='apply.dscntResn != null and apply.dscntResn != ""'>
+                and dscnt_resn like '%' || #{apply.dscntResn} || '%'
+            </if>
+        order by updt_dt desc
+        offset #{beginRowNum} -1 limit #{itemsPerPage}
+
+
+    </select>
+    <!--사용여부 수정-->
+    <update id="updateUsgstt">
+        update tsp_api.tspt_eqpmn_dscnt set
+            use_sttus = #{useSttus}
+        , updusr_id = #{updusrId}
+        , updt_dt = #{updtDt}
+        where 1=1
+        AND dscnt_id = #{dscntId}
+    </update>
+    <insert id="postDscntList">
+        insert into tsp_api.tspt_eqpmn_dscnt
+        (
+            dscnt_id
+            , dscnt_resn
+            , dscnt_rate
+            , use_sttus
+            , creatr_id
+            , updusr_id
+        )
+        VALUES
+        (
+            #{dscntId}
+            , #{dscntResn}
+            , #{dscntRate}
+            , #{useSttus}
+            , #{creatrId}
+            , #{updusrId}
+        )
+    </insert>
+
+    <!-- 장비 할인 적용 -->
+    <insert id="postDscntApplyList">
+        insert into tsp_api.tspt_eqpmn_dscnt_applc
+        (
+            dscnt_id
+            , eqpmn_id
+            , creatr_id
+            , updusr_id
+        )
+        VALUES
+        (
+            #{dscntId}
+            , #{eqpmnId}
+            , #{creatrId}
+            , #{updusrId}
+        )
+    </insert>
+
+    <!-- 장비 분류 삭제 -->
+    <delete id="deleteDiscount">
+        delete from tsp_api.tspt_eqpmn_dscnt_cnd
+        where eqpmn_dscnt_cnd_id = #{eqpmnDscntCndId}
+    </delete>
+
+
+    <select id="selectEqpmnDscntList" resultType="aicluster.tsp.common.dto.EqpmnDscntListDto">
+        select
+            a.dscnt_id,
+            b.dscnt_resn,
+            b.dscnt_rate
+        from
+            tsp_api.tspt_eqpmn_dscnt_applc a
+                left join tsp_api.tspt_eqpmn_dscnt b
+                          on a.dscnt_id = b.dscnt_id
+        where
+            a.eqpmn_id = #{eqpmnId} and a.eqpmn_id != '0'
+          and
+            b.use_sttus = 'USE'
+    </select>
+</mapper>

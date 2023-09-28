@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.tsp.common.dao.TsptFrontResrceDao">
+    <insert id="insertUseReqstResrce">
+        insert into tsp_api.tspt_resrce_use_reqst
+        (
+            reqst_id
+            , reqst_sttus
+            , applcnt_id
+            , gpu_at
+            , cpu_co
+            , data_storge_at
+            , atchmnfl_group_id
+            , useprps
+            , use_begin_dt
+            , use_end_dt
+            , creatr_id
+            , use_sttus
+            , partcptn_div
+        )
+        values (
+                #{reqstId}
+                , #{reqstSttus}
+                , #{applcntId}
+                , #{gpuAt}
+                , #{cpuCo}
+                , #{dataStorgeAt}
+                , #{atchmnflGroupId}
+                , #{useprps}
+                , #{useBeginDt}
+                , #{useEndDt}
+                , #{creatrId}
+                , #{useSttus}
+                , #{partcptnDiv}
+               )
+    </insert>
+
+    <insert id="upsertUserInfo">
+        insert into
+        tsp_api.tspt_applcnt
+        (
+        applcnt_id
+        , ofcps
+        , bsnlcns_file_id
+        , indvdlinfo_colct_agre_at
+        , creatr_id
+        , updusr_id
+        )
+        values(
+        #{applcntId}
+        , #{ofcps}
+        , #{bsnlcnsFileId}
+        , true
+        , #{applcntId}
+        , #{applcntId}
+        ) ON conflict (applcnt_id)
+        DO UPDATE set
+        indvdlinfo_colct_agre_at = true
+        <if test='ofcps != null and ofcps != ""'>
+            , ofcps = #{ofcps}
+        </if>
+        <if test='bsnlcnsFileId != null and bsnlcnsFileId != ""'>
+            , bsnlcns_file_id = #{bsnlcnsFileId}
+        </if>
+        ,updusr_id = #{applcntId}
+        ,updt_dt = now();
+    </insert>
+</mapper>
