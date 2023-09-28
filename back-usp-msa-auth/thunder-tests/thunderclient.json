@@ -1,0 +1,2488 @@
+[
+  {
+    "_id": "30c499ca-81d8-48bd-8cc8-8ec011f91492",
+    "colId": "1c8ec268-937b-4b78-84bc-f104e6a6e510",
+    "containerId": "",
+    "name": "로그인 처리",
+    "url": "http://{{hostname}}/{{contextPath}}/{login_path}/member",
+    "method": "POST",
+    "sortNum": 10000,
+    "created": "2022-01-11T08:48:32.511Z",
+    "modified": "2022-05-11T06:36:50.026Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "login_path",
+        "value": "api/login",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "json",
+      "raw": "{\n    \"loginId\" : \"sckim\",\n    \"passwd\" : \"1234\"\n}",
+      "form": []
+    },
+    "auth": {
+      "type": "none"
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      },
+      {
+        "type": "set-env-var",
+        "custom": "json.accessToken",
+        "action": "setto",
+        "value": "{{accessToken}}"
+      }
+    ]
+  },
+  {
+    "_id": "37b5b521-9db1-4819-8d6c-bed47d1d9416",
+    "colId": "1c8ec268-937b-4b78-84bc-f104e6a6e510",
+    "containerId": "",
+    "name": "로그아웃 처리",
+    "url": "http://{{hostname}}/{{contextPath}}/{logout_path}/member",
+    "method": "POST",
+    "sortNum": 40000,
+    "created": "2022-01-11T08:48:32.511Z",
+    "modified": "2022-01-11T08:48:32.511Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "logout_path",
+        "value": "api/logout",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      }
+    ]
+  },
+  {
+    "_id": "fa96c2d6-6bac-4127-9cc6-c5a2c0a974ba",
+    "colId": "1c8ec268-937b-4b78-84bc-f104e6a6e510",
+    "containerId": "",
+    "name": "사용자 정보 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{member_path}/me",
+    "method": "GET",
+    "sortNum": 20000,
+    "created": "2022-01-11T08:48:32.511Z",
+    "modified": "2022-01-11T08:48:32.511Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "member_path",
+        "value": "api/members",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "fcf200a1-4c97-4310-af59-dba85adc42a9",
+    "colId": "1c8ec268-937b-4b78-84bc-f104e6a6e510",
+    "containerId": "",
+    "name": "사용자 목록 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{member_path}?page=1&itemsPerPage=50&loginId=ymyoo&memberNm&memberSt&memberType",
+    "method": "POST",
+    "sortNum": 30000,
+    "created": "2022-01-11T08:48:32.511Z",
+    "modified": "2022-02-15T05:11:49.012Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "member_path",
+        "value": "api/members",
+        "isPath": true
+      },
+      {
+        "name": "page",
+        "value": "1",
+        "isPath": false
+      },
+      {
+        "name": "itemsPerPage",
+        "value": "50",
+        "isPath": false
+      },
+      {
+        "name": "loginId",
+        "value": "ymyoo",
+        "isPath": false
+      },
+      {
+        "name": "memberNm",
+        "value": "",
+        "isPath": false
+      },
+      {
+        "name": "memberSt",
+        "value": "",
+        "isPath": false
+      },
+      {
+        "name": "memberType",
+        "value": "",
+        "isPath": false
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "4194f80d-a56b-4bbd-8cdf-94e97d7a039a",
+    "colId": "fef70fc7-62e9-42b9-9297-2d389defcfae",
+    "containerId": "",
+    "name": "역할 삭제",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/roles/{roleId}",
+    "method": "DELETE",
+    "sortNum": 50000,
+    "created": "2022-01-11T08:48:40.884Z",
+    "modified": "2022-01-11T08:48:40.884Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "roleId",
+        "value": "ROLE_20220111",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      }
+    ]
+  },
+  {
+    "_id": "6fa97e01-3204-458b-9380-46a969bc53c9",
+    "colId": "fef70fc7-62e9-42b9-9297-2d389defcfae",
+    "containerId": "",
+    "name": "역할 수정",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/roles/{roleId}?roleNm=2022.01.11 수정",
+    "method": "PUT",
+    "sortNum": 40000,
+    "created": "2022-01-11T08:48:40.884Z",
+    "modified": "2022-01-11T09:25:00.782Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "roleId",
+        "value": "ROLE_20220111",
+        "isPath": true
+      },
+      {
+        "name": "roleNm",
+        "value": "2022.01.11 수정",
+        "isPath": false
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "80d2179f-f224-4073-95da-6b848488c619",
+    "colId": "fef70fc7-62e9-42b9-9297-2d389defcfae",
+    "containerId": "",
+    "name": "역할 목록 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/roles",
+    "method": "GET",
+    "sortNum": 10000,
+    "created": "2022-01-11T08:48:40.884Z",
+    "modified": "2022-01-11T08:48:40.884Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "82e24c08-6933-4b0b-abd1-2ba3dd74f3f4",
+    "colId": "fef70fc7-62e9-42b9-9297-2d389defcfae",
+    "containerId": "",
+    "name": "로그인",
+    "url": "http://{{hostname}}/{{contextPath}}/{login_path}/member",
+    "method": "POST",
+    "sortNum": 5000,
+    "created": "2022-01-11T08:48:40.884Z",
+    "modified": "2022-01-11T08:48:40.884Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "login_path",
+        "value": "api/login",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "json",
+      "raw": "{\n    \"loginId\" : \"ymyoo\",\n    \"passwd\" : \"1234\"\n}",
+      "form": []
+    },
+    "auth": {
+      "type": "none"
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      },
+      {
+        "type": "set-env-var",
+        "custom": "json.accessToken",
+        "action": "setto",
+        "value": "{{accessToken}}"
+      }
+    ]
+  },
+  {
+    "_id": "8aea2b41-d9cd-4c0e-982d-e2bb73f2a79f",
+    "colId": "fef70fc7-62e9-42b9-9297-2d389defcfae",
+    "containerId": "",
+    "name": "역할 추가",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/roles?roleId=role_20220111&roleNm=2022.01.11 role",
+    "method": "POST",
+    "sortNum": 20000,
+    "created": "2022-01-11T08:48:40.884Z",
+    "modified": "2022-01-11T08:48:40.884Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "roleId",
+        "value": "role_20220111",
+        "isPath": false
+      },
+      {
+        "name": "roleNm",
+        "value": "2022.01.11 role",
+        "isPath": false
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "c90af982-cc5c-48a7-ac58-f079f0258ca1",
+    "colId": "fef70fc7-62e9-42b9-9297-2d389defcfae",
+    "containerId": "",
+    "name": "역할 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/roles/{roleId}",
+    "method": "GET",
+    "sortNum": 30000,
+    "created": "2022-01-11T08:48:40.884Z",
+    "modified": "2022-01-11T08:48:40.884Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "roleId",
+        "value": "ROLE_20220111",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "5e84a0e3-1c6d-480e-9035-e70fd60aa936",
+    "colId": "f43d4613-9c14-466c-b4fe-7740759770a1",
+    "containerId": "",
+    "name": "메뉴목록조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/menus/{systemId}",
+    "method": "GET",
+    "sortNum": 50000,
+    "created": "2022-01-12T02:48:46.730Z",
+    "modified": "2022-01-12T02:52:22.947Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "systemId",
+        "value": "",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "2125061c-c432-49d4-bb1e-db3f8a83ab41",
+    "colId": "02455aff-092e-48b7-b64c-23b4b8010e44",
+    "containerId": "",
+    "name": "코드목록 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/gender/codes",
+    "method": "GET",
+    "sortNum": 20000,
+    "created": "2022-01-12T05:16:00.911Z",
+    "modified": "2022-01-12T05:24:20.662Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/codegroups",
+        "isPath": true
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "1e154f97-3ee4-4364-b3c3-0c6c985ac428",
+    "colId": "02455aff-092e-48b7-b64c-23b4b8010e44",
+    "containerId": "",
+    "name": "코드 등록",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/{codeGroup}/codes",
+    "method": "POST",
+    "sortNum": 22500,
+    "created": "2022-01-12T05:16:05.701Z",
+    "modified": "2022-02-09T01:52:02.378Z",
+    "headers": [
+      {
+        "name": "auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/codegroups",
+        "isPath": true
+      },
+      {
+        "name": "codeGroup",
+        "value": "gender",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "code",
+          "value": "s"
+        },
+        {
+          "name": "codeNm",
+          "value": "seok"
+        },
+        {
+          "name": "remark",
+          "value": "null"
+        },
+        {
+          "name": "codeType",
+          "value": "null"
+        },
+        {
+          "name": "enabled",
+          "value": "true"
+        },
+        {
+          "name": "sortOrder",
+          "value": "4"
+        }
+      ]
+    },
+    "tests": []
+  },
+  {
+    "_id": "4e713907-3ae8-4262-9573-017661b077dd",
+    "colId": "02455aff-092e-48b7-b64c-23b4b8010e44",
+    "containerId": "",
+    "name": "코드 수정",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/{codeGroup}/codes/{code}",
+    "method": "PUT",
+    "sortNum": 23750,
+    "created": "2022-01-12T05:16:11.031Z",
+    "modified": "2022-02-09T02:23:15.393Z",
+    "headers": [
+      {
+        "name": "auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/codegroups",
+        "isPath": true
+      },
+      {
+        "name": "codeGroup",
+        "value": "gender",
+        "isPath": true
+      },
+      {
+        "name": "code",
+        "value": "s",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "codeNm",
+          "value": "sdfk"
+        },
+        {
+          "name": "remark",
+          "value": "null"
+        },
+        {
+          "name": "codeType",
+          "value": "null"
+        },
+        {
+          "name": "enabled",
+          "value": "true"
+        },
+        {
+          "name": "sortOrder",
+          "value": "4"
+        }
+      ]
+    },
+    "tests": []
+  },
+  {
+    "_id": "a0cdd174-5ab7-40cf-b171-7f656625c919",
+    "colId": "02455aff-092e-48b7-b64c-23b4b8010e44",
+    "containerId": "",
+    "name": "코드 삭제",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/{codeGroup}/codes/{code}",
+    "method": "DELETE",
+    "sortNum": 24375,
+    "created": "2022-01-12T05:16:18.637Z",
+    "modified": "2022-02-09T01:52:09.312Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/codegroups",
+        "isPath": true
+      },
+      {
+        "name": "codeGroup",
+        "value": "gender",
+        "isPath": true
+      },
+      {
+        "name": "code",
+        "value": "s",
+        "isPath": true
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "f3bbeeed-d952-4ae4-ae0c-fa00b35d5105",
+    "colId": "acc6af9e-bd8b-4431-b486-9bb9e4525ce9",
+    "containerId": "",
+    "name": "회원목록 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}",
+    "method": "POST",
+    "sortNum": 10000,
+    "created": "2022-01-12T07:18:54.144Z",
+    "modified": "2022-02-09T04:12:28.668Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/members",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "loginId",
+          "value": "ymyoo",
+          "isDisabled": true
+        },
+        {
+          "name": "memberNm",
+          "value": "유영민",
+          "isDisabled": true
+        },
+        {
+          "name": "memberSt",
+          "value": "NORMAL",
+          "isDisabled": true
+        },
+        {
+          "name": "memberType",
+          "value": "INDIVIDUAL",
+          "isDisabled": true
+        },
+        {
+          "name": "page",
+          "value": "1"
+        },
+        {
+          "name": "itemsPerPage",
+          "value": "10"
+        }
+      ]
+    },
+    "tests": []
+  },
+  {
+    "_id": "bcb488ab-a383-474b-89b0-2b4372047ab1",
+    "colId": "acc6af9e-bd8b-4431-b486-9bb9e4525ce9",
+    "containerId": "",
+    "name": "회원정보 수정",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/{memberId}",
+    "method": "PUT",
+    "sortNum": 30000,
+    "created": "2022-01-12T07:19:04.806Z",
+    "modified": "2022-02-09T04:13:45.087Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/members",
+        "isPath": true
+      },
+      {
+        "name": "memberId",
+        "value": "member-cf191939537f4c3f9e056c1a13cfc521",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "memberNm",
+          "value": "patric"
+        },
+        {
+          "name": "authorityId",
+          "value": "ADMIN"
+        },
+        {
+          "name": "memberSt",
+          "value": "NORMAL"
+        },
+        {
+          "name": "encEmail",
+          "value": "NULL"
+        },
+        {
+          "name": "mobileNo",
+          "value": "NULL"
+        }
+      ]
+    },
+    "tests": []
+  },
+  {
+    "_id": "94e83454-7d3b-4c35-9dba-61fe9c5d49c4",
+    "colId": "acc6af9e-bd8b-4431-b486-9bb9e4525ce9",
+    "containerId": "",
+    "name": "회원탈퇴",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/{memberId}/secession",
+    "method": "PUT",
+    "sortNum": 40000,
+    "created": "2022-01-12T07:19:09.894Z",
+    "modified": "2022-02-09T05:07:36.464Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/members",
+        "isPath": true
+      },
+      {
+        "name": "memberId",
+        "value": "member-cf191939537f4c3f9e056c1a13cfc522",
+        "isPath": true
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "b3d45c4f-e9c7-46ad-95b6-48b73230ea55",
+    "colId": "ce691145-ea74-4d0b-bd97-09c471a41fee",
+    "containerId": "",
+    "name": "권한-역할 목록조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/authorities",
+    "method": "GET",
+    "sortNum": 10000,
+    "created": "2022-01-14T01:32:22.536Z",
+    "modified": "2022-01-14T01:33:29.397Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/auth",
+        "isPath": true
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "ab816d46-e797-460f-868b-45a5bd2af82f",
+    "colId": "ce691145-ea74-4d0b-bd97-09c471a41fee",
+    "containerId": "",
+    "name": "권한-역할 등록",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/authorities",
+    "method": "POST",
+    "sortNum": 20000,
+    "created": "2022-01-14T01:34:01.304Z",
+    "modified": "2022-02-09T00:34:00.218Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/auth",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "authorityId",
+          "value": "custom1"
+        },
+        {
+          "name": "authorityNm",
+          "value": "고객1"
+        },
+        {
+          "name": "roleId",
+          "value": "\"ROLE_ADMIN\",\"ROLE_USER\""
+        }
+      ]
+    },
+    "tests": []
+  },
+  {
+    "_id": "9054914b-afe2-4a67-98bd-2594a9d2c6b2",
+    "colId": "ce691145-ea74-4d0b-bd97-09c471a41fee",
+    "containerId": "",
+    "name": "권한-역할 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/authorities/{authorityId}",
+    "method": "GET",
+    "sortNum": 40000,
+    "created": "2022-01-14T01:45:03.655Z",
+    "modified": "2022-01-14T01:46:17.198Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "authorityId",
+        "value": "USER",
+        "isPath": true
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "04ce50ba-a817-4288-88e8-7b7eb3e44411",
+    "colId": "ce691145-ea74-4d0b-bd97-09c471a41fee",
+    "containerId": "",
+    "name": "권한-역할 수정",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/authorities/{authorityId}",
+    "method": "PUT",
+    "sortNum": 50000,
+    "created": "2022-01-14T01:46:42.758Z",
+    "modified": "2022-02-09T04:04:23.570Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "authorityId",
+        "value": "USER",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "authorityNm",
+          "value": "일반사용자"
+        },
+        {
+          "name": "roleId",
+          "value": "ROLE_USER"
+        }
+      ]
+    },
+    "tests": []
+  },
+  {
+    "_id": "518fef47-7a4f-4146-a1e6-7dedbf064baf",
+    "colId": "ce691145-ea74-4d0b-bd97-09c471a41fee",
+    "containerId": "",
+    "name": "권한-역할 삭제",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/authorities/{authorityId}",
+    "method": "DELETE",
+    "sortNum": 60000,
+    "created": "2022-01-14T04:34:50.637Z",
+    "modified": "2022-02-09T01:06:30.502Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "authorityId",
+        "value": "TEST1",
+        "isPath": true
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "1473f380-1dfe-4ac7-8046-48b5ee0e3e35",
+    "colId": "2ab383cf-16ac-451f-8232-08d784928731",
+    "containerId": "",
+    "name": "코드그룹 목록 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{codegroup_path}",
+    "method": "GET",
+    "sortNum": 15000,
+    "created": "2022-01-17T05:40:03.702Z",
+    "modified": "2022-01-17T05:40:03.702Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "codegroup_path",
+        "value": "api/codegroups",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "3ef11866-7c4e-472f-a2b1-e8038b02b62a",
+    "colId": "2ab383cf-16ac-451f-8232-08d784928731",
+    "containerId": "",
+    "name": "로그인 처리",
+    "url": "http://{{hostname}}/{{contextPath}}/{login_path}/member",
+    "method": "POST",
+    "sortNum": 10000,
+    "created": "2022-01-17T05:40:03.702Z",
+    "modified": "2022-01-17T05:40:03.702Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "login_path",
+        "value": "api/login",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "json",
+      "raw": "{\n    \"loginId\" : \"ymyoo\",\n    \"passwd\" : \"1234\"\n}",
+      "form": []
+    },
+    "auth": {
+      "type": "none"
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      },
+      {
+        "type": "set-env-var",
+        "custom": "json.accessToken",
+        "action": "setto",
+        "value": "{{accessToken}}"
+      }
+    ]
+  },
+  {
+    "_id": "ae44a824-7e56-4a6f-9c9a-617834444b02",
+    "colId": "2ab383cf-16ac-451f-8232-08d784928731",
+    "containerId": "",
+    "name": "코드그룹 수정",
+    "url": "http://{{hostname}}/{{contextPath}}/{codegroup_path}/{codegroup}",
+    "method": "PUT",
+    "sortNum": 30000,
+    "created": "2022-01-17T05:40:03.702Z",
+    "modified": "2022-01-17T05:40:03.702Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "codegroup_path",
+        "value": "api/codegroups",
+        "isPath": true
+      },
+      {
+        "name": "codegroup",
+        "value": "test1",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "codeGroup",
+          "value": "test1"
+        },
+        {
+          "name": "codeGroupNm",
+          "value": "test1"
+        },
+        {
+          "name": "enabled",
+          "value": "1"
+        },
+        {
+          "name": "remark",
+          "value": "0"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "d83647ed-d16f-4ba5-b6e6-3cf320f61206",
+    "colId": "2ab383cf-16ac-451f-8232-08d784928731",
+    "containerId": "",
+    "name": "코드그룹 삭제",
+    "url": "http://{{hostname}}/{{contextPath}}/{codegroup_path}/{codegroup}",
+    "method": "DELETE",
+    "sortNum": 40000,
+    "created": "2022-01-17T05:40:03.702Z",
+    "modified": "2022-01-17T05:40:03.702Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "codegroup_path",
+        "value": "api/codegroups",
+        "isPath": true
+      },
+      {
+        "name": "codegroup",
+        "value": "test1",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "f2422b2b-12f4-4f24-a488-e656c0d085d7",
+    "colId": "2ab383cf-16ac-451f-8232-08d784928731",
+    "containerId": "",
+    "name": "코드그룹 등록",
+    "url": "http://{{hostname}}/{{contextPath}}/{codegroup_path}",
+    "method": "POST",
+    "sortNum": 20000,
+    "created": "2022-01-17T05:40:03.702Z",
+    "modified": "2022-01-17T05:40:03.702Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "codegroup_path",
+        "value": "api/codegroups",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "codeGroup",
+          "value": "test1"
+        },
+        {
+          "name": "codeGroupNm",
+          "value": "test1"
+        },
+        {
+          "name": "enabled",
+          "value": "1"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "74ded49e-7d87-4d71-9b98-3dbed8a8b127",
+    "colId": "0379c242-523d-433a-b0af-87377a37a5d2",
+    "containerId": "",
+    "name": "내부자 정보 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{insider_path}/{member_id}",
+    "method": "GET",
+    "sortNum": 28125,
+    "created": "2022-01-18T01:49:51.521Z",
+    "modified": "2022-01-18T01:49:51.521Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "insider_path",
+        "value": "api/insiders",
+        "isPath": true
+      },
+      {
+        "name": "member_id",
+        "value": "insider-fe7a1d0307df4162ae52d5f8bdf4e8a9",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "77b2f317-b5a2-4146-be61-3c51cd982ad8",
+    "colId": "0379c242-523d-433a-b0af-87377a37a5d2",
+    "containerId": "",
+    "name": "내부자 정보 수정",
+    "url": "http://{{hostname}}/{{contextPath}}/{insider_path}/{member_id}",
+    "method": "PUT",
+    "sortNum": 30000,
+    "created": "2022-01-18T01:49:51.521Z",
+    "modified": "2022-01-18T01:49:51.521Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "insider_path",
+        "value": "api/insiders",
+        "isPath": true
+      },
+      {
+        "name": "member_id",
+        "value": "insider-976388f73af7468a9577fa8253d59422",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "memberId",
+          "value": "insider-5c4774f8b8d54a3db7aa6e33bad3996a"
+        },
+        {
+          "name": "memberNm",
+          "value": "tester1"
+        },
+        {
+          "name": "authorityId",
+          "value": "user"
+        },
+        {
+          "name": "memberSt",
+          "value": "normal"
+        },
+        {
+          "name": "mobileNo",
+          "value": "010-2222-2222"
+        },
+        {
+          "name": "email",
+          "value": "brainednet@brainednet.com"
+        },
+        {
+          "name": "memberIps",
+          "value": "127.0.0.5"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "d5f3858d-233b-426f-92bd-53b7aeb08047",
+    "colId": "0379c242-523d-433a-b0af-87377a37a5d2",
+    "containerId": "",
+    "name": "내부자 목록 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{insider_path}",
+    "method": "GET",
+    "sortNum": 22500,
+    "created": "2022-01-18T01:49:51.521Z",
+    "modified": "2022-01-18T01:49:51.521Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "insider_path",
+        "value": "api/insiders",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "fb5f7c14-6911-4f06-a213-8f1ab5c13b7e",
+    "colId": "0379c242-523d-433a-b0af-87377a37a5d2",
+    "containerId": "",
+    "name": "내부자 등록",
+    "url": "http://{{hostname}}/{{contextPath}}/{insider_path}",
+    "method": "POST",
+    "sortNum": 26250,
+    "created": "2022-01-18T01:49:51.521Z",
+    "modified": "2022-03-31T03:38:52.640Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "insider_path",
+        "value": "api/insiders",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "loginId",
+          "value": "sckim-ad"
+        },
+        {
+          "name": "memberNm",
+          "value": "1234"
+        },
+        {
+          "name": "authorityId",
+          "value": "admin"
+        },
+        {
+          "name": "email",
+          "value": "sckim@brainednet.com"
+        },
+        {
+          "name": "mobileNo",
+          "value": "010-2222-2222"
+        },
+        {
+          "name": "memberIps",
+          "value": "127.0.0.1"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "fce617f6-f1ee-44ff-8ed9-437477fdff91",
+    "colId": "0379c242-523d-433a-b0af-87377a37a5d2",
+    "containerId": "",
+    "name": "내부사용자 로그인 처리",
+    "url": "http://{{hostname}}/{{contextPath}}/{login_path}/insider",
+    "method": "POST",
+    "sortNum": 15000,
+    "created": "2022-01-18T01:49:51.521Z",
+    "modified": "2022-03-31T03:55:16.603Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "login_path",
+        "value": "api/login",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "json",
+      "raw": "{\n    \"loginId\" : \"ymyoo\",\n    \"passwd\" : \"1234\"\n}",
+      "form": []
+    },
+    "auth": {
+      "type": "none"
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      },
+      {
+        "type": "set-env-var",
+        "custom": "json.accessToken",
+        "action": "setto",
+        "value": "{{accessToken}}"
+      }
+    ]
+  },
+  {
+    "_id": "81a537df-4025-451e-bfe6-bebf6794a2f1",
+    "colId": "046f03df-220f-49fa-854e-c64a3f0d492b",
+    "containerId": "",
+    "name": "로그인 처리",
+    "url": "http://{{hostname}}/{{contextPath}}/{login_path}/member",
+    "method": "POST",
+    "sortNum": 10000,
+    "created": "2022-01-18T01:55:52.615Z",
+    "modified": "2022-01-18T01:55:54.289Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "login_path",
+        "value": "api/login",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "json",
+      "raw": "{\n    \"loginId\" : \"ymyoo\",\n    \"passwd\" : \"1234\"\n}",
+      "form": []
+    },
+    "auth": {
+      "type": "none"
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      },
+      {
+        "type": "set-env-var",
+        "custom": "json.accessToken",
+        "action": "setto",
+        "value": "{{accessToken}}"
+      }
+    ]
+  },
+  {
+    "_id": "e88c20a6-9e3c-4553-98fa-46429b69fc79",
+    "colId": "046f03df-220f-49fa-854e-c64a3f0d492b",
+    "containerId": "",
+    "name": "프로그램-역할 목록 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{program_path}",
+    "method": "GET",
+    "sortNum": 20000,
+    "created": "2022-01-18T01:56:57.646Z",
+    "modified": "2022-01-18T02:07:35.959Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "program_path",
+        "value": "api/auth/programs",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "453a7282-6589-42e7-b28d-a1c11ac17b02",
+    "colId": "046f03df-220f-49fa-854e-c64a3f0d492b",
+    "containerId": "",
+    "name": "프로그램-역할 추가",
+    "url": "http://{{hostname}}/{{contextPath}}/{program_path}",
+    "method": "POST",
+    "sortNum": 30000,
+    "created": "2022-01-18T01:58:53.597Z",
+    "modified": "2022-01-18T02:08:46.959Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "program_path",
+        "value": "api/auth/programs",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "programNm",
+          "value": "프로그램 관리"
+        },
+        {
+          "name": "httpMethod",
+          "value": "GET"
+        },
+        {
+          "name": "urlPattern",
+          "value": "/member/api/auth/access/**"
+        },
+        {
+          "name": "checkOrder",
+          "value": "1"
+        },
+        {
+          "name": "roles",
+          "value": "ROLE_USER, ROLE_ADMIN"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "69ea9b8e-c7e1-47c1-8d26-96f4d993358c",
+    "colId": "046f03df-220f-49fa-854e-c64a3f0d492b",
+    "containerId": "",
+    "name": "프로그램-역할 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{program_path}/{programId}",
+    "method": "GET",
+    "sortNum": 40000,
+    "created": "2022-01-18T02:02:33.350Z",
+    "modified": "2022-01-18T02:09:24.087Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "program_path",
+        "value": "api/auth/programs",
+        "isPath": true
+      },
+      {
+        "name": "programId",
+        "value": "program-7d4ba9a2cf4345239abe1a767c35359b",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "ce16eb74-ebf8-4b76-a09b-0bc596f9ee17",
+    "colId": "046f03df-220f-49fa-854e-c64a3f0d492b",
+    "containerId": "",
+    "name": "프로그램-역할 수정",
+    "url": "http://{{hostname}}/{{contextPath}}/{program_path}/{programId}",
+    "method": "PUT",
+    "sortNum": 50000,
+    "created": "2022-01-18T02:03:17.975Z",
+    "modified": "2022-01-18T02:09:29.766Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "program_path",
+        "value": "api/auth/programs",
+        "isPath": true
+      },
+      {
+        "name": "programId",
+        "value": "program-7d4ba9a2cf4345239abe1a767c35359b",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "programNm",
+          "value": "프로그램 관리"
+        },
+        {
+          "name": "httpMethod",
+          "value": "POST"
+        },
+        {
+          "name": "urlPattern",
+          "value": "/member/api/auth/access/**"
+        },
+        {
+          "name": "checkOrder",
+          "value": "1"
+        },
+        {
+          "name": "roles",
+          "value": "ROLE_USER, ROLE_ADMIN"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "e1dacc15-cee5-4ccd-9903-578014461feb",
+    "colId": "046f03df-220f-49fa-854e-c64a3f0d492b",
+    "containerId": "",
+    "name": "프로그램-역할 삭제",
+    "url": "http://{{hostname}}/{{contextPath}}/{program_path}/{programId}",
+    "method": "DELETE",
+    "sortNum": 60000,
+    "created": "2022-01-18T02:04:18.622Z",
+    "modified": "2022-01-18T02:09:52.190Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "program_path",
+        "value": "api/auth/programs",
+        "isPath": true
+      },
+      {
+        "name": "programId",
+        "value": "program-7d4ba9a2cf4345239abe1a767c35359b",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "18b96e03-578f-401d-96b4-e41297527b38",
+    "colId": "0b48ae68-81b1-4e95-9379-6aae2e474814",
+    "containerId": "",
+    "name": "사용자 메뉴조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/menus/{systemId}/me",
+    "method": "GET",
+    "sortNum": 79062,
+    "created": "2022-01-18T05:31:05.351Z",
+    "modified": "2022-01-18T05:31:05.351Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "systemId",
+        "value": "PORTAL_USP",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "1c50f479-cf92-46ae-aec6-bfb24e80afc2",
+    "colId": "0b48ae68-81b1-4e95-9379-6aae2e474814",
+    "containerId": "",
+    "name": "메뉴수정",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/menus/{systemId}/{menuId}",
+    "method": "PUT",
+    "sortNum": 57500,
+    "created": "2022-01-18T05:31:05.351Z",
+    "modified": "2022-01-18T06:11:44.290Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "systemId",
+        "value": "PORTAL_USP",
+        "isPath": true
+      },
+      {
+        "name": "menuId",
+        "value": "menu-MENU2",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "menuNm",
+          "value": "Menu-2U"
+        },
+        {
+          "name": "url",
+          "value": "/member/menu2"
+        },
+        {
+          "name": "newWindow",
+          "value": "false"
+        },
+        {
+          "name": "remark",
+          "value": "Menu 2Depth No2"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      },
+      {
+        "type": "json-query",
+        "custom": "json.menuId",
+        "action": "contains",
+        "value": "menu-"
+      }
+    ]
+  },
+  {
+    "_id": "541f5212-3636-422a-909f-0f937fe501d5",
+    "colId": "0b48ae68-81b1-4e95-9379-6aae2e474814",
+    "containerId": "",
+    "name": "메뉴삭제",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/menus/{systemId}/{menuId}",
+    "method": "DELETE",
+    "sortNum": 58750,
+    "created": "2022-01-18T05:31:05.351Z",
+    "modified": "2022-01-18T05:45:48.010Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "systemId",
+        "value": "PORTAL_USP",
+        "isPath": true
+      },
+      {
+        "name": "menuId",
+        "value": "menu-MENU3",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      }
+    ]
+  },
+  {
+    "_id": "5b945fd0-7da9-4bd5-9a5a-5441bf6623b0",
+    "colId": "0b48ae68-81b1-4e95-9379-6aae2e474814",
+    "containerId": "",
+    "name": "메뉴이동",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/menus/{systemId}/{menuId}/move",
+    "method": "PUT",
+    "sortNum": 69062,
+    "created": "2022-01-18T05:31:05.351Z",
+    "modified": "2022-01-18T05:31:05.351Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "systemId",
+        "value": "PORTAL_USP",
+        "isPath": true
+      },
+      {
+        "name": "menuId",
+        "value": "menu-MENU2",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "direction",
+          "value": "DOWN"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "92e8cf1d-a875-4206-ad8d-267b7b5f5209",
+    "colId": "0b48ae68-81b1-4e95-9379-6aae2e474814",
+    "containerId": "",
+    "name": "메뉴등록",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/menus/{systemId}",
+    "method": "POST",
+    "sortNum": 55000,
+    "created": "2022-01-18T05:31:05.351Z",
+    "modified": "2022-01-18T05:31:05.351Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "systemId",
+        "value": "PORTAL_USP",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "baseMenuId",
+          "value": "menu-MENU4"
+        },
+        {
+          "name": "relation",
+          "value": "CHILD"
+        },
+        {
+          "name": "menuNm",
+          "value": "Menu-4-2"
+        },
+        {
+          "name": "url",
+          "value": "/member/menu4/submenu2"
+        },
+        {
+          "name": "newWindow",
+          "value": "false"
+        },
+        {
+          "name": "remark",
+          "value": "Menu 2Depth No 4-2"
+        },
+        {
+          "name": "menuId",
+          "value": "MENU4_2"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "deee644d-a461-4f86-9aa2-b8c8ac3bac44",
+    "colId": "0b48ae68-81b1-4e95-9379-6aae2e474814",
+    "containerId": "",
+    "name": "메뉴조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/menus/{systemId}/{menuId}",
+    "method": "GET",
+    "sortNum": 56250,
+    "created": "2022-01-18T05:31:05.351Z",
+    "modified": "2022-01-18T05:31:05.351Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "systemId",
+        "value": "PORTAL_USP",
+        "isPath": true
+      },
+      {
+        "name": "menuId",
+        "value": "menu-MENU4_2",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      },
+      {
+        "type": "json-query",
+        "custom": "json.menuId",
+        "action": "contains",
+        "value": "menu-"
+      }
+    ]
+  },
+  {
+    "_id": "e5d48f89-c429-45ac-85c7-b03afec5afd8",
+    "colId": "0b48ae68-81b1-4e95-9379-6aae2e474814",
+    "containerId": "",
+    "name": "메뉴목록조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/menus/{systemId}",
+    "method": "GET",
+    "sortNum": 50000,
+    "created": "2022-01-18T05:31:05.351Z",
+    "modified": "2022-01-18T05:31:05.351Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "systemId",
+        "value": "PORTAL_USP",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "e23754fc-0f07-416e-b1b6-27045aaeb66e",
+    "colId": "5c5b4f42-ff67-44d0-a83f-62a8c55c80ac",
+    "containerId": "",
+    "name": "메뉴-역할 목록 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/menu-roles/{systemId}/{roleId}",
+    "method": "GET",
+    "sortNum": 10000,
+    "created": "2022-01-18T05:31:13.355Z",
+    "modified": "2022-01-18T05:31:13.355Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "systemId",
+        "value": "PORTAL_USP",
+        "isPath": true
+      },
+      {
+        "name": "roleId",
+        "value": "ROLE_USER",
+        "isPath": true
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "fd9b330e-8e7a-41d9-8dcb-45d632f1f3d7",
+    "colId": "5c5b4f42-ff67-44d0-a83f-62a8c55c80ac",
+    "containerId": "",
+    "name": "메뉴-역할 수정",
+    "url": "http://{{hostname}}/{{contextPath}}/{auth_path}/menu-roles/{systemId}/{roleId}",
+    "method": "PUT",
+    "sortNum": 20000,
+    "created": "2022-01-18T05:31:13.355Z",
+    "modified": "2022-01-18T05:31:13.355Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "auth_path",
+        "value": "api/auth",
+        "isPath": true
+      },
+      {
+        "name": "systemId",
+        "value": "PORTAL_USP",
+        "isPath": true
+      },
+      {
+        "name": "roleId",
+        "value": "ROLE_USER",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "menuId",
+          "value": "menu-MENU1"
+        },
+        {
+          "name": "menuId",
+          "value": "menu-MENU4"
+        },
+        {
+          "name": "menuId",
+          "value": "menu-MENU2_2_2"
+        },
+        {
+          "name": "menuId",
+          "value": "menu-MENU2_3"
+        },
+        {
+          "name": "menuId",
+          "value": "menu-MENU2_4_1"
+        },
+        {
+          "name": "menuId",
+          "value": "menu-MENU2_4_2"
+        },
+        {
+          "name": "menuId",
+          "value": "menu-MENU5"
+        }
+      ]
+    },
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "dff8d77c-9348-4f52-ab69-6b71c2da5db6",
+    "colId": "acc6af9e-bd8b-4431-b486-9bb9e4525ce9",
+    "containerId": "",
+    "name": "불량회원등록",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/{memberId}/black",
+    "method": "PUT",
+    "sortNum": 50000,
+    "created": "2022-01-19T03:51:43.067Z",
+    "modified": "2022-02-09T05:29:28.282Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/members",
+        "isPath": true
+      },
+      {
+        "name": "memberId",
+        "value": "member-cf191939537f4c3f9e056c1a13cfc522",
+        "isPath": true
+      }
+    ],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "registerReasons",
+          "value": "RI01,RI02,RI03,RI04,RI05,RI06,RI07"
+        },
+        {
+          "name": "limitBeginDt",
+          "value": "20210101"
+        },
+        {
+          "name": "limitEndDt",
+          "value": "20220113"
+        },
+        {
+          "name": "detailReason",
+          "value": "상세사유,상세사유,상세사유,상세사유,상세사유,상세사유,상세사유,상세사유,상세사유,상세사유,상세사유"
+        }
+      ]
+    },
+    "tests": []
+  },
+  {
+    "_id": "0e9246cf-6a46-4c3c-8b3b-3e7b01d4186a",
+    "colId": "acc6af9e-bd8b-4431-b486-9bb9e4525ce9",
+    "containerId": "",
+    "name": "불량회원해제",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/{memberId}/unblack",
+    "method": "PUT",
+    "sortNum": 60000,
+    "created": "2022-01-19T04:46:55.875Z",
+    "modified": "2022-02-09T05:07:44.284Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/members",
+        "isPath": true
+      },
+      {
+        "name": "memberId",
+        "value": "member-cf191939537f4c3f9e056c1a13cfc522",
+        "isPath": true
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "eeafccbf-1f3e-40ef-b1df-d97ddaf149f8",
+    "colId": "acc6af9e-bd8b-4431-b486-9bb9e4525ce9",
+    "containerId": "",
+    "name": "회원정보 조회",
+    "url": "http://{{hostname}}/{{contextPath}}/{code_path}/{memberId}",
+    "method": "GET",
+    "sortNum": 20000,
+    "created": "2022-01-28T02:20:42.036Z",
+    "modified": "2022-01-28T02:21:57.742Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "code_path",
+        "value": "api/members",
+        "isPath": true
+      },
+      {
+        "name": "memberId",
+        "value": "member-cf191939537f4c3f9e056c1a13cfc521",
+        "isPath": true
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "5e7493b4-3003-4ca4-af01-730663f43989",
+    "colId": "42dea801-dda4-48c4-9160-d06116357a2c",
+    "containerId": "",
+    "name": "사용자현황",
+    "url": "http://{{hostname}}/{{contextPath}}/{ust_path}/user-stats?searchType=MONTH&memberType&beginDay=20220101&endDay=20220331",
+    "method": "GET",
+    "sortNum": 10000,
+    "created": "2022-03-31T02:22:07.578Z",
+    "modified": "2022-03-31T04:01:03.030Z",
+    "headers": [
+      {
+        "name": "Auth",
+        "value": "{{accessTokenForBearer}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "ust_path",
+        "value": "api/ust",
+        "isPath": true
+      },
+      {
+        "name": "searchType",
+        "value": "MONTH",
+        "isPath": false
+      },
+      {
+        "name": "memberType",
+        "value": "",
+        "isPath": false
+      },
+      {
+        "name": "beginDay",
+        "value": "20220101",
+        "isPath": false
+      },
+      {
+        "name": "endDay",
+        "value": "20220331",
+        "isPath": false
+      }
+    ],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      },
+      {
+        "type": "Content-Type",
+        "custom": "",
+        "action": "contains",
+        "value": "application/json"
+      }
+    ]
+  },
+  {
+    "_id": "8d218693-3257-4731-a9c4-73cf8f62821c",
+    "colId": "d98ade4f-2ec8-45ca-91f3-bffeb1a347da",
+    "containerId": "",
+    "name": "bnet 업무담당자 등록",
+    "url": "http://{{hostname}}/{{contextPath}}/api/yym/bnet",
+    "method": "POST",
+    "sortNum": 10000,
+    "created": "2022-05-04T05:36:15.381Z",
+    "modified": "2022-05-04T06:01:22.914Z",
+    "headers": [],
+    "params": [],
+    "tests": []
+  },
+  {
+    "_id": "eea68acc-c17e-40c5-bd6c-60290906088a",
+    "colId": "d98ade4f-2ec8-45ca-91f3-bffeb1a347da",
+    "containerId": "",
+    "name": "bnet 개인사용자 등록",
+    "url": "http://{{hostname}}/{{contextPath}}/api/yym/member",
+    "method": "POST",
+    "sortNum": 20000,
+    "created": "2022-05-04T06:01:32.903Z",
+    "modified": "2022-05-04T06:02:34.384Z",
+    "headers": [],
+    "params": [],
+    "tests": []
+  },
+  {
+    "_id": "96d63ddf-f992-4a41-b306-3549d1b413d3",
+    "colId": "1c8ec268-937b-4b78-84bc-f104e6a6e510",
+    "containerId": "",
+    "name": "사용자 Token refresh",
+    "url": "http://{{hostname}}/{{contextPath}}/{login_path}/refresh-token/member",
+    "method": "POST",
+    "sortNum": 50000,
+    "created": "2022-05-11T06:01:22.861Z",
+    "modified": "2022-05-11T06:02:30.703Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "login_path",
+        "value": "api/login",
+        "isPath": true
+      }
+    ],
+    "tests": []
+  }
+]

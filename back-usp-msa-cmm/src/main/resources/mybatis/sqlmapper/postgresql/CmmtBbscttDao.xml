@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtBbscttDao">
+
+	<sql id="CmmtBbsctt_cols">
+		 bbsctt_id							as article_id
+		,bbs_id								as board_id
+		,sj_nm								as title
+		,bbsctt_cn							as article
+		,notice_at							as notice
+		,atchmnfl_group_id					as attachment_group_id
+		,image_group_id						as image_group_id
+		,ctgry_code							as category_cd
+		,ntce_at							as posting
+		,web_editr_use_at					as web_editor
+		,cnrs_url							as shared_url
+		,pcom_thumb_file_id					as pc_thumbnail_file_id
+		,mobile_thumb_file_id				as mobile_thumbnail_file_id
+		,thumb_replc_cn						as thumbnail_alt_cn
+		,rdcnt								as read_cnt
+		,creatr_id							as creator_id
+		,fn_cmm_get_member_nm(creatr_id)	as creator_nm
+		,creat_dt							as created_dt
+		,updusr_id							as updater_id
+		,fn_cmm_get_member_nm(updusr_id)	as updater_nm
+		,updt_dt							as updated_dt
+	</sql>
+
+	<sql id="CmmtBbsctt_listCols">
+		 ${alias}bbsctt_id							as article_id
+		,${alias}bbs_id								as board_id
+		,${alias}sj_nm								as title
+		,${alias}bbsctt_cn							as article
+		,${alias}notice_at							as notice
+		,${alias}atchmnfl_group_id					as attachment_group_id
+		,${alias}image_group_id						as image_group_id
+		,${alias}ctgry_code							as category_cd
+		,${alias}ntce_at							as posting
+		,${alias}web_editr_use_at					as web_editor
+		,${alias}cnrs_url							as shared_url
+		,${alias}pcom_thumb_file_id					as pc_thumbnail_file_id
+		,${alias}mobile_thumb_file_id				as mobile_thumbnail_file_id
+		,${alias}thumb_replc_cn						as thumbnail_alt_cn
+		,${alias}rdcnt								as read_cnt
+		,${alias}creatr_id							as creator_id
+		,fn_cmm_get_member_nm(${alias}creatr_id)	as creator_nm
+		,${alias}creat_dt							as created_dt
+		,${alias}updusr_id							as updater_id
+		,fn_cmm_get_member_nm(${alias}updusr_id)	as updater_nm
+		,${alias}updt_dt							as updated_dt
+	</sql>
+
+	<select id="existsBoardArticles" resultType="Boolean">
+		/** CmmtBbscttDao.existsBoardArticles */
+		select
+			exists (
+				select 1
+				from com_api.cmmt_bbsctt
+				where bbs_id = #{boardId}
+			)
+	</select>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtBbsctt">
+		/** CmmtBbscttDao.select */
+		select
+			<include refid="CmmtBbsctt_cols" />
+		from com_api.cmmt_bbsctt
+		where
+			bbsctt_id = #{articleId}
+	</select>
+
+	<sql id="where-selectList">
+		a.notice_at = false
+		<if test='param.boardId != null and param.boardId != ""'>
+			and a.bbs_id = #{param.boardId}
+		</if>
+		<if test='param.categoryCd != null and param.categoryCd != ""'>
+			and a.ctgry_code = #{param.categoryCd}
+		</if>
+		<if test='param.title != null and param.title != ""'>
+			and a.sj_nm like '%' || #{param.title} || '%'
+		</if>
+		<if test='param.posting != null'>
+			and a.ntce_at = #{param.posting}
+		</if>
+		<if test='param.beginDay != null and param.beginDay != ""'>
+			and a.creat_dt <![CDATA[>=]]> to_timestamp(#{param.beginDay} || '000000', 'yyyymmddhh24miss')
+		</if>
+		<if test='param.endDay != null and param.endDay != ""'>
+			and a.creat_dt <![CDATA[<=]]> to_timestamp(#{param.endDay} || '000000', 'yyyymmddhh24miss')
+		</if>
+		<if test='param.articleSrchWord != null and param.articleSrchWord != ""'>
+			and (
+			<choose>
+				<when test='param.articleSrchCd eq "TITLE"'>
+				a.sj_nm like '%' || #{param.articleSrchWord} || '%'
+				</when>
+				<when test='param.articleSrchCd eq "CONTENT"'>
+				a.bbsctt_cn like '%' || #{param.articleSrchWord} || '%'
+				or a.bbsctt_id in (
+									select bbsctt_id
+									from com_api.cmmt_bbsctt_cn
+									where hder like '%' || #{param.articleSrchWord} || '%'
+									or bbsctt_cn like '%' || #{param.articleSrchWord} || '%'
+								 )
+				</when>
+				<when test='param.articleSrchCd eq "ALLPLUS"'>
+				a.sj_nm like '%' || #{param.articleSrchWord} || '%'
+				or a.bbsctt_cn like '%' || #{param.articleSrchWord} || '%'
+				or a.bbsctt_id in (
+									select bbsctt_id
+									from com_api.cmmt_bbsctt_cn
+									where hder like '%' || #{param.articleSrchWord} || '%'
+									or bbsctt_cn like '%' || #{param.articleSrchWord} || '%'
+								 )
+				or b.login_id like '%' || #{param.articleSrchWord} || '%'
+				or b.mber_nm like '%' || #{param.articleSrchWord} || '%'
+				</when>
+				<otherwise>
+				a.sj_nm like '%' || #{param.articleSrchWord} || '%'
+				or a.bbsctt_cn like '%' || #{param.articleSrchWord} || '%'
+				or a.bbsctt_id in (
+									select bbsctt_id
+									from com_api.cmmt_bbsctt_cn
+									where hder like '%' || #{param.articleSrchWord} || '%'
+									or bbsctt_cn like '%' || #{param.articleSrchWord} || '%'
+								 )
+				</otherwise>
+			</choose>
+			    )
+		</if>
+	</sql>
+
+	<select id="selectList_count" resultType="Long">
+		/** CmmtBbscttDao.selectList_count */
+		select
+			count(*)
+		from com_api.cmmt_bbsctt a
+		left join auth_api.cmmv_user b
+		  on a.creatr_id = b.mber_id
+		where
+			<include refid="where-selectList"/>
+	</select>
+
+	<select id="selectList" resultType="aicluster.common.common.dto.BoardArticleListItem">
+		/** CmmtBbscttDao.selectList */
+		select
+			<include refid="CmmtBbsctt_listCols"><property name="alias" value="a."/></include>
+			,fn_cmm_get_code_nm(c.ctgry_code_group_id, a.ctgry_code) as category_nm
+			,#{totalItems} + 1 - (row_number() over (order by a.creat_dt desc)) as rn
+		from com_api.cmmt_bbsctt a
+		left join auth_api.cmmv_user b
+		  on a.creatr_id = b.mber_id
+		join com_api.cmmt_bbs c
+		  on a.bbs_id = c.bbs_id
+		where
+			<include refid="where-selectList"/>
+		offset
+			#{beginRowNum} -1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="selectList_notice" resultType="aicluster.common.common.dto.BoardArticleListItem">
+		/** CmmtBbscttDao.selectList_notice */
+		select
+			<include refid="CmmtBbsctt_listCols"><property name="alias" value="a."/></include>
+			,fn_cmm_get_code_nm(c.ctgry_code_group_id, a.ctgry_code) as category_nm
+			,row_number() over (order by a.creat_dt desc) as rn
+		from com_api.cmmt_bbsctt a
+		join com_api.cmmt_bbs c
+		  on a.bbs_id = c.bbs_id
+		where
+			a.notice_at = true
+			<if test='boardId != null and boardId != ""'>
+				and a.bbs_id = #{boardId}
+			</if>
+			<if test='categoryCd != null and categoryCd != ""'>
+				and a.ctgry_code = #{categoryCd}
+			</if>
+			<if test='posting != null'>
+				and a.ntce_at = #{posting}
+			</if>
+	</select>
+
+	<insert id="insert">
+		/** CmmtBbscttDao.insert */
+		insert into com_api.cmmt_bbsctt (
+			 bbsctt_id
+			,bbs_id
+			,sj_nm
+			,bbsctt_cn
+			,notice_at
+			,atchmnfl_group_id
+			,image_group_id
+			,ctgry_code
+			,ntce_at
+			,web_editr_use_at
+			,cnrs_url
+			,pcom_thumb_file_id
+			,mobile_thumb_file_id
+			,thumb_replc_cn
+			,rdcnt
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		 ) values (
+			 #{articleId}
+			,#{boardId}
+			,#{title}
+			,#{article}
+			,#{notice}
+			,#{attachmentGroupId}
+			,#{imageGroupId}
+			,#{categoryCd}
+			,#{posting}
+			,#{webEditor}
+			,#{sharedUrl}
+			,#{pcThumbnailFileId}
+			,#{mobileThumbnailFileId}
+			,#{thumbnailAltCn}
+			,#{readCnt}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		 )
+	</insert>
+
+	<update id="update">
+		/** CmmtBbscttDao.update */
+		update com_api.cmmt_bbsctt set
+			 bbs_id                 = #{boardId}
+			,sj_nm                    = #{title}
+			,bbsctt_cn                  = #{article}
+			,notice_at                   = #{notice}
+			,atchmnfl_group_id      = #{attachmentGroupId}
+			,image_group_id           = #{imageGroupId}
+			,ctgry_code              = #{categoryCd}
+			,ntce_at                  = #{posting}
+			,web_editr_use_at               = #{webEditor}
+			,cnrs_url               = #{sharedUrl}
+			,pcom_thumb_file_id     = #{pcThumbnailFileId}
+			,mobile_thumb_file_id = #{mobileThumbnailFileId}
+			,thumb_replc_cn         = #{thumbnailAltCn}
+			,rdcnt                 = #{readCnt}
+			,creatr_id               = #{creatorId}
+			,creat_dt               = #{createdDt}
+			,updusr_id               = #{updaterId}
+			,updt_dt               = #{updatedDt}
+		where
+			bbsctt_id = #{articleId}
+	</update>
+
+	<delete id="delete">
+		/** CmmtBbscttDao.delete */
+		delete from com_api.cmmt_bbsctt
+		where
+			bbsctt_id = #{articleId}
+	</delete>
+
+	<update id="incReadCnt">
+		/** CmmtBbscttDao.incReadCnt */
+		update com_api.cmmt_bbsctt set
+			rdcnt = rdcnt + 1
+		where
+			bbsctt_id = #{articleId}
+	</update>
+
+	<select id="selectList_recent" resultType="aicluster.common.common.dto.BoardArticleListItem">
+		/** CmmtBbscttDao.selectList_recent */
+		select
+			<include refid="CmmtBbsctt_listCols"><property name="alias" value="a."/></include>
+			,fn_cmm_get_code_nm(c.ctgry_code_group_id, a.ctgry_code) as category_nm
+			,row_number() over (order by a.creat_dt desc) as rn
+		from com_api.cmmt_bbsctt a
+		join com_api.cmmt_bbs c
+		  on a.bbs_id = c.bbs_id
+		where
+			a.ntce_at = true
+			<if test='boardId != null and boardId != ""'>
+				and a.bbs_id = #{boardId}
+			</if>
+			<if test='categoryCd != null and categoryCd != ""'>
+				and a.ctgry_code = #{categoryCd}
+			</if>
+			<if test='hasNotice != null and hasNotice == false'>
+				and a.notice_at = false
+			</if>
+		limit #{cnt}
+	</select>
+
+	<select id="selectPrevNext" resultType="aicluster.common.common.dto.BoardArticlePrevNextItem">
+		/** CmmtBbscttDao.selectPrevNext */
+		with tmp_article as (
+		<if test='noticeAvailable == true'>
+			select
+				 a.bbsctt_id
+				,a.bbs_id
+				,a.sj_nm
+				,a.notice_at
+				,a.creat_dt
+			from com_api.cmmt_bbsctt a
+			where
+				a.notice_at = true
+			<if test='param.boardId != null and param.boardId != ""'>
+				and a.bbs_id = #{param.boardId}
+			</if>
+			<if test='param.categoryCd != null and param.categoryCd != ""'>
+				and a.ctgry_code = #{param.categoryCd}
+			</if>
+			<if test='param.posting != null'>
+				and a.ntce_at = #{param.posting}
+			</if>
+			union all
+		</if>
+			select
+				 a.bbsctt_id
+				,a.bbs_id
+				,a.sj_nm
+				,a.notice_at
+				,a.creat_dt
+			from com_api.cmmt_bbsctt a
+			left join auth_api.cmmv_user b
+			  on a.creatr_id = b.mber_id
+			where
+				<include refid="where-selectList"/>
+		)
+		select
+			 y.bbs_id			as board_id
+			,y.bbsctt_id		as article_id
+			,y.sj_nm			as title
+			,y.prev_article_id
+			,y.prev_title
+			,y.next_article_id
+			,y.next_title
+		from (
+			select
+				 x.*
+				,lead(x.bbsctt_id) over w	as prev_article_id
+				,lead(x.sj_nm) over w		as prev_title
+				,lag(x.bbsctt_id) over w	as next_article_id
+				,lag(x.sj_nm) over w		as next_title
+			from tmp_article x
+			window w as (partition by x.bbs_id order by x.notice_at desc, x.creat_dt desc)
+			) y
+		where
+			y.bbsctt_id = #{articleId}
+	</select>
+
+	<select id="selectMinuteCount" resultType="Long">
+		/** CmmtBbscttDao.selectMinuteCount */
+		select
+			count(1)
+		from
+			com_api.cmmt_bbsctt
+		where
+			bbs_id = #{boardId}
+			and creatr_id = #{memberId}
+			and creat_dt between now() - interval'1 minute' and now()
+	</select>
+</mapper>

@@ -1,0 +1,120 @@
+#################################
+# TOMCAT
+#################################
+server:
+   port: 8088
+   tomcat:
+      keep-alive-timeout: 100 
+      max-connections: 8192 # 수립가능한 connection의 총 개수
+      accept-count: 100 # 작업큐의 사이즈
+      connection-timeout: 20000 # timeout 판단 기준 시간, 20초
+      threads:
+         max: 50
+         min-spare: 10 # 항상 활성화 되어있는(idle) thread의 개수
+                     
+#server.error.path=
+#server.servlet.session.timeout=
+
+#################################
+# DBCP
+#################################
+spring:
+   main:
+      allow-bean-definition-overriding: "true"
+   
+   datasource:
+      hikari:
+         driver-class-name: "org.postgresql.Driver"
+         jdbc-url: "jdbc:postgresql://192.168.0.119:5432/cmmdb0_dev00?currentSchema=com_api&serverTimezone=Asia/Seoul"
+         username: "thenet"
+         password: "thenet1!"
+
+         auto-commit: false
+         minimum-idle: 10
+         maximum-pool-size: 50
+         connection-timeout: 20000
+         idle-timeout: 600000
+         max-lifetime: 2000000
+         connection-test-query: "SELECT 1"
+
+#################################
+# LOGGING
+#################################
+logging:
+   pattern:
+      #default log pattern
+      #console: '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx'
+      #custom log pattern
+      #console: '%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%4line]){magenta} %clr(%-40.40logger{39}){cyan} %clr(:){red} %m%n%wEx'
+      file: '%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%4line]){magenta} %clr(%-40.40logger{39}){cyan} %clr(:){red} %m%n%wEx'
+      #rolling-file-name: "/log1/app/API_BATCH/app.%d{yyyy-MM-dd}.%i"
+   logback:
+      rollingpolicy:
+         file-name-pattern: "/log1/app/API_BATCH/app.%d{yyyy-MM-dd}.%i"
+   file:
+      name: "/log1/app/API_BATCH/app.log"
+      max-history: 30
+   level:
+      root: info
+      aicluster: debug
+      jdbc:
+         resultset: error
+         audit: error
+      
+#################################
+# 환경설정
+#################################
+env:
+   cors:
+      origins:
+         - "http://pc.atops.or.kr:5500"
+         - "http://dev-portal.atops.or.kr"
+         - "http://dev-admin.atops.or.kr"
+         - "https://dev-portal.atops.or.kr"
+         - "https://dev-admin.atops.or.kr"
+      headers:
+         - "Content-Disposition"
+         - "Content-Language"
+         - "Content-Transfer-Encoding"
+         - "Content-Type"
+      methods:
+         - "*"
+      pattern: "/**"
+   cookie: 
+      domain: "atops.or.kr"
+      #max-age = jwt.refreshTokenExpireTime / 1000 이어야 한다.
+      max-age: 1800
+      secure: false
+      httpOnly: true
+      path: "/"
+   dir:
+      core-log: "/logs_data/logs1/core"
+      upload: "/aica_data/data/ai-cluster/upload"
+
+
+
+##################################################################
+### 모니터링 ######################################################
+##################################################################
+opentracing:
+   jaeger:
+      service-name: ai-batch-svc # jaeger service name
+      http-sender:
+         url: http://jaeger-collector.istio-system.svc:14268/api/traces 
+      enabled: true
+      const-sampler:
+         decision: true
+      log-spans: true   
+      enable-b3-propagation: true
+      enable-w3c-propagation: true 
+      metrics:
+         exporter:
+            http:
+               path: "/metrics"  
+         
+# actuator 설정 metric
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtBbsAuthorDao">
+
+	<sql id="CmmtBbsAuthor_cols">
+		 bbs_id				as board_id
+		,author_id			as authority_id
+		,bbs_author_code	as board_authority
+		,creatr_id			as creator_id
+		,creat_dt			as created_dt
+		,(select author_nm from auth_api.cmmt_author where author_id = a.author_id) as authority_nm
+		,fn_cmm_get_code_nm('BOARD_AUTHORITY', bbs_author_code) as board_authority_nm
+	</sql>
+
+	<sql id="CmmtBbsAuthor_insertCols">
+			 bbs_id
+			,author_id
+			,bbs_author_code
+			,creatr_id
+			,creat_dt
+	</sql>
+
+	<delete id="delete_board">
+		/** CmmtBbsAuthorDao.delete_board */
+		delete from com_api.cmmt_bbs_author
+		where
+			bbs_id = #{boardId}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtBbsAuthor">
+		/** CmmtBbsAuthorDao.selectList */
+		select
+			<include refid="CmmtBbsAuthor_cols" />
+		from com_api.cmmt_bbs_author a
+		where
+			bbs_id = #{boardId}
+	</select>
+
+	<update id="save">
+		/** CmmtBbsAuthorDao.save */
+		insert into com_api.cmmt_bbs_author (
+			<include refid="CmmtBbsAuthor_insertCols" />
+		) values (
+			 #{boardId}
+			,#{authorityId}
+			,#{boardAuthority}
+			,#{creatorId}
+			,#{createdDt}
+		) on conflict (bbs_id, author_id)
+		do update set
+			 bbs_author_code = #{boardAuthority}
+			,creatr_id      = #{creatorId}
+			,creat_dt      = #{createdDt}
+	</update>
+
+	<insert id="insertList">
+		/** CmmtBbsAuthorDao.insertList */
+		insert into com_api.cmmt_bbs_author (
+			<include refid="CmmtBbsAuthor_insertCols" />
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+			(
+				 #{item.boardId}
+				,#{item.authorityId}
+				,#{item.boardAuthority}
+				,#{item.creatorId}
+				,#{item.createdDt}
+			)
+		</foreach>
+	</insert>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtBbsAuthor">
+		/** CmmtBbsAuthorDao.select */
+		select
+			<include refid="CmmtBbsAuthor_cols" />
+		from com_api.cmmt_bbs_author a
+		where
+			bbs_id = #{boardId}
+			and author_id = #{authorityId}
+	</select>
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtSysChargerDao">
+
+	<select id="selectList" resultType="aicluster.member.common.entity.CmmtSysCharger">
+		/** CmmtSysChargerDao.selectList */
+		select
+			api_sys_id
+			,charger_email
+			,charger_nm
+		from com_api.cmmt_sys_charger
+	</select>
+
+	<insert id="insertList">
+		/** CmmtSysChargerDao.insertList */
+		insert into com_api.cmmt_sys_charger (
+			api_sys_id
+			,charger_email
+			,charger_nm
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+			(
+				#{item.apiSysId}
+				,#{item.chargerEmail}
+				,#{item.chargerNm}
+			)
+		</foreach>
+	</insert>
+
+	<delete id="deleteList">
+		/** CmmtSysChargerDao.deleteList */
+		delete from com_api.cmmt_sys_charger
+		where 1=1
+	</delete>
+</mapper>

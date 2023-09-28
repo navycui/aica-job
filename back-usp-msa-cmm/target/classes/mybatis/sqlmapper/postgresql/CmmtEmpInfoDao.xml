@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtEmpInfoDao">
+
+	<sql id="CmmtEmpInfo_cols">
+		 mber_id									as member_id
+		,login_id									as login_id
+		,encpt_password								as enc_passwd
+		,password_change_dt							as passwd_dt
+		,password_initl_at							as passwd_init
+		,mber_nm									as member_nm
+		,ncnm										as nickname
+		,sexdstn_code								as gender
+		,fn_cmm_get_code_nm('DEPT_CD', dept_code)	as dept_nm
+		,clsf_nm									as position_nm
+		,author_id									as authority_id
+		,mber_sttus_code							as member_st
+		,mber_sttus_change_dt						as member_st_dt
+		,encpt_telno								as enc_tel_no
+		,encpt_mbtlnum								as enc_mobile_no
+		,encpt_email								as enc_email
+		,mber_ip_set								as member_ips
+		,refresh_token								as refresh_token
+		,last_login_dt								as last_login_dt
+		,creatr_id									as creator_id
+		,creat_dt									as created_dt
+		,updusr_id									as updater_id
+		,updt_dt									as updated_dt
+	</sql>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtEmpInfo">
+		/** CmmtEmpInfoDao.select */
+		select
+			<include refid="CmmtEmpInfo_cols" />
+		from auth_api.cmmt_emp_info
+		where
+			mber_id = #{memberId}
+	</select>
+</mapper>

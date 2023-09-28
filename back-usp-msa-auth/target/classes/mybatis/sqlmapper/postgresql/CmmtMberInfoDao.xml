@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtMberInfoDao">
+
+	<sql id="CmmtMberInfo_columns">
+		mber_id												as member_id
+		,login_id											as login_id
+		,encpt_password										as enc_passwd
+		,password_change_dt									as passwd_dt
+		,password_initl_at									as passwd_init
+		,mber_nm											as member_nm
+		,ncnm												as nickname
+		,sexdstn_code										as gender
+		,author_id											as authority_id
+		,fn_cmm_get_authority_nm(author_id) 				as authority_nm
+		,mber_sttus_code									as member_st
+		,fn_cmm_get_code_nm('MEMBER_ST', mber_sttus_code)	as member_st_nm
+		,mber_sttus_change_dt								as member_st_dt
+		,blclst_bgnde										as black_list_begin_day
+		,blclst_endde										as black_list_end_day
+		,blclst_detail_resn									as black_list_reason
+		,mber_ty_code										as member_type
+		,fn_cmm_get_code_nm('MEMBER_TYPE', mber_ty_code)	as member_type_nm
+		,idntfr												as ci
+		,encpt_email										as enc_email
+		,encpt_brthdy										as enc_birthday
+		,encpt_mbtlnum										as enc_mobile_no
+		,charger_nm											as charger_nm
+		,ceo_nm												as ceo_nm
+		,bizrno												as bizrno
+		,jurirno											as jurirno
+		,instrctr_at										as instr
+		,markt_recptn_at									as marketing_reception
+		,refresh_token										as refresh_token
+		,kakao_token										as kakao_token
+		,naver_token										as naver_token
+		,google_token										as google_token
+		,last_login_dt										as last_login_dt
+		,creatr_id											as creator_id
+		,creat_dt											as created_dt
+		,updusr_id											as updater_id
+		,updt_dt											as updated_dt
+	</sql>
+
+	<select id="selectByLoginId" resultType="aicluster.member.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.selectByLoginId */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			login_id = #{loginId}
+	</select>
+
+	<select id="selectByNaverToken" resultType="aicluster.member.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.selectByNaverToken */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			naver_token = #{naverToken}
+	</select>
+
+	<select id="selectByGoogleToken" resultType="aicluster.member.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.selectByGoogleToken */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			google_token = #{googleToken}
+	</select>
+
+	<select id="selectByKakaoToken" resultType="aicluster.member.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.selectByKakaoToken */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			kakao_token = #{kakaoToken}
+	</select>
+
+	<select id="select" resultType="aicluster.member.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.select */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			mber_id = #{memberId}
+	</select>
+
+	<select id="selectByRefreshToken" resultType="aicluster.member.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.selectByRefreshToken */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			refresh_token = #{refreshToken}
+	</select>
+
+	<select id="selectCountByAuthorityId" resultType="Long">
+		/** CmmtMberInfoDao.selectCountByAuthorityId */
+		select
+			count(mber_id) as cnt
+		from auth_api.cmmt_mber_info
+		where
+			author_id = #{authorityId}
+	</select>
+
+	<sql id="selectList_where">
+		1=1
+		and mber_id != login_id
+		<if test='param.loginId != null and param.loginId != ""'>
+			and login_id = #{param.loginId}
+		</if>
+		<if test='param.memberNm != null and param.memberNm != ""'>
+			and mber_nm like '%'||#{param.memberNm}||'%'
+		</if>
+		<if test='param.memberSt != null and param.memberSt != ""'>
+			and mber_sttus_code = #{param.memberSt}
+		</if>
+		<if test='param.memberType != null and param.memberType != ""'>
+			and mber_ty_code = #{param.memberType}
+		</if>
+		<if test='param.beginDay != null and param.beginDay != "" and param.endDay != null and param.endDay != ""'>
+			and creat_dt between to_timestamp(#{param.beginDay}||'000000', 'yyyymmddhh24miss') and to_timestamp(#{param.endDay}||'235959', 'yyyymmddhh24miss')
+		</if>
+		<if test='param.instr != null'>
+			<choose>
+				<when test='param.instr == false'>
+			and (instrctr_at is null or instrctr_at = false)
+				</when>
+				<otherwise>
+			and instrctr_at = true
+				</otherwise>
+			</choose>
+		</if>
+		<if test='param.bizrno != null and param.bizrno != ""'>
+			and bizrno = #{param.bizrno}
+		</if>
+	</sql>
+
+	<select id="selectCount" resultType="Long">
+		/** CmmtMberInfoDao.selectCount */
+		select
+			count(login_id) as cnt
+		from auth_api.cmmt_mber_info
+		where
+			<include refid="selectList_where" />
+	</select>
+
+	<select id="selectList" resultType="aicluster.member.common.dto.MemberDto">
+		/** CmmtMberInfoDao.selectList */
+		select
+			<include refid="CmmtMberInfo_columns" />
+			,row_number() over (order by mber_nm, mber_id) as rn
+		from auth_api.cmmt_mber_info
+		where
+			<include refid="selectList_where" />
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+	<insert id="insert">
+		/** CmmtMberInfoDao.insert */
+		insert into auth_api.cmmt_mber_info (
+			 mber_id
+			,login_id
+			,encpt_password
+			,password_change_dt
+			,password_initl_at
+			,mber_nm
+			,ncnm
+			,sexdstn_code
+			,author_id
+			,mber_sttus_code
+			,mber_sttus_change_dt
+			,mber_ty_code
+			,idntfr
+			,encpt_email
+			,encpt_brthdy
+			,encpt_mbtlnum
+			,charger_nm
+			,ceo_nm
+			,bizrno
+			,jurirno
+			,instrctr_at
+			,markt_recptn_at
+			,refresh_token
+			,kakao_token
+			,naver_token
+			,google_token
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{memberId}
+			,#{loginId}
+			,#{encPasswd}
+			,#{passwdDt}
+			,#{passwdInit}
+			,#{memberNm}
+			,#{nickname}
+			,#{gender}
+			,#{authorityId}
+			,#{memberSt}
+			,#{memberStDt}
+			,#{memberType}
+			,#{ci}
+			,#{encEmail}
+			,#{encBirthday}
+			,#{encMobileNo}
+			,#{chargerNm}
+			,#{ceoNm}
+			,#{bizrno}
+			,#{jurirno}
+			,#{instr}
+			,#{marketingReception}
+			,#{refreshToken}
+			,#{kakaoToken}
+			,#{naverToken}
+			,#{googleToken}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** CmmtMberInfoDao.update */
+		update auth_api.cmmt_mber_info set
+			 login_id      			= #{loginId}
+			,encpt_password    		= #{encPasswd}
+			,password_change_dt     = #{passwdDt}
+			,password_initl_at   	= #{passwdInit}
+			,mber_nm     			= #{memberNm}
+			,ncnm      				= #{nickname}
+			,sexdstn_code        	= #{gender}
+			,author_id  			= #{authorityId}
+			,mber_sttus_code    	= #{memberSt}
+			,mber_sttus_change_dt  	= #{memberStDt}
+			,blclst_bgnde   		= #{blackListBeginDay}
+			,blclst_endde     		= #{blackListEndDay}
+			,blclst_detail_resn		= #{blackListReason}
+			,mber_ty_code   		= #{memberType}
+			,idntfr            		= #{ci}
+			,encpt_email     		= #{encEmail}
+			,encpt_brthdy  			= #{encBirthday}
+			,encpt_mbtlnum 			= #{encMobileNo}
+			,charger_nm				= #{chargerNm}
+			,ceo_nm					= #{ceoNm}
+			,bizrno        			= #{bizrno}
+			,jurirno				= #{jurirno}
+			,instrctr_at			= #{instr}
+			,markt_recptn_at    	= #{marketingReception}
+			,refresh_token 			= #{refreshToken}
+			,kakao_token            = #{kakaoToken}
+			,naver_token            = #{naverToken}
+			,google_token           = #{googleToken}
+			,last_login_dt          = #{lastLoginDt}
+			,creatr_id    			= #{creatorId}
+			,creat_dt    			= #{createdDt}
+			,updusr_id    			= #{updaterId}
+			,updt_dt    			= #{updatedDt}
+		where
+			mber_id = #{memberId}
+	</update>
+
+	<select id="selectCurrStats" resultType="aicluster.member.common.dto.MemberStatsDto">
+		/** CmmtMberInfoDao.selectCurrStats */
+		select
+			  current_timestamp as crtr_dt
+			, sum(case when mber_sttus_code = 'SECESSION' then 0 else 1 end) as crtr_total_mbr_cnt      /** 탈퇴자는 회원에서 제외해야 ... */
+			, sum(case when mber_sttus_code = 'SECESSION' then 1 else 0 end) as crtr_secession_mbr_cnt
+			, sum(case when mber_sttus_code = 'DORMANT' then 1 else 0 end) as crtr_dormant_mbr_cnt
+			, sum(case when mber_sttus_code = 'BLACK' then 1 else 0 end) as crtr_black_mbr_cnt
+			, sum(case when mber_sttus_code in ('NORMAL', 'LOCK') then 1 else 0 end) as crtr_normal_mbr_cnt
+		from auth_api.cmmt_mber_info
+	</select>
+
+	<select id="selectDayStatsList" resultType="aicluster.member.common.dto.MemberStatsListItemDto">
+		/** CmmtMberInfoDao.selectDayStatsList */
+		<choose>
+			<when test='memberType != null and memberType != ""'>
+		select
+			  stats_de				as stats_day
+			, tot_mber_co			as total_mbr_cnt
+			, sbscrb_mber_co		as join_mbr_cnt
+			, secsn_mber_co			as secession_mbr_cnt
+			, drmncy_mber_co		as dormant_mbr_cnt
+			, badn_mber_co			as black_mbr_cnt
+		from auth_api.cmmt_mber_de_unit_stats
+		where
+			stats_de between #{beginDay} and #{endDay}
+			and mber_ty_code = #{memberType}
+			</when>
+			<otherwise>
+		select
+			  stats_de					as stats_day
+			, sum(tot_mber_co)			as total_mbr_cnt
+			, sum(sbscrb_mber_co)		as join_mbr_cnt
+			, sum(secsn_mber_co) 		as secession_mbr_cnt
+			, sum(drmncy_mber_co)		as dormant_mbr_cnt
+			, sum(badn_mber_co)			as black_mbr_cnt
+		from auth_api.cmmt_mber_de_unit_stats
+		where
+			stats_de between #{beginDay} and #{endDay}
+		group by stats_de
+			</otherwise>
+		</choose>
+		order by stats_de
+	</select>
+
+	<select id="selectMonthStatsList" resultType="aicluster.member.common.dto.MemberStatsListItemDto">
+		/** CmmtMberInfoDao.selectMonthStatsList */
+		<choose>
+			<when test='memberType != null and memberType != ""'>
+		select
+			  stats_ym				as stats_day
+			, tot_mber_co			as total_mbr_cnt
+			, sbscrb_mber_co		as join_mbr_cnt
+			, secsn_mber_co			as secession_mbr_cnt
+			, drmncy_mber_co		as dormant_mbr_cnt
+			, badn_mber_co			as black_mbr_cnt
+		from auth_api.cmmt_mber_mt_unit_stats
+		where
+			stats_ym between substring(#{beginDay}, 1, 6) and substring(#{endDay}, 1, 6)
+			and mber_ty_code = #{memberType}
+			</when>
+			<otherwise>
+		select
+			  stats_ym					as stats_day
+			, sum(tot_mber_co)			as total_mbr_cnt
+			, sum(sbscrb_mber_co)		as join_mbr_cnt
+			, sum(secsn_mber_co)		as secession_mbr_cnt
+			, sum(drmncy_mber_co)		as dormant_mbr_cnt
+			, sum(badn_mber_co)			as black_mbr_cnt
+		from auth_api.cmmt_mber_mt_unit_stats
+		where
+			stats_ym between substring(#{beginDay}, 1, 6) and substring(#{endDay}, 1, 6)
+		group by stats_ym
+			</otherwise>
+		</choose>
+		order by stats_ym
+	</select>
+
+	<select id="selectByMemberNm" resultType="aicluster.member.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.selectByMemberNm */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			mber_nm = #{memberNm}
+	</select>
+
+	<select id="selectByCi" resultType="aicluster.member.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.selectByCi */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			idntfr = #{ci}
+	</select>
+
+	<select id="selectMe" resultType="aicluster.member.common.dto.MemberSelfDto">
+		/** CmmtMberInfoDao.selectMe */
+		select
+			 mber_id				as member_id
+			,login_id				as login_id
+			,mber_nm				as member_nm
+			,ncnm					as nickname
+			,sexdstn_code			as gender
+			,mber_ty_code			as member_type
+			,encpt_email			as enc_email
+			,encpt_brthdy			as enc_birthday
+			,encpt_mbtlnum			as enc_mobile_no
+			,charger_nm				as charger_nm
+			,ceo_nm					as ceo_nm
+			,bizrno					as bizrno
+			,jurirno				as jurirno
+			,instrctr_at			as instr
+			,markt_recptn_at		as marketing_reception
+			,last_login_dt			as last_login_dt
+		from auth_api.cmmt_mber_info
+		where
+			mber_id = #{memberId}
+	</select>
+</mapper>

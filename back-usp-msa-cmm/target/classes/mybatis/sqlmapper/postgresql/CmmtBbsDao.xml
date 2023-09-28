@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtBbsDao">
+
+	<sql id="CmmtBbs_cols">
+		bbs_id					as board_id
+		,sys_id					as system_id
+		,bbs_nm					as board_nm
+		,bbsctt_co				as article_cnt
+		,use_at					as enabled
+		,web_editr_use_at		as web_editor
+		,notice_perm_at			as notice_available
+		,answer_perm_at			as commentable
+		,ctgry_use_at			as category
+		,ctgry_code_group_id	as category_code_group
+		,atch_perm_at			as attachable
+		,atchmnfl_lmtt_size		as attachment_size
+		,atchmnfl_extsn_set		as attachment_ext
+		,cnrs_url_use_at		as use_shared_url
+		,thumb_use_at			as use_thumbnail
+		,form_use_at			as use_form
+		,all_user_readng_at		as all_readable
+		,creatr_id				as creator_id
+		,creat_dt				as created_dt
+		,updusr_id				as updater_id
+		,updt_dt				as updated_dt
+	</sql>
+
+	<!-- 사용 -->
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtBbs">
+		/** CmmtBbsDao.selectList */
+		select
+			<include refid="CmmtBbs_cols" />
+		from com_api.cmmt_bbs
+		where
+			1=1
+			<if test='systemId != null and systemId != ""'>
+			and sys_id = #{systemId}
+			</if>
+			<if test="enabled != null">
+				and use_at = #{enabled}
+			</if>
+			<if test='boardId != null and boardId != ""'>
+				and bbs_id = #{boardId}
+			</if>
+			<if test='boardNm != null and boardNm != ""'>
+				and bbs_nm like '%' || #{boardNm} || '%'
+			</if>
+	</select>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtBbs">
+		/** CmmtBbsDao.select */
+		select
+			<include refid="CmmtBbs_cols" />
+		from com_api.cmmt_bbs
+		where
+			bbs_id = #{boardId}
+	</select>
+
+	<insert id="insert">
+		/** CmmtBbsDao.insert */
+		insert into com_api.cmmt_bbs (
+			bbs_id
+			,sys_id
+			,bbs_nm
+			,bbsctt_co
+			,use_at
+			,web_editr_use_at
+			,notice_perm_at
+			,answer_perm_at
+			,ctgry_use_at
+			,ctgry_code_group_id
+			,atch_perm_at
+			,atchmnfl_lmtt_size
+			,atchmnfl_extsn_set
+			,cnrs_url_use_at
+			,thumb_use_at
+			,form_use_at
+			,all_user_readng_at
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{boardId}
+			,#{systemId}
+			,#{boardNm}
+			,#{articleCnt}
+			,#{enabled}
+			,#{webEditor}
+			,#{noticeAvailable}
+			,#{commentable}
+			,#{category}
+			,#{categoryCodeGroup}
+			,#{attachable}
+			,#{attachmentSize}
+			,#{attachmentExt}
+			,#{useSharedUrl}
+			,#{useThumbnail}
+			,#{useForm}
+			,#{allReadable}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** CmmtBbsDao.update */
+		update com_api.cmmt_bbs set
+			 sys_id					= #{systemId}
+			,bbs_nm					= #{boardNm}
+			,bbsctt_co				= #{articleCnt}
+			,use_at					= #{enabled}
+			,web_editr_use_at		= #{webEditor}
+			,notice_perm_at			= #{noticeAvailable}
+			,answer_perm_at			= #{commentable}
+			,ctgry_use_at			= #{category}
+			,ctgry_code_group_id	= #{categoryCodeGroup}
+			,atch_perm_at			= #{attachable}
+			,atchmnfl_lmtt_size		= #{attachmentSize}
+			,atchmnfl_extsn_set		= #{attachmentExt}
+			,cnrs_url_use_at		= #{useSharedUrl}
+			,thumb_use_at			= #{useThumbnail}
+			,form_use_at			= #{useForm}
+			,all_user_readng_at		= #{allReadable}
+			,updusr_id				= #{updaterId}
+			,updt_dt				= #{updatedDt}
+		where
+			bbs_id = #{boardId}
+	</update>
+
+	<delete id="delete">
+		/** CmmtBbsDao.delete */
+		delete from com_api.cmmt_bbs
+		where
+			bbs_id = #{boardId}
+	</delete>
+
+	<update id="updateArticleCnt">
+		/** CmmtBbsDao.updateArticleCnt */
+		update com_api.cmmt_bbs set
+			bbsctt_co = (select count(*) from com_api.cmmt_bbsctt where bbs_id = #{boardId})
+		where
+			bbs_id = #{boardId}
+	</update>
+	
+	<select id="selectBoardExtsn" resultType="aicluster.common.api.qna.dto.QnaExtsnResponseParam">
+		/** CmmtBbsDao.selectBoardExtsn */
+		select
+			atchmnfl_extsn_set
+		from
+			com_api.cmmt_bbs
+		where
+			bbs_id = #{boardId}
+	</select>
+</mapper>

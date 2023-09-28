@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtQnaQuestDao">
+
+	<sql id="cmmtQnaQuest_cols">
+		 a.quest_id
+		,a.qna_id
+		,a.ctgry_code				as category_cd
+		,case
+			when b.ctgry_use_at = true then fn_cmm_get_code_nm(b.ctgry_code_group_id, a.ctgry_code)
+			else null
+		 end as category_nm
+		,a.quest_sttus_code			as quest_st
+		,fn_cmm_get_code_nm('QUEST_STATUS', a.quest_sttus_code) as quest_st_nm
+		,a.quest_sttus_change_dt	as quest_st_dt
+		,a.sj_nm					as title
+		,a.quest_cn					as question
+		,a.quest_atchmnfl_group_id	as quest_attachment_group_id
+		,a.questr_id				as questioner_id
+		,a.quest_creat_dt			as quest_created_dt
+		,a.quest_updt_dt			as quest_updated_dt
+		,a.rspns_cn					as answer
+		,a.rspns_atchmnfl_group_id	as answer_attachment_group_id
+		,a.respond_id				as answer_creator_id
+		,a.rspns_creat_dt			as answer_created_dt
+		,a.rspns_updusr_id			as answer_updater_id
+		,a.rspns_updt_dt			as answer_updated_dt
+		,fn_cmm_get_member_nm(a.questr_id)			as questioner_nm
+		,fn_cmm_get_member_nm(a.rspns_updusr_id)	as answerer_nm
+	</sql>
+
+	<sql id="cmmtQnaQuest_listCols">
+		a.qna_id
+		,a.quest_id
+		,a.ctgry_code				as category_cd
+		,case
+			when b.ctgry_use_at = true then fn_cmm_get_code_nm(b.ctgry_code_group_id, a.ctgry_code)
+			else null
+		 end as category_nm
+		,a.sj_nm					as title
+		,a.quest_sttus_code			as quest_st
+		,fn_cmm_get_code_nm('QUEST_STATUS', a.quest_sttus_code) as quest_st_nm
+		,a.questr_id				as questioner_id
+		,fn_cmm_get_member_nm(a.questr_id)			as questioner_nm
+		,a.quest_creat_dt			as quest_created_dt
+		,a.rspns_updusr_id			as answerer_id
+		,fn_cmm_get_member_nm(a.rspns_updusr_id)	as answerer_nm
+		,a.rspns_updt_dt			as answer_updated_dt
+	</sql>
+
+	<select id="existsQnaQuests" resultType="Boolean">
+		/** CmmtQnaQuestDao.existsQnaQuests */
+		select
+			exists (
+				select 1
+				from com_api.cmmt_qna_quest
+				where qna_id = #{qnaId}
+			)
+	</select>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtQnaQuest">
+		/** CmmtQnaQuestDao.select */
+		select
+			<include refid="cmmtQnaQuest_cols"/>
+		from com_api.cmmt_qna_quest a
+		join com_api.cmmt_qna b
+		  on a.qna_id = b.qna_id
+		where
+			a.quest_id = #{questId}
+	</select>
+
+	<sql id="selectList_where">
+		a.qna_id = #{qnaId}
+		<if test='param.questStatus != null and param.questStatus != ""'>
+			and quest_sttus_code in 
+			<foreach collection="param.questStatusList" open="(" close=")" separator="," item="questStatus">
+				#{questStatus}
+			</foreach>
+		</if>
+		<if test='param.categoryCd != null and param.categoryCd != ""'>
+			and ctgry_code = #{param.categoryCd}
+		</if>
+		<if test="param.title != null and param.title.length() gt 0">
+			and sj_nm like ('%' || #{param.title} || '%')
+		</if>
+		<if test='param.memberNm != null and param.memberNm != ""'>
+			and questr_id in (select mber_id from auth_api.cmmt_mber_info where mber_nm = #{param.memberNm})
+		</if>
+		<if test='param.questBeginDay != null and param.questBeginDay.length() eq 8 and param.questEndDay != null and param.questEndDay.length() eq 8'>
+			and quest_creat_dt between to_timestamp(#{param.questBeginDay} || '000000', 'yyyymmddhh24miss') and to_timestamp(#{param.questEndDay} || '235959', 'yyyymmddhh24miss')
+		</if>
+		<if test='questionerId != null and questionerId != ""'>
+			and questr_id = #{questionerId}
+		</if>
+	</sql>
+
+	<select id="selectList_count" resultType="Long">
+		/** CmmtQnaQuestDao.selectList_count */
+		select
+			count(*) as cnt
+		from com_api.cmmt_qna_quest a
+		join com_api.cmmt_qna b
+		  on a.qna_id = b.qna_id
+		where
+			<include refid="selectList_where"/>
+	</select>
+
+	<select id="selectList" resultType="aicluster.common.common.dto.QnaQuestListItem">
+		/** CmmtQnaQuestDao.selectList */
+		select
+			<include refid="cmmtQnaQuest_listCols"/>
+			,#{totalItems} + 1 - (row_number() over(order by quest_creat_dt desc, sj_nm asc)) as rn
+		from com_api.cmmt_qna_quest a
+		join com_api.cmmt_qna b
+		  on a.qna_id = b.qna_id
+		where
+			<include refid="selectList_where"/>
+		offset
+			#{beginRowNum} -1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<update id="update">
+		/** CmmtQnaQuestDao.update */
+		update com_api.cmmt_qna_quest set
+			 qna_id						= #{qnaId}
+			,ctgry_code					= #{categoryCd}
+			,quest_sttus_code			= #{questSt}
+			,quest_sttus_change_dt		= #{questStDt}
+			,sj_nm						= #{title}
+			,quest_cn					= #{question}
+			,quest_atchmnfl_group_id	= #{questAttachmentGroupId}
+			,questr_id					= #{questionerId}
+			,quest_creat_dt				= #{questCreatedDt}
+			,quest_updt_dt				= #{questUpdatedDt}
+			,rspns_cn					= #{answer}
+			,rspns_atchmnfl_group_id	= #{answerAttachmentGroupId}
+			,respond_id					= #{answerCreatorId}
+			,rspns_creat_dt				= #{answerCreatedDt}
+			,rspns_updusr_id			= #{answerUpdaterId}
+			,rspns_updt_dt				= #{answerUpdatedDt}
+		where
+			quest_id = #{questId}
+	</update>
+
+	<insert id="insert">
+		/** CmmtQnaQuestDao.insert */
+		insert into com_api.cmmt_qna_quest (
+			 quest_id
+			,qna_id
+			,ctgry_code
+			,quest_sttus_code
+			,quest_sttus_change_dt
+			,sj_nm
+			,quest_cn
+			,quest_atchmnfl_group_id
+			,questr_id
+			,quest_creat_dt
+			,quest_updt_dt
+			,rspns_cn
+			,rspns_atchmnfl_group_id
+			,respond_id
+			,rspns_creat_dt
+			,rspns_updusr_id
+			,rspns_updt_dt
+		) values (
+			 #{questId}
+			,#{qnaId}
+			,#{categoryCd}
+			,#{questSt}
+			,#{questStDt}
+			,#{title}
+			,#{question}
+			,#{questAttachmentGroupId}
+			,#{questionerId}
+			,#{questCreatedDt}
+			,#{questUpdatedDt}
+			,#{answer}
+			,#{answerAttachmentGroupId}
+			,#{answerCreatorId}
+			,#{answerCreatedDt}
+			,#{answerUpdaterId}
+			,#{answerUpdatedDt}
+		)
+	</insert>
+
+	<delete id="delete">
+		/** CmmtQnaQuestDao.delete */
+		delete from com_api.cmmt_qna_quest
+		where
+			quest_id = #{questId}
+	</delete>
+	
+	<select id="selectMinuteCount" resultType="Long">
+		/** CmmtQnaQuestDao.selectMinuteCount */
+		select
+			count(1)
+		from
+			com_api.cmmt_qna_quest
+		where
+			qna_id = #{qnaId}
+			and questr_id = #{memberId}
+			and quest_creat_dt between now() - interval'1 minute' and now()
+	</select>
+</mapper>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtQustnrDao">
+
+	<sql id="CmmtQustnr_cols">
+		 qustnr_id		as survey_id
+		,qustnr_nm		as survey_nm
+		,sys_id			as system_id
+		,bgnde			as begin_day
+		,endde			as end_day
+		,rm				as remark
+		,use_at			as enabled
+		,dplct_perm_at	as duplicated
+		,creatr_id		as creator_id
+		,creat_dt		as created_dt
+		,updusr_id		as updater_id
+		,updt_dt		as updated_dt
+	</sql>
+
+	<sql id="CmmtQustnr_listCols">
+		 qustnr_id		as survey_id
+		,qustnr_nm		as survey_nm
+		,sys_id			as system_id
+		,fn_cmm_get_code_nm('SYSTEM_ID', sys_id) as system_nm
+		,bgnde			as begin_day
+		,endde			as end_day
+		,use_at			as enabled
+		,dplct_perm_at	as duplicated
+		,creatr_id		as creator_id
+		,fn_cmm_get_member_nm(creatr_id) as creator_nm
+		,creat_dt		as created_dt
+		,case
+			when use_at = false or bgnde <![CDATA[>]]> to_char(now(), 'yyyymmdd') then fn_cmm_get_code_nm('SURVEY_ST', 'WAIT')
+			when use_at = true and to_char(now(), 'yyyymmdd') between bgnde and endde then fn_cmm_get_code_nm('SURVEY_ST', 'ING')
+			when endde <![CDATA[<]]> to_char(now(), 'yyyymmdd') then fn_cmm_get_code_nm('SURVEY_ST', 'END')
+			else null
+		 end as survey_st_nm
+	</sql>
+
+	<insert id="insert">
+		/** CmmtQustnrDao.insert */
+		insert into com_api.cmmt_qustnr (
+			 qustnr_id
+			,qustnr_nm
+			,sys_id
+			,bgnde
+			,endde
+			,rm
+			,use_at
+			,dplct_perm_at
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{surveyId}
+			,#{surveyNm}
+			,#{systemId}
+			,#{beginDay}
+			,#{endDay}
+			,#{remark}
+			,#{enabled}
+			,#{duplicated}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtQustnr">
+		/** CmmtQustnrDao.select */
+		select
+			<include refid="CmmtQustnr_cols"/>
+			,fn_cmm_get_code_nm('SYSTEM_ID', sys_id) as system_nm
+			,fn_cmm_get_member_nm(creatr_id) as creator_nm
+			,case
+				when use_at = false or bgnde <![CDATA[>]]> to_char(now(), 'yyyymmdd') then fn_cmm_get_code_nm('SURVEY_ST', 'WAIT')
+				when use_at = true and to_char(now(), 'yyyymmdd') between bgnde and endde then fn_cmm_get_code_nm('SURVEY_ST', 'ING')
+				when endde <![CDATA[<]]> to_char(now(), 'yyyymmdd') then fn_cmm_get_code_nm('SURVEY_ST', 'END')
+				else null
+			 end as survey_st_nm
+		from com_api.cmmt_qustnr
+		where
+			qustnr_id = #{surveyId}
+	</select>
+
+	<sql id="where-selectList">
+		1=1
+		<if test="param.systemId != null and param.systemId != ''">
+			and sys_id = #{param.systemId}
+		</if>
+		<![CDATA[
+			AND (
+				bgnde between #{param.beginDay} and #{param.endDay}
+				or endde between #{param.beginDay} and #{param.endDay}
+				or (
+					bgnde < #{param.beginDay}
+					and endde > #{param.beginDay}
+				)
+			)
+		]]>
+		<if test='param.surveySt != null and param.surveySt.equals("WAIT")'>
+		<![CDATA[
+			and (
+				use_at = false
+				or bgnde > to_char(now(), 'yyyymmdd')
+			)
+		]]>
+		</if>
+		<if test='param.surveySt != null and param.surveySt.equals("ING")'>
+		<![CDATA[
+			and (
+				use_at = true
+				and to_char(now(), 'yyyymmdd') between bgnde and endde
+			)
+		]]>
+		</if>
+		<if test='param.surveySt != null and param.surveySt.equals("END")'>
+		<![CDATA[
+			and (
+				endde < to_char(now(), 'yyyymmdd')
+			)
+		]]>
+		</if>
+		<if test='param.surveyNm != null and param.surveyNm != ""'>
+			and qustnr_nm like '%' || #{param.surveyNm} || '%'
+		</if>
+	</sql>
+
+	<select id="selectList_count" resultType="Long">
+		/** CmmtQustnrDao.selectList_count */
+		select
+			count(*) as cnt
+		from com_api.cmmt_qustnr
+		where
+			<include refid="where-selectList" />
+	</select>
+
+	<select id="selectList" resultType="aicluster.common.common.dto.SurveyListItem">
+		/** CmmtQustnrDao.selectList */
+		select
+			<include refid="CmmtQustnr_listCols" />
+			<choose>
+				<when test='memberId != null and memberId != ""'>
+			,exists (select mber_rspns_id from com_api.cmmt_qustnr_mber_rspns where qustnr_id = a.qustnr_id and mber_id = #{memberId}) as partcptn_at
+				</when>
+				<otherwise>
+			,null as partcptn_at
+				</otherwise>
+			</choose>
+			,#{totalItems} + 1 - (row_number() over (order by bgnde desc)) as rn
+		from com_api.cmmt_qustnr a
+		where
+			<include refid="where-selectList" />
+		offset
+			#{beginRowNum} -1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<delete id="delete">
+		/** CmmtQustnrDao.delete */
+		delete from com_api.cmmt_qustnr
+		where
+			qustnr_id = #{surveyId}
+	</delete>
+
+	<update id="update">
+		/** CmmtQustnrDao.update */
+		update com_api.cmmt_qustnr set
+			 qustnr_nm  = #{surveyNm}
+			,sys_id  = #{systemId}
+			,bgnde  = #{beginDay}
+			,endde    = #{endDay}
+			,rm     = #{remark}
+			,use_at    = #{enabled}
+			,dplct_perm_at = #{duplicated}
+			,creatr_id = #{creatorId}
+			,creat_dt = #{createdDt}
+			,updusr_id = #{updaterId}
+			,updt_dt = #{updatedDt}
+		where
+			qustnr_id = #{surveyId}
+	</update>
+</mapper>

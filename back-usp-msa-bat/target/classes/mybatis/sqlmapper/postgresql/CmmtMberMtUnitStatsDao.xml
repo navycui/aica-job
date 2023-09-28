@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.CmmtMberMtUnitStatsDao">
+
+	<update id="upsert">
+		/** CmmtMberMtUnitStatsDao.upsert */
+		insert into auth_api.cmmt_mber_mt_unit_stats (
+			stats_ym
+			,mber_ty_code
+			,tot_mber_co
+			,sbscrb_mber_co
+			,secsn_mber_co
+			,drmncy_mber_co
+			,badn_mber_co
+			,creat_dt
+		)
+		select
+			substring(stats_de, 1, 6) as stats_ym
+			,mber_ty_code
+			,(
+				select (tot_mber_co)
+				from auth_api.cmmt_mber_de_unit_stats cmds
+				where
+					stats_de = (
+						select max(stats_de)
+						from auth_api.cmmt_mber_de_unit_stats
+						where
+							stats_de like #{ym} || '%'
+							and mber_ty_code = a.mber_ty_code
+					)
+					and mber_ty_code = a.mber_ty_code
+			)
+			,sum(sbscrb_mber_co)
+			,sum(secsn_mber_co)
+			,sum(drmncy_mber_co)
+			,sum(badn_mber_co)
+			,now()
+		from auth_api.cmmt_mber_de_unit_stats a
+		where
+			stats_de like #{ym} || '%'
+		group by
+			substring(stats_de, 1, 6)
+			,mber_ty_code
+		on conflict (stats_ym, mber_ty_code)
+		do update set
+			 tot_mber_co     = excluded.tot_mber_co
+			,sbscrb_mber_co      = excluded.sbscrb_mber_co
+			,secsn_mber_co = excluded.secsn_mber_co
+			,drmncy_mber_co   = excluded.drmncy_mber_co
+			,badn_mber_co     = excluded.badn_mber_co
+			,creat_dt        = excluded.creat_dt
+	</update>
+
+</mapper>

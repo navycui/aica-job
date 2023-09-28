@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtRestdeDao">
+
+	<sql id="CmmtRestde_cols">
+		 ymd_id			as ymd
+		,ymd_nm			as ymd_nm
+		,user_appn_at	as user_dsgn
+	</sql>
+
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtRestde">
+		/** CmmtRestdeDao.selectList */
+		select
+			<include refid="CmmtRestde_cols" />
+		from com_api.cmmt_restde
+		where
+			substring(ymd_id, 1, 4) = #{year}
+			<if test="ymdNm != null and ymdNm != ''">
+				and ymd_nm = #{ymdNm}
+			</if>
+	</select>
+
+	<insert id="insert">
+		/** CmmtRestdeDao.insert */
+		insert into com_api.cmmt_restde (
+			 ymd_id
+			,ymd_nm
+			,user_appn_at
+		) values (
+			 #{ymd}
+			,#{ymdNm}
+			,#{userDsgn}
+		)
+	</insert>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtRestde">
+		/** CmmtRestdeDao.select */
+		select
+			<include refid="CmmtRestde_cols" />
+			from com_api.cmmt_restde
+			where
+				ymd_id = #{ymd}
+	</select>
+
+	<update id="update" >
+		/** CmmtRestdeDao.update */
+		update com_api.cmmt_restde set
+			 ymd_id 	= #{ymd}
+			,ymd_nm 	= #{ymdNm}
+			,user_appn_at  = #{userDsgn}
+		where
+			ymd_id = #{ymd}
+	</update>
+
+	<insert id="delete" >
+		/** CmmtRestdeDao.delete */
+		delete from com_api.cmmt_restde
+		where
+			ymd_id = #{ymd}
+	</insert>
+
+	<select id="selectSummary" resultType="aicluster.common.common.dto.HldySmmryDto">
+		/** CmmtRestdeDao.selectListSummary */
+		SELECT xx.ym
+			, xx.total_cnt
+			, xx.saturday_cnt
+			, xx.sunday_cnt
+			, coalesce(yy.holiday_cnt, 0) as holiday_cnt
+			, coalesce(yy.dsgn_holiday_cnt, 0) as dsgn_holiday_cnt
+			, coalesce(zz.excl_holiday_cnt, 0) as excl_holiday_cnt
+			, (xx.total_cnt - xx.saturday_cnt - xx.sunday_cnt - coalesce(yy.holiday_cnt, 0) - coalesce(yy.dsgn_holiday_cnt, 0)) AS working_day_cnt
+		  FROM (
+		        SELECT to_char(y.date, 'YYYYMM') AS ym
+		             , count(y.date) AS total_cnt
+		             , sum(saturday) AS saturday_cnt
+		             , sum(sunday)   AS sunday_cnt
+		          FROM (
+		                SELECT x.date
+		                     , EXTRACT(ISODOW FROM x.date) AS week
+		                     , CASE WHEN EXTRACT(ISODOW FROM x.date) = 6 THEN 1 ELSE 0 END AS saturday
+		                     , CASE WHEN EXTRACT(ISODOW FROM x.date) = 7 THEN 1 ELSE 0 END AS sunday
+		                  FROM (
+		                        SELECT a.date + b.idx AS date
+		                          FROM ( SELECT (#{year}||'-01-01')::date AS date ) a
+		                         CROSS JOIN ( SELECT generate_series(0, 364) AS idx ) b
+		                       ) x
+		               ) y
+		         GROUP BY to_char(y.date, 'YYYYMM')
+		         ORDER BY to_char(y.date, 'YYYYMM')
+		       ) XX
+		 LEFT JOIN (
+		        SELECT SUBSTRING(ymd_id, 1, 6) AS YM
+		             , SUM(CASE WHEN user_appn_at = FALSE THEN 1 ELSE 0 END) AS holiday_cnt
+		             , SUM(CASE WHEN user_appn_at = TRUE  THEN 1 ELSE 0 END) AS dsgn_holiday_cnt
+		          FROM com_api.cmmt_restde
+		         WHERE SUBSTRING(ymd_id, 1, 4) = #{year}
+		         GROUP BY SUBSTRING(ymd_id, 1, 6)
+		       ) YY
+		    ON XX.YM = YY.YM
+		 LEFT JOIN (
+		        SELECT SUBSTRING(ymd_id, 1, 6) AS YM
+		             , COUNT(ymd_id) AS excl_holiday_cnt
+		          FROM com_api.cmmt_restde_excl
+		         WHERE SUBSTRING(ymd_id, 1, 4) = #{year}
+		         GROUP BY SUBSTRING(ymd_id, 1, 6)
+		       ) ZZ
+		    ON XX.YM = ZZ.YM
+
+	</select>
+
+	<select id="selectMonthList" resultType="aicluster.common.api.holiday.dto.MonthHolidaysDto">
+		/** CmmtRestdeDao.selectMonthList */
+		select
+			 ymd_id		as ymd
+			,ymd_nm
+			,true as holiday_yn
+		from com_api.cmmt_restde ch
+		where
+			ymd_id like #{ym}||'%'
+		union
+			all
+		select
+			 ymd_id		as ymd
+			,ymd_nm
+			,false as holiday_yn
+		from com_api.cmmt_restde_excl che
+		where
+			ymd_id like #{ym}||'%'
+
+	</select>
+</mapper>

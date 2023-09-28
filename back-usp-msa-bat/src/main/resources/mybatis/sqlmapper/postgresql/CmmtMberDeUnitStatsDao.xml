@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.CmmtMberDeUnitStatsDao">
+
+	<select id="selectTotalMbrCnt" resultType="aicluster.batch.common.dto.MemberStatsItem">
+	<![CDATA[
+		/** CmmtMberDeUnitStatsDao.selectTotalMbrCnt */
+		select
+			b.mber_ty_code		as member_type
+			,COALESCE(a.cnt, 0) as cnt
+		from
+			(	select
+					mber_ty_code
+					,count(*) as cnt
+				from auth_api.cmmt_mber_info
+				where
+					mber_sttus_code != 'SECESSION'
+					and creat_dt <= to_timestamp(#{ymd} || '235959', 'yyyymmddhh24miss')
+				group by
+					mber_ty_code
+			) a
+			right join (select code as mber_ty_code from com_api.cmmt_code where code_group_id = 'MEMBER_TYPE' and code_ty_nm = 'PORTAL') b
+			on (a.mber_ty_code = b.mber_ty_code )
+	]]>
+	</select>
+
+	<select id="selectJoinMbrCnt" resultType="aicluster.batch.common.dto.MemberStatsItem">
+		/** CmmtMberDeUnitStatsDao.selectJoinMbrCnt */
+		select
+			b.mber_ty_code		as member_type
+			,COALESCE(a.cnt, 0) as cnt
+		from
+			(	select
+					mber_ty_code
+					,count(*) as cnt
+				from auth_api.cmmt_mber_info
+				where
+					mber_sttus_code != 'SECESSION'
+					and creat_dt
+						between to_timestamp(#{ymd} || '000000', 'yyyymmddhh24miss') and to_timestamp(#{ymd} || '235959', 'yyyymmddhh24miss')
+				group by
+					mber_ty_code
+			) a
+			right join (select code as mber_ty_code from com_api.cmmt_code where code_group_id = 'MEMBER_TYPE' and code_ty_nm = 'PORTAL') b
+			on (a.mber_ty_code = b.mber_ty_code )
+	</select>
+
+	<select id="selectSecessionMbrCnt" resultType="aicluster.batch.common.dto.MemberStatsItem">
+		/** CmmtMberDeUnitStatsDao.selectSecessionMbrCnt */
+		select
+			b.mber_ty_code		as member_type
+			,COALESCE(a.cnt, 0) as cnt
+		from
+			(	select
+					mber_ty_code
+					,count(*) as cnt
+				from auth_api.cmmt_mber_info
+				where
+					mber_sttus_code = 'SECESSION'
+					and mber_sttus_change_dt
+						between to_timestamp(#{ymd} || '000000', 'yyyymmddhh24miss') and to_timestamp(#{ymd} || '235959', 'yyyymmddhh24miss')
+				group by
+					mber_ty_code
+			) a
+			right join (select code as mber_ty_code from com_api.cmmt_code where code_group_id = 'MEMBER_TYPE' and code_ty_nm = 'PORTAL') b
+			on (a.mber_ty_code = b.mber_ty_code )
+	</select>
+
+	<select id="selectDormantMbrCnt" resultType="aicluster.batch.common.dto.MemberStatsItem">
+		/** CmmtMberDeUnitStatsDao.selectDormantMbrCnt */
+		select
+			b.mber_ty_code		as member_type
+			,COALESCE(a.cnt, 0) as cnt
+		from
+			(	select
+					mber_ty_code
+					,count(*) as cnt
+				from auth_api.cmmt_mber_info
+				where
+					mber_sttus_code = 'DORMANT'
+					and mber_sttus_change_dt
+						between to_timestamp(#{ymd} || '000000', 'yyyymmddhh24miss') and to_timestamp(#{ymd} || '235959', 'yyyymmddhh24miss')
+				group by
+					mber_ty_code
+			) a
+			right join (select code as mber_ty_code from com_api.cmmt_code where code_group_id = 'MEMBER_TYPE' and code_ty_nm = 'PORTAL') b
+			on (a.mber_ty_code = b.mber_ty_code )
+	</select>
+
+	<select id="selectBlackMbrCnt" resultType="aicluster.batch.common.dto.MemberStatsItem">
+		/** CmmtMberDeUnitStatsDao.selectBlackMbrCnt */
+		select
+			b.mber_ty_code		as member_type
+			,COALESCE(a.cnt, 0) as cnt
+		from
+			(	select
+					mber_ty_code
+					,count(*) as cnt
+				from auth_api.cmmt_mber_info
+				where
+					mber_sttus_code = 'BLACK'
+					and mber_sttus_change_dt
+						between to_timestamp(#{ymd} || '000000', 'yyyymmddhh24miss') and to_timestamp(#{ymd} || '235959', 'yyyymmddhh24miss')
+				group by
+					mber_ty_code
+			) a
+			right join (select code as mber_ty_code from com_api.cmmt_code where code_group_id = 'MEMBER_TYPE' and code_ty_nm = 'PORTAL') b
+			on (a.mber_ty_code = b.mber_ty_code )
+	</select>
+
+	<update id="upsert">
+		/** CmmtMberDeUnitStatsDao.upsert */
+		insert into auth_api.cmmt_mber_de_unit_stats (
+			 stats_de
+			,mber_ty_code
+			,dfk_nm
+			,tot_mber_co
+			,sbscrb_mber_co
+			,secsn_mber_co
+			,drmncy_mber_co
+			,badn_mber_co
+			,creat_dt
+		) values
+		<foreach item="item" collection="list" separator=",">
+		(
+			 #{item.statsYmd}
+			,#{item.memberType}
+			,#{item.weekDayNm}
+			,#{item.totalMbrCnt}
+			,#{item.joinMbrCnt}
+			,#{item.secessionMbrCnt}
+			,#{item.dormantMbrCnt}
+			,#{item.blackMbrCnt}
+			,#{item.createdDt}
+		)
+		</foreach>
+		on conflict (stats_de, mber_ty_code)
+		do update set
+			 dfk_nm			= excluded.dfk_nm
+			,tot_mber_co	= excluded.tot_mber_co
+			,sbscrb_mber_co	= excluded.sbscrb_mber_co
+			,secsn_mber_co	= excluded.secsn_mber_co
+			,drmncy_mber_co	= excluded.drmncy_mber_co
+			,badn_mber_co	= excluded.badn_mber_co
+			,creat_dt		= excluded.creat_dt
+	</update>
+
+</mapper>

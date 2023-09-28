@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtRoleDao">
+
+	<sql id="CmmtRole_cols">
+			 role_id		as role_id
+			,role_nm		as role_nm
+			,creatr_id		as creator_id
+			,creat_dt		as created_dt
+			,updusr_id		as updater_id
+			,updt_dt		as updated_dt
+	</sql>
+
+
+	<select id="select" resultType="aicluster.member.common.entity.CmmtRole">
+		/** CmmtRoleDao.select */
+		select
+			<include refid="CmmtRole_cols" />
+		from auth_api.cmmt_role
+		where
+			role_id = #{roleId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.member.common.entity.CmmtRole">
+		/** CmmtRoleDao.selectList */
+		select
+			<include refid="CmmtRole_cols" />
+		from auth_api.cmmt_role
+		order by
+			role_id
+	</select>
+
+	<select id="selectByName" resultType="aicluster.member.common.entity.CmmtRole">
+		/** CmmtRoleDao.selectByName */
+		select
+		    <include refid="CmmtRole_cols" />
+		from auth_api.cmmt_role
+		where
+			role_nm = #{roleNm}
+			<if test='roleId != null and roleId != ""'>
+			and role_id != #{roleId}
+			</if>
+	</select>
+
+	<insert id="insert">
+		/** CmmtRoleDao.insert */
+		insert into auth_api.cmmt_role (
+			 role_id
+			,role_nm
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{roleId}
+			,#{roleNm}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** CmmtRoleDao.update */
+		update auth_api.cmmt_role set
+			role_nm = #{roleNm}
+			, updusr_id = #{updaterId}
+			, updt_dt = #{updatedDt}
+		where role_id = #{roleId}
+	</update>
+
+	<delete id="delete">
+		/** CmmtRoleDao.delete */
+		delete from auth_api.cmmt_role
+		where role_id = #{roleId}
+	</delete>
+</mapper>

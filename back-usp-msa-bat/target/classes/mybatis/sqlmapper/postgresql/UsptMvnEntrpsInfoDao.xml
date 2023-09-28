@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.UsptMvnEntrpsInfoDao">
+
+	<sql id="UsptMvnEntrpsInfo-cols">
+              ${alias}.mvn_id							as mvn_id
+            , ${alias}.bsns_code						as bsns_cd
+			, ${alias}.evl_last_slctn_id
+			, ${alias}.last_slctn_trget_id
+            , ${alias}.bsns_slctn_trget_id				as bsns_slctn_id
+            , ${alias}.mvn_fclty_id						as mvn_fc_id
+            , ${alias}.mvn_bgnde						as mvn_begin_day
+            , ${alias}.mvn_endde						as mvn_end_day
+            , ${alias}.entrps_id						as cmpny_id
+            , fn_cmm_get_member_nm(${alias}.entrps_id)	as cmpny_nm
+            , ${alias}.mvn_entrps_sttus_code			as mvn_cmpny_st
+            , ${alias}.mvn_entrps_sttus_change_dt		as mvn_cmpny_st_dt
+            , ${alias}.updusr_id						as updater_id
+            , ${alias}.updt_dt							as updated_dt
+	</sql>
+
+	<select id="select" resultType="aicluster.batch.common.entity.UsptMvnEntrpsInfo">
+		/** UsptMvnEntrpsInfoDao.select */
+        select
+			<include refid="UsptMvnEntrpsInfo-cols">
+				<property name="alias" value="a" />
+			</include>
+		from mvn_api.uspt_mvn_entrps_info a
+		left join mvn_api.uspt_mvn_fclty_info b
+		  on a.mvn_fclty_id = b.mvn_fclty_id
+		where
+			a.mvn_id = #{mvnId}
+	</select>
+
+	<update id="update">
+        /** UsptMvnEntrpsInfoDao.update */
+		update mvn_api.uspt_mvn_entrps_info set
+		      mvn_entrps_sttus_code			= #{mvnCmpnySt}
+		    , mvn_entrps_sttus_change_dt	= #{mvnCmpnyStDt}
+		    , updusr_id						= #{updaterId}
+		    , updt_dt						= #{updatedDt}
+		where
+		    mvn_id = #{mvnId}
+    </update>
+
+</mapper>

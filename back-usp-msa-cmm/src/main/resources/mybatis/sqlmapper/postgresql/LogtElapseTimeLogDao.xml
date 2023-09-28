@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.LogtElapseTimeLogDao">
+
+	<select id="selectElapsedTimeLogSummary" resultType="aicluster.common.common.dto.ElapsedTimeLogSummary">
+	<![CDATA[
+		/** LogtIndvdlinfoLogDao.selectElapsedTimeLogSummary */
+		select
+			max(elapse_time) as max
+			,min(elapse_time) as min
+			,avg(elapse_time) as avg
+		from com_api.logt_elapse_time_log
+		where
+			log_dt > (now() - interval '30 minute')
+	]]>
+	</select>
+
+</mapper>

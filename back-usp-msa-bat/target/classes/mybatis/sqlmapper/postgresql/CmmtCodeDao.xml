@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.CmmtCodeDao">
+
+	<sql id="cmmtCode_cols">
+		code_group_id	as code_group
+		,code			as code
+		,code_nm		as code_nm
+		,rm				as remark
+		,code_ty_nm		as code_type
+		,use_at			as enabled
+		,sort_ordr		as sort_order
+		,creatr_id		as creator_id
+		,creat_dt		as created_dt
+		,updusr_id		as updater_id
+		,updt_dt		as updated_dt
+	</sql>
+
+	<select id="selectList_enabled" resultType="aicluster.batch.common.entity.CmmtCode">
+		/** CmmtCodeDao.selectList_enabled */
+		select
+			<include refid="cmmtCode_cols"/>
+		from com_api.cmmt_code
+		where
+			code_group_id = upper(#{codeGroup})
+			and use_at = true
+			<if test='codeType != null and codeType != ""'>
+				and code_ty_nm = upper(#{codeType})
+			</if>
+		order by
+			sort_ordr
+	</select>
+
+
+	<insert id="insert">
+		/** CmmtCodeDao.insert */
+		insert into com_api.cmmt_code
+			(
+				code_group_id
+				, code
+				, code_nm
+				, rm
+				, code_ty_nm
+				, use_at
+				, sort_ordr
+				, creatr_id
+				, creat_dt
+				, updusr_id
+				, updt_dt
+			) values (
+				#{codeGroup}
+				, #{code}
+				, #{codeNm}
+				, #{remark}
+				, #{codeType}
+				, #{enabled}
+				, #{sortOrder}
+				, #{creatorId}
+				, #{createdDt}
+				, #{updaterId}
+				, #{updatedDt}
+			) on conflict (code_group_id, code) do nothing
+	</insert>
+
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtMenuRoleDao">
+
+	<select id="selectByMenuId" resultType="aicluster.member.common.entity.CmmtMenuRole">
+		/** CmmtMenuRoleDao.selectByMenuId */
+        SELECT
+        	sys_id				as system_id
+            ,menu_id			as menu_id
+            ,role_id			as role_id
+            ,creatr_id			as creator_id
+            ,creat_dt			as created_dt
+        from auth_api.cmmt_menu_role
+		where
+			sys_id = #{systemId}
+			and menu_id = #{menuId}
+	</select>
+
+	<delete id="deleteByRoleId">
+		/** CmmtMenuRoleDao.deleteByRoleId */
+		delete from auth_api.cmmt_menu_role
+		where
+			sys_id = #{systemId}
+			and role_id = #{roleId}
+	</delete>
+
+	<insert id="insert">
+		/** CmmtMenuRoleDao.insert */
+		insert into auth_api.cmmt_menu_role (
+			sys_id
+			,menu_id
+			,role_id
+			,creatr_id
+			,creat_dt
+		) values (
+			#{systemId}
+			,#{menuId}
+			,#{roleId}
+			,#{creatorId}
+			,#{createdDt}
+		)
+	</insert>
+
+	<insert id="insertList">
+		/** CmmtMenuRoleDao.insertList */
+		insert into auth_api.cmmt_menu_role (
+			sys_id
+			,menu_id
+			,role_id
+			,creatr_id
+			,creat_dt
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+			(
+				#{item.systemId}
+				,#{item.menuId}
+				,#{item.roleId}
+				,#{item.creatorId}
+				,#{item.createdDt}
+			)
+		</foreach>
+	</insert>
+</mapper>

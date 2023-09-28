@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.CmmtSysChargerDao">
+
+	<sql id="CmmtSysCharger_cols">
+		api_sys_id		as api_system_id
+		,charger_email	as pic_email
+		,charger_nm		as pic_nm
+	</sql>
+
+	<select id="selectList" resultType="aicluster.batch.common.entity.CmmtSysCharger">
+		/** CmmtSysChargerDao.selectList */
+		select
+			<include refid="CmmtSysCharger_cols"/>
+		from com_api.cmmt_sys_charger
+		where
+			api_sys_id = #{apiSystemId}
+	</select>
+
+	<select id="selectAll" resultType="aicluster.batch.common.entity.CmmtSysCharger">
+		/** CmmtSysChargerDao.selectAll */
+		select
+			distinct
+			<include refid="CmmtSysCharger_cols"/>
+		from com_api.cmmt_sys_charger
+	</select>
+
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtBbscttLinkDao">
+
+	<sql id="CmmtBbscttLink_cols">
+		 link_id	as url_id
+		,bbsctt_id	as article_id
+		,sort_ordr	as sort_order
+		,link_nm	as url_nm
+		,link_url	as url
+	</sql>
+
+	<insert id="insertList">
+		/** CmmtBbscttLinkDao.insertList */
+		insert into com_api.cmmt_bbsctt_link (
+			 link_id
+			,bbsctt_id
+			,sort_ordr
+			,link_nm
+			,link_url
+		) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				 #{item.urlId}
+				,#{item.articleId}
+				,#{item.sortOrder}
+				,#{item.urlNm}
+				,#{item.url}
+			)
+		</foreach>
+	</insert>
+
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtBbscttLink">
+		/** CmmtBbscttLinkDao.selectList */
+		select
+			<include refid="CmmtBbscttLink_cols"/>
+		from com_api.cmmt_bbsctt_link
+		where
+			bbsctt_id = #{articleId}
+		order by
+			sort_ordr
+	</select>
+
+	<delete id="deleteList">
+		/** CmmtBbscttLinkDao.deleteList */
+		delete from com_api.cmmt_bbsctt_link
+		where
+			bbsctt_id = #{articleId}
+	</delete>
+</mapper>

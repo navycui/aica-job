@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtQustnrMberRspnsDao">
+
+	<sql id="CmmtQustnrMberRspns_cols">
+		 mber_rspns_id		as member_ans_id
+		,qustnr_id			as survey_id
+		,qustnr_qesitm_id	as question_id
+		,rspns_id			as answer_id
+		,mber_id			as member_id
+		,sbjct_rspns_cn		as short_answer
+		,creat_dt			as created_dt
+	</sql>
+
+	<insert id="insertList">
+		/** CmmtQustnrMberRspnsDao.insertList */
+		insert into com_api.cmmt_qustnr_mber_rspns (
+			 mber_rspns_id
+			,qustnr_id
+			,qustnr_qesitm_id
+			,rspns_id
+			,mber_id
+			,sbjct_rspns_cn
+			,creat_dt
+		) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				 #{item.memberAnsId}
+				,#{item.surveyId}
+				,#{item.questionId}
+				,#{item.answerId}
+				,#{item.memberId}
+				,#{item.shortAnswer}
+				,#{item.createdDt}
+			)
+		</foreach>
+	</insert>
+
+	<select id="existsSurveyAns" resultType="Boolean">
+		/** CmmtQustnrMberRspnsDao.existsSurveyAns */
+		select
+			exists (
+				select
+					mber_rspns_id
+				from com_api.cmmt_qustnr_mber_rspns
+				where
+					qustnr_id =  #{surveyId}
+			)
+	</select>
+
+	<select id="selectCmmvUserList_answerer" resultType="aicluster.common.common.dto.SurveyAnswerersListItem">
+		/** CmmtQustnrMberRspnsDao.selectCmmvUserList_answerer */
+		select
+			b.mber_id			as member_id
+			,b.mber_nm			as member_nm
+			,b.login_id
+			,b.mber_ty_code		as member_type
+			,fn_cmm_get_code_nm('MEMBER_TYPE', b.mber_ty_code)	as member_type_nm
+			,b.author_id		as authority_id
+			,b.encpt_email		as enc_email
+			,b.encpt_mbtlnum	as enc_mobile_no
+		from (
+			select mber_id
+				, max(creat_dt) as creat_dt
+			from com_api.cmmt_qustnr_mber_rspns
+			where
+				qustnr_id = #{surveyId}
+				and creat_dt between
+					to_timestamp(#{beginDay} || '000000', 'YYYYMMDDHH24MISS')
+					and to_timestamp(#{endDay} || '235959', 'YYYYMMDDHH24MISS')
+			group by mber_id
+			 ) a
+		join auth_api.cmmv_user b
+		  on a.mber_id = b.mber_id
+		order by a.creat_dt
+	</select>
+
+	<select id="existsMember" resultType="Boolean">
+		/** CmmtQustnrMberRspnsDao.existsMember */
+		select
+			exists (
+				select
+					mber_rspns_id
+				from com_api.cmmt_qustnr_mber_rspns
+				where
+					qustnr_id =  #{surveyId}
+					and mber_id = #{memberId}
+			)
+	</select>
+
+	<select id="existsMember_day" resultType="Boolean">
+		/** CmmtQustnrMberRspnsDao.existsMember_day */
+		select
+			exists (
+				select
+					mber_rspns_id
+				from com_api.cmmt_qustnr_mber_rspns
+				where
+					qustnr_id = #{surveyId}
+					and mber_id = #{memberId}
+					and creat_dt between
+						to_timestamp(#{day} || '000000', 'YYYYMMDDHH24MISS')
+						and to_timestamp(#{day} || '235959', 'YYYYMMDDHH24MISS')
+			)
+	</select>
+
+	<select id="selectResultAnswerList" resultType="aicluster.common.common.dto.ResultAnswerDto">
+		/** CmmtQustnrMberRspnsDao.selectResultAnswerList */
+		select
+			 a.qustnr_id		as survey_id
+			,a.qustnr_qesitm_id	as question_id
+			,a.rspns_id			as answer_id
+			,a.rspns_no			as answer_no
+			,coalesce(u.sbjct_rspns_cn, a.rspns_cn)	as short_answer
+			,sum(
+				case when u.mber_id is null then
+					0
+				else
+					1
+				end
+			) as cnt
+		from
+			com_api.cmmt_qustnr_rspns a
+			left join (
+				select
+					*
+				from com_api.cmmt_qustnr_mber_rspns
+				where
+					creat_dt between to_timestamp(#{beginDay},'YYYYMMDD')
+						and to_timestamp( #{endDay} || '235959', 'YYYYMMDDHH24MISS')
+					) U
+				on (
+					a.qustnr_id = u.qustnr_id
+					and a.qustnr_qesitm_id = u.qustnr_qesitm_id
+					and a.rspns_id = u.rspns_id
+				)
+		where
+			a.qustnr_id = #{surveyId}
+		group by
+			a.qustnr_id,
+			a.qustnr_qesitm_id,
+			a.rspns_id,
+			a.rspns_no,
+			u.sbjct_rspns_cn
+	</select>
+</mapper>

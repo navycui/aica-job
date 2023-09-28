@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtQustnrQesitmDao">
+
+	<sql id="CmmtQustnrQesitm_cols">
+		 qustnr_id				as survey_id
+		,qustnr_qesitm_id		as question_id
+		,qustnr_qesitm_no		as question_no
+		,qustnr_qesitm_ty_code	as question_type
+		,essntl_at				as required
+		,qustnr_qesitm_cn		as question_cn
+	</sql>
+
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtQustnrQesitm">
+		/** CmmtQustnrQesitmDao.selectList */
+		select
+			<include refid="CmmtQustnrQesitm_cols"/>
+		from com_api.cmmt_qustnr_qesitm
+		where
+			qustnr_id = #{surveyId}
+		order by
+			qustnr_qesitm_no
+	</select>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtQustnrQesitm">
+		/** CmmtQustnrQesitmDao.select */
+		select
+			<include refid="CmmtQustnrQesitm_cols"/>
+		from com_api.cmmt_qustnr_qesitm
+		where
+			qustnr_id = #{surveyId}
+			and qustnr_qesitm_id = #{questionId}
+	</select>
+
+	<select id="selectResultList" resultType="aicluster.common.common.entity.CmmtQustnrQesitm">
+		/** CmmtQustnrQesitmDao.selectResultList */
+		select
+			<include refid="CmmtQustnrQesitm_cols"/>
+			,(	select
+					count(distinct mber_id)
+				from com_api.cmmt_qustnr_mber_rspns
+				where
+					qustnr_id = sq.qustnr_id
+					and qustnr_qesitm_id = sq.qustnr_qesitm_id
+					and creat_dt between
+						to_timestamp(#{beginDay},'YYYYMMDD')
+						and to_timestamp(#{endDay} || '235959', 'YYYYMMDDHH24MISS')
+					) as answerer_cnt
+		from com_api.cmmt_qustnr_qesitm sq
+		where
+			qustnr_id = #{surveyId}
+		order by
+			qustnr_qesitm_no
+	</select>
+
+	<delete id="deleteList_surveyId">
+		/** CmmtQustnrQesitmDao.deleteList_surveyId */
+		delete from com_api.cmmt_qustnr_qesitm
+		where
+			qustnr_id = #{surveyId}
+	</delete>
+
+	<insert id="insertList">
+		/** CmmtQustnrQesitmDao.insertList */
+		insert into com_api.cmmt_qustnr_qesitm (
+			 qustnr_id
+			,qustnr_qesitm_id
+			,qustnr_qesitm_no
+			,qustnr_qesitm_ty_code
+			,essntl_at
+			,qustnr_qesitm_cn
+		) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				 #{item.surveyId}
+				,#{item.questionId}
+				,#{item.questionNo}
+				,#{item.questionType}
+				,#{item.required}
+				,#{item.questionCn}
+			)
+		</foreach>
+	</insert>
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtEventCnDao">
+
+	<sql id="cmmtEventCn_cols">
+		 event_cn_id
+		,event_id
+		,sort_ordr	as sort_order
+		,hder		as header
+		,bbsctt_cn	as article_cn
+	</sql>
+
+	<insert id="insertList">
+		/** CmmtEventCnDao.insertList */
+		insert into com_api.cmmt_event_cn (
+			 event_cn_id
+			 ,event_id
+			 ,sort_ordr
+			 ,hder
+			 ,bbsctt_cn
+		) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				 #{item.eventCnId}
+				,#{item.eventId}
+				,#{item.sortOrder}
+				,#{item.header}
+				,#{item.articleCn}
+			)
+		</foreach>
+	</insert>
+
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtEventCn">
+		/** CmmtEventCnDao.selectList */
+		select
+			<include refid="cmmtEventCn_cols"/>
+		from com_api.cmmt_event_cn
+		where
+			event_id = #{eventId}
+		<!-- order by
+			sort_order -->
+	</select>
+
+	<delete id="deleteList">
+		/** CmmtEventCnDao.deleteList */
+		delete from com_api.cmmt_event_cn
+		where
+			event_id = #{eventId}
+	</delete>
+</mapper>

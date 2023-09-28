@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.UsptBsnsPblancDao">
+
+	<select id="selectNtceAtList" resultType="aicluster.batch.common.entity.UsptBsnsPblanc">
+		/** UsptBsnsPblancDao.selectNtceAtList */
+		select
+			pblanc_id
+			, pblanc_nm
+			, pblanc_de
+			, ntce_at
+		from usp_api.uspt_bsns_pblanc
+		where
+			pblanc_de = #{today}
+			and ntce_at != true
+			and pblanc_sttus_code != 'CLOS'
+			and use_at = true
+	</select>
+
+	<update id="updateNtceAt">
+		/** UsptBsnsPblancDao.updateNtceAt */
+		update usp_api.uspt_bsns_pblanc
+		set
+			updusr_id	= #{updusrId}
+			, updt_dt	= #{updtDt}
+			, ntce_at	= true
+			, pblanc_sttus_code = 'ING'
+		where
+			pblanc_id = #{pblancId}
+	</update>
+
+
+	<select id="selectRceptClosingList" resultType="aicluster.batch.common.entity.UsptBsnsPblanc">
+		/** UsptBsnsPblancDao.selectRceptClosingList */
+		select
+			pblanc_id
+			, pblanc_nm
+			, rcept_endde
+			, rcept_clos_hm
+			, pblanc_sttus_code
+		from usp_api.uspt_bsns_pblanc
+		where
+			rcept_endde = #{today}
+			and rcept_clos_hm = #{hour}
+			and pblanc_sttus_code = 'ING'
+	</select>
+
+
+	<select id="selectRceptClosingListOfYesterday" resultType="aicluster.batch.common.entity.UsptBsnsPblanc">
+		/** UsptBsnsPblancDao.selectRceptClosingListOfYesterday */
+		select
+			pblanc_id
+			, pblanc_nm
+			, rcept_endde
+			, rcept_clos_hm
+			, pblanc_sttus_code
+		from usp_api.uspt_bsns_pblanc
+		where
+			rcept_endde = #{yesterday}
+			and pblanc_sttus_code = 'ING'
+			and (rcept_clos_hm is null or rcept_clos_hm = '')
+	</select>
+
+
+	<update id="updateRceptClosing">
+		/** UsptBsnsPblancDao.updateRceptClosing */
+		update usp_api.uspt_bsns_pblanc
+		set
+			updusr_id	= #{updusrId}
+			, updt_dt	= #{updtDt}
+			, pblanc_sttus_code = 'CLOS'
+		where
+			pblanc_id = #{pblancId}
+	</update>
+
+</mapper>

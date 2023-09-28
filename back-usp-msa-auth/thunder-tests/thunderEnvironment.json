@@ -1,0 +1,28 @@
+[
+  {
+    "_id": "0a2df8f9-4612-4354-a884-f830870c7e45",
+    "name": "Auth Login",
+    "default": true,
+    "sortNum": 10000,
+    "created": "2022-01-11T08:47:52.963Z",
+    "modified": "2022-05-11T06:56:04.775Z",
+    "data": [
+      {
+        "name": "hostname",
+        "value": "pc.bnet.com:8082"
+      },
+      {
+        "name": "contextPath",
+        "value": "member"
+      },
+      {
+        "name": "accessToken",
+        "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzY2tpbSIsImF1dGgiOiJST0xFX1VTRVIiLCJwcmluY2lwYWwiOnsibWVtYmVySWQiOiJtZW1iZXItMWRhZTcyNzc2ZjA4NDgzYmIxMmQ5NTdlMmU2YzNmODgiLCJsb2dpbklkIjoic2NraW0iLCJtZW1iZXJObSI6Iuq5gOyEseyyoCIsIm1lbWJlclR5cGUiOiJJTkRJVklEVUFMIiwibWVtYmVyU3QiOiJOT1JNQUwiLCJnZW5kZXIiOm51bGwsImVuY0JpcnRoZGF5IjpudWxsLCJlbmNQYXNzd2QiOiIkMmEkMTAkQ2h6Y3lwTDdldG5nMHBjdFFKY1NzdThUU04xRzZ6WUEzRUNlVHlDa09qWG1mYU1QSU52SzYiLCJkZXB0Tm0iOm51bGwsInBvc2l0aW9uTm0iOm51bGwsInJlZnJlc2hUb2tlbiI6ImV5SmhiR2NpT2lKSVV6VXhNaUo5LmV5SmxlSEFpT2pFMk5USXlOVE0xTVRCOS4tMHJ1aWhxVDAtREVyUVl3U0plVDlPV3NWUUJTQ3MxVi1OOE00U0xwQTNwdG56UTZLMllqWExINzVvT0EtcjFLdHJyVHVGclU0eXAzUHZ1VERib0JidyIsImF1dGhvcml0eUlkIjoiVVNFUiIsImVuYWJsZWQiOnRydWUsInJvbGVzIjpudWxsLCJwYXNzd2QiOiIkMmEkMTAkQ2h6Y3lwTDdldG5nMHBjdFFKY1NzdThUU04xRzZ6WUEzRUNlVHlDa09qWG1mYU1QSU52SzYiLCJiaXJ0aGRheSI6bnVsbH0sImV4cCI6MTY1MjI1Mjc2NH0.d8R26GbhgKyhuw6CEytGUsQHrplU0m5ACfoExbsSKC5JdryuBRWR2GtDLYOAFnefZv5lKXZBZENdrVpm3nmKbg"
+      },
+      {
+        "name": "accessTokenForBearer",
+        "value": "Bearer {{accessToken}}"
+      }
+    ]
+  }
+]

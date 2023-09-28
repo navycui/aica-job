@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtStplatDao">
+
+	<sql id="CmmtStplat_cols">
+		 stplat_ty_code		as terms_type
+		,fn_cmm_get_code_nm('TERMS_TYPE', stplat_ty_code) as terms_type_nm
+		,bgnde				as begin_day
+		,essntl_at			as required
+		,stplat_cn			as terms_cn
+		,hold_pd_code		as possess_term_cd
+		,fn_cmm_get_code_nm('POSSESS_TERM', hold_pd_code) as possess_term_nm
+		,creatr_id			as creator_id
+		,creat_dt			as created_dt
+		,updusr_id			as updater_id
+		,updt_dt			as updated_dt
+	</sql>
+
+	<insert id="insert">
+		/** CmmtStplatDao.insert */
+		insert into com_api.cmmt_stplat (
+			 stplat_ty_code
+			,bgnde
+			,essntl_at
+			,stplat_cn
+			,hold_pd_code
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{termsType}
+			,#{beginDay}
+			,#{required}
+			,#{termsCn}
+			,#{possessTermCd}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtStplat">
+		/** CmmtStplatDao.select */
+		select
+			<include refid="CmmtStplat_cols"/>
+		from com_api.cmmt_stplat
+		where
+			stplat_ty_code = #{termsType}
+			and bgnde = #{beginDay}
+			and essntl_at = #{required}
+	</select>
+
+	<select id="selectSet" resultType="aicluster.common.common.entity.CmmtStplat">
+		/** CmmtStplatDao.select */
+		select
+			<include refid="CmmtStplat_cols"/>
+		from com_api.cmmt_stplat
+		where
+			stplat_ty_code = #{termsType}
+			and bgnde = #{beginDay}
+		order by essntl_at desc
+		</select>
+
+	<select id="selectList_beginDay" resultType="aicluster.common.common.dto.TermsListItem">
+		/** CmmtStplatDao.selectList_beginDay */
+		select distinct
+			 stplat_ty_code		as terms_type
+			,fn_cmm_get_code_nm('TERMS_TYPE', stplat_ty_code) as terms_type_nm
+			,bgnde				as begin_day
+		from com_api.cmmt_stplat
+		where
+			stplat_ty_code = #{termsType}
+		<if test='srchCd == "TODAY"'>
+			<![CDATA[and bgnde = (select max(bgnde) from com_api.cmmt_stplat where stplat_ty_code=#{termsType} and bgnde <= to_char(now(), 'yyyymmdd'))]]>
+		</if>
+		order by
+			bgnde desc
+	</select>
+
+	<update id="update">
+		/** CmmtStplatDao.update */
+		update com_api.cmmt_stplat set
+			 stplat_cn   = #{termsCn}
+			,hold_pd_code = #{possessTermCd}
+			,creatr_id = #{creatorId}
+			,creat_dt = #{createdDt}
+			,updusr_id = #{updaterId}
+			,updt_dt = #{updatedDt}
+		where
+			stplat_ty_code = #{termsType}
+			and bgnde = #{beginDay}
+			and essntl_at   = #{required}
+	</update>
+
+	<delete id="delete">
+		/** CmmtStplatDao.delete */
+		delete from com_api.cmmt_stplat
+		where
+			stplat_ty_code = #{termsType}
+			and bgnde = #{beginDay}
+	</delete>
+
+	<select id="select_today" resultType="aicluster.common.common.entity.CmmtStplat">
+		/** CmmtStplatDao.select_today */
+		select
+			<include refid="CmmtStplat_cols"/>
+		from com_api.cmmt_stplat
+		where
+			stplat_ty_code = #{termsType}
+		<![CDATA[and bgnde = (select max(bgnde) from com_api.cmmt_stplat where stplat_ty_code=#{termsType} and bgnde <= to_char(now(), 'yyyymmdd'))]]>
+		order by essntl_at desc
+	</select>
+</mapper>

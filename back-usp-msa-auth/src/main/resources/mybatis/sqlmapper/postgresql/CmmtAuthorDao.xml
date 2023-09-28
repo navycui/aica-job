@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtAuthorDao">
+
+	<sql id="cmmtAuthority_cols">
+		author_id		as authority_id
+		,author_nm		as authority_nm
+		,prpos_code		as purpose
+		,creatr_id		as creator_id
+		,creat_dt		as created_dt
+		,updusr_id		as updater_id
+		,updt_dt		as updated_dt
+		,(select string_agg(role_id, ',') from auth_api.cmmt_author_role where author_id = a.author_id) as role_ids
+	</sql>
+
+	<select id="selectAll" resultType="aicluster.member.common.entity.CmmtAuthor">
+		/** CmmtAuthorDao.selectAll */
+		select
+			<include refid="cmmtAuthority_cols"/>
+		from auth_api.cmmt_author a
+	</select>
+
+	<select id="select" resultType="aicluster.member.common.entity.CmmtAuthor">
+		/** CmmtAuthorDao.select */
+		select
+			<include refid="cmmtAuthority_cols"/>
+		from auth_api.cmmt_author a
+		where
+			author_id = #{authorityId}
+	</select>
+
+	<select id="selectByName" resultType="aicluster.member.common.entity.CmmtAuthor">
+		/** CmmtAuthorDao.selectByName */
+		select
+			<include refid="cmmtAuthority_cols"/>
+		from auth_api.cmmt_author a
+		where
+			author_nm = #{authorityNm}
+	</select>
+
+	<insert id="insert">
+		/** CmmtAuthorDao.insert */
+		insert into auth_api.cmmt_author (
+			author_id
+			,author_nm
+			,prpos_code
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			#{authorityId}
+			,#{authorityNm}
+			,#{purpose}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** CmmtAuthorDao.update */
+		update auth_api.cmmt_author set
+			author_nm = #{authorityNm}
+			,prpos_code	= #{purpose}
+			,creatr_id	= #{creatorId}
+			,creat_dt	= #{createdDt}
+			,updusr_id	= #{updaterId}
+			,updt_dt	= #{updatedDt}
+		where
+			author_id = #{authorityId}
+	</update>
+
+	<delete id="delete">
+		/** CmmtAuthorDao.delete */
+		delete from auth_api.cmmt_author
+		where
+			author_id = #{authorityId}
+	</delete>
+
+	<select id="selectByRoleId" resultType="aicluster.member.common.entity.CmmtAuthorRole">
+		/** CmmtAuthorDao.selectByRoleId */
+        SELECT b.author_id		as authority_id
+             , b.role_id		as role_id
+             , b.creatr_id		as creator_id
+             , b.creat_dt		as created_dt
+          FROM auth_api.cmmt_author a
+          JOIN auth_api.cmmt_author_role b
+            ON a.author_id = b.author_id
+         WHERE b.role_id = #{roldId}
+	</select>
+</mapper>

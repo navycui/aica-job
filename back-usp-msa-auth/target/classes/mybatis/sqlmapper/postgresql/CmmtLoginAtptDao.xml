@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtLoginAtptDao">
+
+	<insert id="save">
+		/** CmmtLoginAtptDao.save */
+		insert into auth_api.cmmt_login_atpt (
+			 mber_id
+			,mber_ip
+			,atpt_numt
+			,updt_dt
+		) values (
+			 #{memberId}
+			,#{memberIp}
+			,1
+			,now()
+		)
+		on conflict (mber_id, mber_ip)
+		do update set
+			 atpt_numt    = cmmt_login_atpt.atpt_numt + 1
+			,updt_dt = now()
+	</insert>
+
+	<select id="select" resultType="aicluster.member.common.entity.CmmtLoginAtpt">
+		/** CmmtLoginAtptDao.select */
+		select
+			 mber_id		as member_id
+			,mber_ip		as member_ip
+			,atpt_numt		as try_cnt
+			,updt_dt		as updated_dt
+		from auth_api.cmmt_login_atpt
+		where
+			mber_id = #{memberId}
+			and mber_ip = #{memberIp}
+	</select>
+
+	<delete id="delete">
+		/** CmmtLoginAtptDao.delete */
+		delete from auth_api.cmmt_login_atpt
+		where
+			mber_id = #{memberId}
+			and mber_ip = #{memberIp}
+	</delete>
+
+	<delete id="deleteOld">
+	<![CDATA[
+		/** CmmtLoginAtptDao.deleteOld */
+		delete from auth_api.cmmt_login_atpt
+		where
+			updt_dt < (now() - interval '10 minute')
+	]]>
+	</delete>
+</mapper>

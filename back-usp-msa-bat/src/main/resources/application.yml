@@ -1,0 +1,75 @@
+server:
+   servlet:
+      context-path: "/batch"
+   error: 
+      include-exception: false # 오류 응답에 exception의 내용을 포함할지 여부 
+      include-stacktrace: never # 오류 응답에 stacktrace 내용을 포함할 지 여부
+      whitelabel:
+         enabled: false
+#   ssl:
+#      #openssl pkcs12 -export -in cert.pem -inkey key.pem -out atops.or.kr.p12
+#      enabled: true
+#      enabled-protocols:
+#      - TLSv1.1
+#      - TLSv1.2
+#      key-store: "classpath:ssl/atops.or.kr.p12"
+#      key-store-type: "PKCS12"
+#      key-store-password: "aicA0811!"
+      
+spring:
+   devtools:
+      livereload:
+         enabled: true
+         
+   h2:
+      console:
+         enabled: true
+         
+   mvc:
+      pathmatch:
+         matching-strategy: ant-path-matcher
+
+   servlet:
+      multipart:
+         max-file-size: 500MB  # 파일 1개의 최채 크기
+         max-request-size: 500MB  # 업로드되는 전체 파일의 크기  
+
+jwt:
+   secret: c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFsLWppd29vbi1zcHJpbmctYm9vdC1zZWN1cml0eS1qd3QtdHV0b3JpYWwKKK
+   # 10분(msec)
+   accessTokenExpireTime: 600000
+   # 30분(msec), "env.cookie.max-age"에도 이 값을 초로 바꾸어(/1000) 넣어줘야 한다.
+   refreshTokenExpireTime: 1800000
+   exceptAutoRefreshTokenUriPattern: /member/api/login/refresh-token/*
+
+env:
+   system-id: "API_BATCH"
+   
+# NHN 이메일 설정
+email:
+   url: "https://api-mail.cloud.toast.com"
+   app-key: "lCQTV8avjXfRfmcU"
+   secret-key: "i8v3IvXg"
+   sender-email: "webmaster@atops.or.kr"
+   sender-name: "AICA 인공지능산업융합사업단"
+
+# NHN SMS 설정
+sms:
+   url: "https://api-sms.cloud.toast.com"
+   app-key: "SohASg9V5x6Sqp0E"
+   secret-key: "CXNCA6Iv"
+   sender-no: "0626103910"
+
+# 공공데이터포털 특일정보 설정
+publicdata:
+   url: "http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo"
+   service-key: "qCu35TOmfaf0SEqAHaeHsIUJVlRh6JeHxLs965BHJkx55vGUbyqQyUxlkNmGjbduZyKYDdYCCqdeFD4jese4lQ=="
+
+# 휴대폰 본인인증(Nice ID)  
+nice-id:
+   site-code: "BY099"
+   site-password: "VI6llMhRTL5A"
+
+# StreamDocs 변수
+docs:
+  url: "http://203.255.162.205:8080/streamdocs"

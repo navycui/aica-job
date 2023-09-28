@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtQustnrRspnsDao">
+
+	<sql id="CmmtQustnrRspns_cols">
+		 qustnr_id			as survey_id
+		,qustnr_qesitm_id	as question_id
+		,rspns_id			as answer_id
+		,rspns_no			as answer_no
+		,rspns_cn			as answer_cn
+	</sql>
+
+	<select id="selectList_surveyId" resultType="aicluster.common.common.entity.CmmtQustnrRspns">
+		/** CmmtQustnrRspnsDao.selectList_surveyId */
+		select
+			<include refid="CmmtQustnrRspns_cols"/>
+		from com_api.cmmt_qustnr_rspns
+		where
+			qustnr_id = #{surveyId}
+		order by
+			qustnr_qesitm_id
+			,rspns_no
+	</select>
+
+	<delete id="deleteList_surveyId">
+		/** CmmtQustnrRspnsDao.deleteList_surveyId */
+		delete from com_api.cmmt_qustnr_rspns
+		where
+			qustnr_id = #{surveyId}
+	</delete>
+
+	<insert id="insertList">
+		/** CmmtQustnrRspnsDao.insertList */
+		insert into com_api.cmmt_qustnr_rspns (
+			 qustnr_id
+			,qustnr_qesitm_id
+			,rspns_id
+			,rspns_no
+			,rspns_cn
+		) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				 #{item.surveyId}
+				,#{item.questionId}
+				,#{item.answerId}
+				,#{item.answerNo}
+				,#{item.answerCn}
+			)
+		</foreach>
+	</insert>
+</mapper>

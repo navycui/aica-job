@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.LogtErrorLogDao">
+
+	<select id="selectCount" resultType="Long">
+		/** LogtErrorLogDao.selectCount */
+		select
+			count(*) as cnt
+		from com_api.logt_error_log
+		where
+			api_sys_id = #{apiSystemId}
+			and log_dt between
+				to_timestamp(#{ymd} || '000000', 'yyyymmddhh24miss')
+				and to_timestamp(#{ymd} || '235959', 'yyyymmddhh24miss');
+	</select>
+
+</mapper>

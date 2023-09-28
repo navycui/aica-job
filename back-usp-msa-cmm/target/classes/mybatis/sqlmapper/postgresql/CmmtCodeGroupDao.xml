@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtCodeGroupDao">
+
+	<sql id="cmmtCodeGroup_cols">
+		code_group_id	as code_group
+		,code_group_nm	as code_group_nm
+		,rm				as remark
+		,use_at			as enabled
+		,creatr_id		as creator_id
+		,creat_dt		as created_dt
+		,updusr_id		as updater_id
+		,updt_dt		as updated_dt
+	</sql>
+
+	<insert id="insert">
+		/** CmmtCodeGroupDao.insert */
+		insert into com_api.cmmt_code_group (
+			 code_group_id
+			,code_group_nm
+			,rm
+			,use_at
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{codeGroup}
+			,#{codeGroupNm}
+			,#{remark}
+			,#{enabled}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtCodeGroup">
+		/** CmmtCodeGroupDao.select */
+		select
+			<include refid="cmmtCodeGroup_cols"/>
+		from com_api.cmmt_code_group
+		where
+			code_group_id = #{codeGroup}
+	</select>
+
+	<update id="update">
+		/** CmmtCodeGroupDao.update */
+		update com_api.cmmt_code_group set
+			,code_group_nm	= #{code_group_nm}
+			,rm				= #{remark}
+			,use_at			= #{enabled}
+			,updusr_id		= #{updater_id}
+			,updt_dt		= #{updated_dt}
+		where
+			code_group_id = #{codeGroup}
+	</update>
+
+	<delete id="delete">
+		/** CmmtCodeGroupDao.delete */
+		delete from com_api.cmmt_code_group
+		where
+			code_group_id = #{codeGroup}
+	</delete>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.CmmtEmpInfoDao">
+	
+	<update id="updateToDormantAdmin">
+		/** CmmtEmpInfoDao.updateToDormantAdmin */
+		<![CDATA[
+			update auth_api.cmmt_emp_info set
+				mber_sttus_code = 'DORMANT',
+				mber_sttus_change_dt = now()
+			where
+				mber_sttus_code not in ('DORMANT', 'SECESSION')
+				and (
+					last_login_dt <= to_timestamp(#{day} || '235959', 'yyyymmddhh24miss')
+					or (
+						last_login_dt is null
+						and creat_dt <= to_timestamp(#{day} || '235959', 'yyyymmddhh24miss')
+					)
+				)
+		]]>
+	</update>
+
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.api.member.dao.MemberDao">
+
+	<sql id="cmmtMember_columns">
+			member_id
+			,login_id
+			,passwd
+			,member_nm
+			,authority_id
+			,enabled
+			,refresh_token
+	</sql>
+
+	<select id="selectByLoginId" resultType="aicluster.member.common.entity.CmmtMember">
+		/** MemberDao.selectByLoginId */
+		select
+			<include refid="cmmtMember_columns" />
+		from
+			cmmt_member
+		where
+			login_id = #{loginId}
+	</select>
+
+	<select id="select" resultType="aicluster.member.common.entity.CmmtMember">
+		/** MemberDao.select */
+		select
+			<include refid="cmmtMember_columns" />
+		from
+			cmmt_member
+		where
+			member_id = #{memberId}
+	</select>
+
+	<select id="selectByRefreshToken" resultType="aicluster.member.common.entity.CmmtMember">
+		/** MemberDao.selectByRefreshToken */
+		select
+			<include refid="cmmtMember_columns" />
+		from
+			cmmt_member
+		where
+			refresh_token = #{refreshToken}
+	</select>
+
+	<update id="save">
+		/** MemberDao.save */
+		insert into cmmt_member (
+			member_id
+			,login_id
+			,passwd
+			,member_nm
+			,authority_id
+			,enabled
+			,refresh_token
+		) values (
+			#{memberId}
+			,#{loginId}
+			,#{passwd}
+			,#{memberNm}
+			,#{authorityId}
+			,#{enabled}
+			,#{refreshToken}
+		)
+		on duplicate key update
+			login_id = #{loginId}
+			,passwd = #{passwd}
+			,member_nm = #{memberNm}
+			,authority_id = #{authorityId}
+			,enabled = #{enabled}
+			,refresh_token = #{refreshToken}
+	</update>
+</mapper>

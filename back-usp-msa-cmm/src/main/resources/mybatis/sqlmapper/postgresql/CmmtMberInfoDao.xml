@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtMberInfoDao">
+
+	<sql id="CmmtMberInfo_columns">
+		mber_id												as member_id
+		,login_id											as login_id
+		,encpt_password										as passwd
+		,password_change_dt									as passwd_dt
+		,password_initl_at									as passwd_init
+		,mber_nm											as member_nm
+		,ncnm												as nickname
+		,sexdstn_code										as gender
+		,author_id											as authority_id
+		,fn_cmm_get_authority_nm(author_id) 				as authority_nm
+		,mber_sttus_code									as member_st
+		,fn_cmm_get_code_nm('MEMBER_ST', mber_sttus_code)	as member_st_nm
+		,mber_sttus_change_dt								as member_st_dt
+		,mber_ty_code										as member_type
+		,blclst_bgnde										as black_list_begin_day
+		,blclst_endde										as black_list_end_day
+		,blclst_detail_resn									as black_list_reason
+		,fn_cmm_get_code_nm('MEMBER_TYPE', mber_ty_code)	as member_type_nm
+		,idntfr												as ci
+		,encpt_email										as enc_email
+		,encpt_brthdy										as enc_birthday
+		,encpt_mbtlnum										as enc_mobile_no
+		,charger_nm											as charger_nm
+		,ceo_nm												as ceo_nm
+		,bizrno												as bizrno
+		,refresh_token										as refresh_token
+		,kakao_token										as kakao_token
+		,naver_token										as naver_token
+		,google_token										as google_token
+		,last_login_dt										as last_login_dt
+		,creatr_id											as creator_id
+		,creat_dt											as created_dt
+		,updusr_id											as updater_id
+		,updt_dt											as updated_dt
+	</sql>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.select */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			mber_id = #{memberId}
+	</select>
+
+</mapper>

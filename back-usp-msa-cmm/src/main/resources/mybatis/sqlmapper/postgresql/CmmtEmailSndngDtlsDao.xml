@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtEmailSndngDtlsDao">
+
+	<sql id="CmmtEmailSndngDtls_cols">
+		 email_id
+		,sj_nm		as title
+		,email_cn
+		,html_at	as html
+		,sndr_email	as sender_email
+		,sndr_nm	as sender_nm
+		,creat_dt	as created_dt
+	</sql>
+
+	<insert id="insert">
+		/** CmmtEmailSndngDtlsDao.insert */
+		insert into com_api.cmmt_email_sndng_dtls (
+			 email_id
+			,sj_nm
+			,email_cn
+			,html_at
+			,sndr_email
+			,sndr_nm
+			,creat_dt
+		) values (
+			 #{emailId}
+			,#{title}
+			,#{emailCn}
+			,#{html}
+			,#{senderEmail}
+			,#{senderNm}
+			,#{createdDt}
+		)
+	</insert>
+
+	<insert id="insertList">
+		/** CmmtEmailSndngDtlsDao.insertList */
+		insert into com_api.cmmt_email_sndng_dtls (
+			 email_id
+			,sj_nm
+			,email_cn
+			,html_at
+			,sndr_email
+			,sndr_nm
+			,creat_dt
+		) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				 #{item.emailId}
+				,#{item.title}
+				,#{item.emailCn}
+				,#{item.html}
+				,#{item.senderEmail}
+				,#{item.senderNm}
+				,#{item.createdDt}
+			)
+		</foreach>
+	</insert>
+
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtEmailSndngDtls">
+		/** CmmtEmailSndngDtlsDao.select */
+		select
+			<include refid="CmmtEmailSndngDtls_cols"/>
+		from com_api.cmmt_email_sndng_dtls
+		where
+			<![CDATA[creat_dt between to_timestamp(#{beginDay} || '000000', 'yyyymmddhh24miss') and to_timestamp(#{endDay} || '235959', 'yyyymmddhh24miss')]]>
+			<if test='senderEmail != null and senderEmail != ""'>
+			and sndr_email = #{senderEmail}
+			</if>
+			<if test='senderNm != null and senderNm != ""'>
+			and sndr_nm like '%'||#{senderNm}||'%'
+			</if>
+			<if test='emailCn != null and emailCn != ""'>
+			and email_cn like '%'||#{emailCn}||'%'
+			</if>
+		order by creat_dt desc
+	</select>
+
+</mapper>

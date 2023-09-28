@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmvUserDao">
+
+	<sql id="cmmvUser-cols">
+		 mber_id			as member_id
+		,mber_nm			as member_nm
+		,ncnm				as nickname
+		,login_id
+		,mber_ty_code		as member_type
+		,sexdstn_code		as gender
+		,encpt_brthdy		as enc_birthday
+		,dept_nm
+		,clsf_nm			as position_nm
+		,author_id			as authority_id
+		,mber_sttus_code	as member_st
+		,encpt_email		as enc_email
+		,encpt_mbtlnum		as enc_mobile_no
+		,refresh_token
+	</sql>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmvUser">
+		/** CmmvUserDao.select */
+		select
+			<include refid="cmmvUser-cols"/>
+		from auth_api.cmmv_user
+		where
+			mber_id = #{memberId}
+	</select>
+
+	<select id="selectByRefreshToken" resultType="aicluster.common.common.entity.CmmvUser">
+		/** CmmvUserDao.selectByRefreshToken */
+		select
+			<include refid="cmmvUser-cols"/>
+		from auth_api.cmmv_user
+		where
+			refresh_token = #{refreshToken}
+	</select>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.UsptMvnFcltyResveDao">
+
+	<select id="selectList" resultType="aicluster.batch.common.entity.UsptMvnFcltyResve">
+		/** UsptMvnFcltyResveDao.selectList */
+		select
+			a.resve_id					as reserve_id
+			,a.mvn_fclty_id				as mvn_fc_id
+			,a.rsvctm_id
+			,a.rsvde					as rsvt_day
+			,a.resve_begin_tm			as rsvt_bgng_tm
+			,a.resve_end_tm				as rsvt_end_tm
+			,a.resve_requst_dt			as rsvt_req_dt
+			,a.resve_sttus_code			as reserve_st
+			,a.resve_sttus_change_dt	as reserve_st_dt
+			,a.updusr_id				as updater_id
+			,a.updt_dt					as updated_dt
+		from mvn_api.uspt_mvn_fclty_resve a
+		where a.resve_sttus_code = 'APRV'
+			and to_timestamp(a.rsvde||a.resve_end_tm, 'yyyymmddhh24mi') + '1 hour'::interval <![CDATA[<]]> now()
+	</select>
+
+	<update id="updateList">
+		/** UsptMvnFcltyResveDao.updateList */
+		update mvn_api.uspt_mvn_fclty_resve as x set
+			  resve_sttus_code = u.resve_sttus_code
+			, resve_sttus_change_dt = u.resve_sttus_change_dt::timestamp
+			, updusr_id = u.updusr_id
+			, updt_dt = u.updt_dt::timestamp
+		from (
+		values
+		<foreach item="item" collection="list" separator=",">
+		(
+			  #{item.reserveId}
+			, #{item.reserveSt}
+			, #{item.reserveStDt}
+			, #{item.updaterId}
+			, #{item.updatedDt}
+		)
+		</foreach>
+		) as u (
+			  resve_id
+			, resve_sttus_code
+			, resve_sttus_change_dt
+			, updusr_id
+			, updt_dt
+		)
+		where
+			u.resve_id = x.resve_id
+	</update>
+
+</mapper>

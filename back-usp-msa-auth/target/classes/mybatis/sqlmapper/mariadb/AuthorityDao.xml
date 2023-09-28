@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.api.auth.dao.AuthorityDao">
+
+	<select id="selectAuthorityRoles" resultType="aicluster.member.common.entity.CmmtAuthorityRole">
+		/** AuthorityDao.selectAuthorityRoles */
+		select
+			authority_id
+			,role_id
+		from
+			cmmt_authority_role
+		where
+			authority_id = #{authorityId}
+	</select>
+
+	<select id="selectProgramRoles" resultType="aicluster.framework.security.dto.ProgramRole">
+		/** AuthorityDao.selectAuthorityRoles */
+		select
+			a.url_pattern
+			,b.role_id
+		from
+			cmmt_url a
+			join cmmt_url_role b
+			on a.url_id = b.url_id
+		order by
+			a.check_order
+	</select>
+
+</mapper>

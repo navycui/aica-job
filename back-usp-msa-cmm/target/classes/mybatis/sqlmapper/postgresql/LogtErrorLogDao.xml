@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.LogtErrorLogDao">
+
+	<select id="selectTrendDaily" resultType="aicluster.common.common.dto.LogTrendItem">
+		/** LogtErrorLogDao.selectTrendDaily */
+		select
+			ymd as date,
+			coalesce(cnt,0) as cnt
+		from
+			(
+				select
+					to_char(log_dt,'yyyymmdd') as day
+					,count(*) as cnt
+				from com_api.logt_error_log
+				where
+					api_sys_id = #{apiSystemId}
+					and log_dt between
+						to_timestamp(#{beginDay} || '000000', 'yyyymmddhh24miss')
+						and to_timestamp(#{endDay} || '235959', 'yyyymmddhh24miss')
+				group by
+					to_char(log_dt,'yyyymmdd')
+			) a
+			right join (
+				WITH date_series AS
+				(	SELECT
+						to_char(GENERATE_SERIES(TO_DATE(#{beginDay}, 'YYYYMMDD'), TO_DATE(#{endDay}, 'YYYYMMDD'),'1 day'), 'yyyymmdd') AS ymd
+				)
+				SELECT
+					ymd
+				FROM date_series
+			) b
+			on (a.day = b.ymd)
+		order by ymd
+	</select>
+
+	<select id="selectTrendMonthly" resultType="aicluster.common.common.dto.LogTrendItem">
+		/** LogtErrorLogDao.selectTrendMonthly */
+		select
+			b.ym as date,
+			coalesce(cnt,0) as cnt
+		from
+			(
+				select
+					to_char(log_dt,'yyyymm') as ym
+					,count(*) as cnt
+				from com_api.logt_error_log
+				where
+					api_sys_id = #{apiSystemId}
+					and log_dt between
+						to_timestamp(#{beginMonth} || '01000000', 'yyyymmddhh24miss')
+						and (date_trunc('MONTH', to_date(#{endMonth},'yyyymm')) + INTERVAL '1 MONTH - 1 day')::timestamp
+				group by
+					to_char(log_dt,'yyyymm')
+			) a
+			right join (
+				WITH date_series AS
+				(	SELECT
+						to_char(GENERATE_SERIES(TO_DATE(#{beginMonth}, 'YYYYMM'), (date_trunc('MONTH', to_date(#{endMonth},'yyyymm')) + INTERVAL '1 MONTH - 1 day')::date,'1 month'), 'yyyymm') AS ym
+				)
+				SELECT
+					ym
+				FROM date_series
+			) b
+			on (a.ym = b.ym)
+		order by b.ym
+	</select>
+
+	<sql id="where-selectList">
+		api_sys_id = #{apiSystemId}
+		and log_dt between
+			to_timestamp(#{beginDay} || '000000', 'yyyymmddhh24miss')
+			and to_timestamp(#{endDay} || '235959', 'yyyymmddhh24miss')
+	</sql>
+
+	<select id="selectList_count" resultType="Long">
+		/** LogtErrorLogDao.selectList_count */
+		select
+			count(*) as cnt
+		from com_api.logt_error_log
+		where
+			<include refid="where-selectList"/>
+	</select>
+
+	<select id="selectList" resultType="aicluster.common.common.dto.ErrorLogListItem">
+		/** LogtErrorLogDao.selectList */
+		select
+			log_id
+			,api_sys_id		as api_system_id
+			,log_dt
+			,error_code
+			,link_url		as url
+			,mber_id		as member_id
+			,login_id
+			,mber_nm		as member_nm
+			,mber_ty_code	as member_type
+			,sexdstn_code	as gender
+			,age
+			,mber_ip		as member_ip
+			,clsf_nm		as position_nm
+			,dept_nm
+			,pstinst_nm
+			,#{totalItems} + 1 - (row_number() over (order by log_dt desc)) as rn
+		from com_api.logt_error_log
+		where
+			<include refid="where-selectList"/>
+		offset
+			#{beginRowNum} -1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="select" resultType="aicluster.common.common.entity.LogtErrorLog">
+		/** LogtErrorLogDao.select */
+		select
+			log_id
+			,api_sys_id		as api_system_id
+			,log_dt
+			,error_code
+			,error_mssage	as error_msg
+			,link_url		as url
+			,mber_id		as member_id
+			,login_id
+			,mber_nm		as member_nm
+			,mber_ty_code	as member_type
+			,sexdstn_code	as gender
+			,age
+			,mber_ip		as member_ip
+			,clsf_nm		as position_nm
+			,dept_nm
+			,pstinst_nm
+		from com_api.logt_error_log
+		where
+			log_id = #{logId}
+	</select>
+</mapper>

@@ -1,0 +1,85 @@
+#################################
+# TOMCAT
+#################################
+server:
+   port: 8088
+   tomcat:
+      threads:
+         max: 10
+         min-spare: 2
+            
+#server.error.path=
+#server.servlet.session.timeout=
+
+#################################
+# DBCP
+#################################
+spring:
+   main:
+      allow-bean-definition-overriding: "true"
+   
+   datasource:
+      hikari:
+         driver-class-name: "org.postgresql.Driver"
+         jdbc-url: "jdbc:postgresql://fw.thenet-global.com:5432/thenetdb?currentSchema=new_public&serverTimezone=Asia/Seoul"
+         username: "thenet"
+         password: "thenet1!"
+
+         auto-commit: false
+         maximum-pool-size: 10
+         connectionTimeout: 30000
+         idleTimeout: 600000
+         maxLifetime: 1800000
+         connection-test-query: "SELECT 1"
+
+#################################
+# LOGGING
+#################################
+logging:
+   pattern:
+      file: '%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%4line]){magenta} %clr(%-40.40logger{39}){cyan} %clr(:){red} %m%n%wEx'
+      rolling-file-name: "/home/dev-nps/app_test/logs/app/API_BATCH/app.%d{yyyy-MM-dd}.%i"
+   file:
+      name: "/home/dev-nps/app_test/logs/app/API_BATCH/app.log"
+      max-history: 30
+   level:
+      root: info
+      aicluster: debug
+      jdbc.resultset: error
+      jdbc.audit: error
+#################################
+# 환경설정
+#################################
+env:
+   cors:
+      origins:
+         - "http://pc.bnet.com:8081"
+         - "http://pc.bnet.com:8082"
+         - "http://pc.bnet.com:8083"
+         - "http://pc.bnet.com:8084"
+         - "http://pc.bnet.com:8085"
+         - "http://pc.bnet.com:8086"
+         - "http://pc.bnet.com:8087"
+         - "http://pc.bnet.com:8088"
+         - "http://pc.bnet.com:5500"
+         - "http://api.bnet.com"
+         - "http://ckment.com"
+         - "http://125.6.37.87"
+      headers:
+         - "Content-Disposition"
+         - "Content-Language"
+         - "Content-Transfer-Encoding"
+         - "Content-Type"
+      methods:
+         - "*"
+      pattern: "/**"
+   cookie: 
+      domain: "bnet.com"
+      #max-age = jwt.refreshTokenExpireTime / 1000 이어야 한다.
+      max-age: 1800
+      secure: false
+      httpOnly: true
+      path: "/"
+   dir:
+      core-log: "/home/dev-nps/app_test/logs"
+      upload: "/home/dev-nps/app_test/uploads"

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.LogtLoginLogDao">
+
+	<select id="selectTrendDaily" resultType="aicluster.common.common.dto.LogTrendItem">
+		/** LogtLoginLogDao.selectTrendDaily */
+		select
+			ymd as date,
+			coalesce(cnt,0) as cnt
+		from
+			(
+				select
+					to_char(log_dt,'yyyymmdd') as day
+					,count(*) as cnt
+				from com_api.logt_login_log
+				where
+					log_dt between
+						to_timestamp(#{beginDay} || '000000', 'yyyymmddhh24miss')
+						and to_timestamp(#{endDay} || '235959', 'yyyymmddhh24miss')
+				group by
+					to_char(log_dt,'yyyymmdd')
+			) a
+			right join (
+				WITH date_series AS
+				(	SELECT
+						to_char(GENERATE_SERIES(TO_DATE(#{beginDay}, 'YYYYMMDD'), TO_DATE(#{endDay}, 'YYYYMMDD'),'1 day'), 'yyyymmdd') AS ymd
+				)
+				SELECT
+					ymd
+				FROM date_series
+			) b
+			on (a.day = b.ymd)
+		order by ymd
+	</select>
+
+	<select id="selectTrendMonthly" resultType="aicluster.common.common.dto.LogTrendItem">
+		/** LogtLoginLogDao.selectTrendMonthly */
+		select
+			b.ym as date,
+			coalesce(cnt,0) as cnt
+		from
+			(
+				select
+					to_char(log_dt,'yyyymm') as ym
+					,count(*) as cnt
+				from com_api.logt_login_log
+				where
+					log_dt between
+						to_timestamp(#{beginMonth} || '01000000', 'yyyymmddhh24miss')
+						and (date_trunc('MONTH', to_date(#{endMonth},'yyyymm')) + INTERVAL '1 MONTH - 1 day')::timestamp
+				group by
+					to_char(log_dt,'yyyymm')
+			) a
+			right join (
+				WITH date_series AS
+				(	SELECT
+						to_char(GENERATE_SERIES(TO_DATE(#{beginMonth}, 'YYYYMM'), (date_trunc('MONTH', to_date(#{endMonth},'yyyymm')) + INTERVAL '1 MONTH - 1 day')::date,'1 month'), 'yyyymm') AS ym
+				)
+				SELECT
+					ym
+				FROM date_series
+			) b
+			on (a.ym = b.ym)
+		order by b.ym
+	</select>
+</mapper>

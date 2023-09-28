@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtMberInfoHistDao">
+	<sql id="CmmtMberInfoHist_cols">
+		hist_id			as hist_id
+		,hist_dt		as hist_dt
+		,opert_ty_nm	as work_type_nm
+		,mber_id		as member_id
+		,fn_cmm_get_member_nm(mber_id) as member_nm
+		,opertor_id		as worker_id
+		,fn_cmm_get_member(opertor_id) as worker_nm
+		,opert_cn		as work_cn
+	</sql>
+
+	<insert id="insert">
+		/** CmmtMberInfoHistDao.insert */
+		insert into auth_api.cmmt_mber_info_hist (
+			hist_id
+			,hist_dt
+			,opert_ty_nm
+			,mber_id
+			,opertor_id
+			,opert_cn
+		) values (
+			#{histId}
+			,#{histDt}
+			,#{workTypeNm}
+			,#{memberId}
+			,#{workerId}
+			,#{workCn}
+		)
+	</insert>
+
+	<insert id="insertList">
+		/** CmmtMberInfoHistDao.insert */
+		insert into auth_api.cmmt_mber_info_hist (
+			hist_id
+			,hist_dt
+			,opert_ty_nm
+			,mber_id
+			,opertor_id
+			,opert_cn
+		) values
+		<foreach item="item" collection="list" separator=",">
+		(
+			 #{item.histId}
+			,#{item.histDt}
+			,#{item.workTypeNm}
+			,#{item.memberId}
+			,#{item.workerId}
+			,#{item.workCn}
+		)
+		</foreach>
+	</insert>
+	<select id="selectListByMemberId" resultType="aicluster.member.common.entity.CmmtMberInfoHist">
+		/** CmmtMberInfoHistDao.selectListByMemberId */
+		select
+			<include refid="CmmtMberInfoHist_cols"/>
+		from auth_api.cmmt_mber_info_hist
+		where
+			mber_id = #{memberId}
+		order by
+			hist_dt desc
+	</select>
+	<select id="selectCount" resultType="Long">
+		/** CmmtMemberDao.selectCount */
+		select
+			count(mber_id) as cnt
+		from auth_api.cmmt_mber_info_hist
+		where
+			mber_id = #{memberId}
+	</select>
+	<select id="selectList" resultType="aicluster.member.common.entity.CmmtMberInfoHist">
+		/** CmmtMberInfoHistDao.selectList */
+		select
+			<include refid="CmmtMberInfoHist_cols" />
+			,row_number() over (order by hist_dt) as rn
+		from auth_api.cmmt_mber_info_hist
+		where
+			mber_id = #{memberId}
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+</mapper>

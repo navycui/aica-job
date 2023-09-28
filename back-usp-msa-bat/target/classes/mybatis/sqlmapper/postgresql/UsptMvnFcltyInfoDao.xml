@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.UsptMvnFcltyInfoDao">
+
+	<sql id="UsptMvnFcltyInfo_columns">
+		mvn_fclty_id			as mvn_fc_id
+		, mvn_sttus_code		as mvn_st
+		, mvn_sttus_change_dt	as mvn_st_dt
+		, now_mvn_mber_id		as cur_occupant_id
+		, updusr_id				as updater_id
+		, updt_dt				as updated_dt
+	</sql>
+
+	<select id="select" resultType="aicluster.batch.common.entity.UsptMvnFcltyInfo">
+		/** UsptMvnFcltyInfoDao.select */
+		select
+			<include refid="UsptMvnFcltyInfo_columns" />
+		from mvn_api.uspt_mvn_fclty_info
+		where
+			mvn_fclty_id = #{mvnFcId}
+	</select>
+
+	<update id="update">
+		/** UsptMvnFcltyInfoDao.update */
+		update mvn_api.uspt_mvn_fclty_info set
+			mvn_sttus_code			= #{mvnSt}
+			,mvn_sttus_change_dt	= #{mvnStDt}
+			,now_mvn_mber_id		= #{curOccupantId}
+			,updusr_id				= #{updaterId}
+			,updt_dt				= #{updatedDt}
+		where
+			mvn_fclty_id = #{mvnFcId}
+    </update>
+
+</mapper>

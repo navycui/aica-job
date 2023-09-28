@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtEmailRcverDao">
+
+	<sql id="CmmtEmailRcver_cols">
+		 email_id
+		,rcver_email	as email
+		,rcver_nm		as recipient_nm
+		,paramtr		as param
+		,succes_at		as success
+		,result_code
+		,result_mssage	as result_message
+		,creat_dt		as created_dt
+	</sql>
+
+	<insert id="insert">
+		/** CmmtEmailRcverDao.insert */
+		insert into com_api.cmmt_email_rcver (
+			 email_id
+			,rcver_email
+			,rcver_nm
+			,paramtr
+			,succes_at
+			,result_code
+			,result_mssage
+			,creat_dt
+		) values (
+			 #{emailId}
+			,#{email}
+			,#{recipientNm}
+			,#{param}
+			,#{success}
+			,#{resultCode}
+			,#{resultMessage}
+			,#{createdDt}
+		)
+	</insert>
+
+	<insert id="insertList">
+		/** CmmtEmailRcverDao.insertList */
+		insert into com_api.cmmt_email_rcver (
+			 email_id
+			,rcver_email
+			,rcver_nm
+			,paramtr
+			,succes_at
+			,result_code
+			,result_mssage
+			,creat_dt
+		) values
+		<foreach item="item" collection="list" separator=",">
+			(
+				 #{item.emailId}
+				,#{item.email}
+				,#{item.recipientNm}
+				,#{item.param}
+				,#{item.success}
+				,#{item.resultCode}
+				,#{item.resultMessage}
+				,#{item.createdDt}
+			)
+		</foreach>
+	</insert>
+
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtEmailRcver">
+		/** CmmtEmailRcverDao.selectList */
+		select
+			<include refid="CmmtEmailRcver_cols"/>
+		from com_api.cmmt_email_rcver
+		where
+			email_id = #{emailId}
+	</select>
+
+</mapper>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.CmmtMberInfoDao">
+
+	<sql id="CmmtMberInfo_columns">
+		mber_id												as member_id
+		,login_id											as login_id
+		,encpt_password										as enc_passwd
+		,password_change_dt									as passwd_dt
+		,password_initl_at									as passwd_init
+		,mber_nm											as member_nm
+		,ncnm												as nickname
+		,sexdstn_code										as gender
+		,author_id											as authority_id
+		,fn_cmm_get_authority_nm(author_id) 				as authority_nm
+		,mber_sttus_code									as member_st
+		,fn_cmm_get_code_nm('MEMBER_ST', mber_sttus_code)	as member_st_nm
+		,mber_sttus_change_dt								as member_st_dt
+		,blclst_bgnde										as black_list_begin_day
+		,blclst_endde										as black_list_end_day
+		,blclst_detail_resn									as black_list_reason
+		,mber_ty_code										as member_type
+		,fn_cmm_get_code_nm('MEMBER_TYPE', mber_ty_code)	as member_type_nm
+		,idntfr												as ci
+		,encpt_email										as enc_email
+		,encpt_brthdy										as enc_birthday
+		,encpt_mbtlnum										as enc_mobile_no
+		,charger_nm											as charger_nm
+		,ceo_nm												as ceo_nm
+		,bizrno												as bizrno
+		,jurirno											as jurirno
+		,instrctr_at										as instr
+		,markt_recptn_at									as marketing_reception
+		,refresh_token										as refresh_token
+		,kakao_token										as kakao_token
+		,naver_token										as naver_token
+		,google_token										as google_token
+		,last_login_dt										as last_login_dt
+		,creatr_id											as creator_id
+		,creat_dt											as created_dt
+		,updusr_id											as updater_id
+		,updt_dt											as updated_dt
+	</sql>
+
+	<select id="select" resultType="aicluster.batch.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.select */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			mber_id = #{memberId}
+	</select>
+
+	<select id="selectList_blackMemberToNormal" resultType="aicluster.batch.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.selectList_blackMemberToNormal */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			<![CDATA[
+			mber_sttus_code = 'BLACK'
+			and blclst_endde < to_char(now(), 'yyyymmdd')
+			]]>
+	</select>
+
+	<update id="update">
+		/** CmmtMberInfoDao.update */
+		update auth_api.cmmt_mber_info set
+			 login_id      			= #{loginId}
+			,encpt_password    		= #{encPasswd}
+			,password_change_dt     = #{passwdDt}
+			,password_initl_at   	= #{passwdInit}
+			,mber_nm     			= #{memberNm}
+			,ncnm      				= #{nickname}
+			,sexdstn_code        	= #{gender}
+			,author_id  			= #{authorityId}
+			,mber_sttus_code    	= #{memberSt}
+			,mber_sttus_change_dt  	= #{memberStDt}
+			,blclst_bgnde   		= #{blackListBeginDay}
+			,blclst_endde     		= #{blackListEndDay}
+			,blclst_detail_resn		= #{blackListReason}
+			,mber_ty_code   		= #{memberType}
+			,idntfr            		= #{ci}
+			,encpt_email     		= #{encEmail}
+			,encpt_brthdy  			= #{encBirthday}
+			,encpt_mbtlnum 			= #{encMobileNo}
+			,charger_nm				= #{chargerNm}
+			,ceo_nm					= #{ceoNm}
+			,bizrno        			= #{bizrno}
+			,jurirno				= #{jurirno}
+			,instrctr_at			= #{instr}
+			,markt_recptn_at		= #{marketingReception}
+			,refresh_token 			= #{refreshToken}
+			,kakao_token            = #{kakaoToken}
+			,naver_token            = #{naverToken}
+			,google_token           = #{googleToken}
+			,last_login_dt          = #{lastLoginDt}
+			,creatr_id    			= #{creatorId}
+			,creat_dt    			= #{createdDt}
+			,updusr_id    			= #{updaterId}
+			,updt_dt    			= #{updatedDt}
+		where
+			mber_id = #{memberId}
+	</update>
+
+	<select id="selectList_lastLoginDt" resultType="aicluster.batch.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.selectList_lastLoginDt */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where
+			<![CDATA[
+			mber_sttus_code not in ('DORMANT', 'SECESSION')
+			and (
+				last_login_dt between
+					to_timestamp(#{day} || '000000', 'yyyymmddhh24miss')
+					and to_timestamp(#{day} || '235959', 'yyyymmddhh24miss')
+				or (
+					last_login_dt is null
+					and creat_dt between
+						to_timestamp(#{day} || '000000', 'yyyymmddhh24miss')
+						and to_timestamp(#{day} || '235959', 'yyyymmddhh24miss')
+				)
+			)
+			]]>
+	</select>
+
+	<update id="updateToDormant">
+	<![CDATA[
+		/** CmmtMberInfoDao.updateToDormant */
+		update auth_api.cmmt_mber_info set
+			mber_sttus_code = 'DORMANT',
+			mber_sttus_change_dt = now()
+		where
+			mber_sttus_code not in ('DORMANT', 'SECESSION')
+			and (
+				last_login_dt <= to_timestamp(#{day} || '235959', 'yyyymmddhh24miss')
+				or (
+					last_login_dt is null
+					and creat_dt <= to_timestamp(#{day} || '235959', 'yyyymmddhh24miss')
+				)
+			)
+	]]>
+	</update>
+
+	<select id="selectList_memberSt" resultType="aicluster.batch.common.entity.CmmtMberInfo">
+		/** CmmtMberInfoDao.selectList_memberSt */
+		select
+			<include refid="CmmtMberInfo_columns" />
+		from auth_api.cmmt_mber_info
+		where mber_sttus_code = #{memberSt}
+			<if test="day > 0">
+			<![CDATA[and date_part('DAY', now() - mber_sttus_change_dt) > #{day}]]>
+			</if>
+			<if test='memberSt == "SECESSION"'>
+			and mber_id != login_id
+			</if>
+	</select>
+
+	<delete id="delete">
+		/** CmmtMberInfoDao.delete */
+		delete from auth_api.cmmt_mber_info
+		where mber_id = #{memberId}
+	</delete>
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtPasswordHistDao">
+
+	<sql id="cmmtPasswdHist-cols">
+		 mber_id		as member_id
+		,hist_dt		as hist_dt
+		,encpt_password	as enc_passwd
+	</sql>
+
+	<insert id="insert">
+		/** CmmtPasswordHistDao.insert */
+		insert into auth_api.cmmt_password_hist (
+			 mber_id
+			,hist_dt
+			,encpt_password
+		) values (
+			 #{memberId}
+			,#{histDt}
+			,#{encPasswd}
+		)
+	</insert>
+
+	<select id="selectList_recent" resultType="aicluster.member.common.entity.CmmtPasswordHist">
+		/** CmmtPasswordHistDao.selectList_recent */
+		select
+			<include refid="cmmtPasswdHist-cols"/>
+			,row_number() over (order by hist_dt desc) as rn
+		from auth_api.cmmt_password_hist
+		where
+			mber_id = #{memberId}
+		offset 0
+		limit #{cnt}
+	</select>
+</mapper>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.UsptMvnChcktReqstDao">
+
+	<update id="update">
+		/** UsptMvnChcktReqstDao.update */
+		update mvn_api.uspt_mvn_chckt_reqst set
+			,mvn_entrps_chckt_at	= #{mvnCheckoutYn}
+			,updusr_id				= #{updaterId}
+			,updt_dt				= #{updatedDt}
+		where
+			chckt_reqst_id = #{checkoutReqId}
+	</update>
+
+	<select id="selectList_mvnCheckoutYn" resultType="aicluster.batch.common.entity.UsptMvnChcktReqst">
+	<![CDATA[
+		/** UsptMvnChcktReqstDao.selectList_mvnCheckoutYn */
+		select
+			chckt_reqst_id					as checkout_req_id
+			,mvn_id							as mvn_id
+			,chckt_reqst_dt					as checkout_req_dt
+			,chckt_prarnde					as checkout_plan_day
+			,chckt_reqst_sttus_code			as checkout_req_st
+			,chckt_reqst_sttus_change_dt	as checkout_req_st_dt
+			,mvn_entrps_chckt_at			as mvn_checkout_yn
+		from mvn_api.uspt_mvn_chckt_reqst
+		where
+			chckt_reqst_sttus_code = 'APRV'
+			and mvn_entrps_chckt_at = false
+			and to_timestamp(chckt_prarnde, 'YYYYMMDD') < now()
+	]]>
+	</select>
+
+</mapper>

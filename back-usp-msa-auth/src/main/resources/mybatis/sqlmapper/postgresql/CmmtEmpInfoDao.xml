@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtEmpInfoDao">
+
+	<sql id="CmmtEmpInfo_cols">
+		 ${alias}.mber_id											as member_id
+		,${alias}.login_id											as login_id
+		,${alias}.encpt_password									as enc_passwd
+		,${alias}.password_change_dt								as passwd_dt
+		,${alias}.password_initl_at									as passwd_init
+		,${alias}.mber_nm											as member_nm
+		,${alias}.ncnm												as nickname
+		,${alias}.sexdstn_code										as gender
+		,fn_cmm_get_code_nm('DEPT_CD', ${alias}.dept_code)			as dept_nm
+		,${alias}.clsf_nm											as position_nm
+		,${alias}.author_id											as authority_id
+		,(select author_nm from auth_api.cmmt_author where author_id = ${alias}.author_id) as authority_nm
+		,${alias}.mber_sttus_code									as member_st
+		,fn_cmm_get_code_nm('MEMBER_ST', ${alias}.mber_sttus_code)	as member_st_nm
+		,${alias}.mber_sttus_change_dt								as member_st_dt
+		,${alias}.encpt_telno										as enc_tel_no
+		,${alias}.encpt_mbtlnum										as enc_mobile_no
+		,${alias}.encpt_email										as enc_email
+		,${alias}.mber_ip_set										as member_ips
+		,${alias}.refresh_token										as refresh_token
+		,${alias}.creatr_id											as creator_id
+		,${alias}.creat_dt											as created_dt
+		,${alias}.updusr_id											as updater_id
+		,${alias}.updt_dt											as updated_dt
+		,${alias}.last_login_dt										as last_login_dt
+	</sql>
+
+	<select id="selectByLoginId" resultType="aicluster.member.common.entity.CmmtEmpInfo">
+		/** CmmtEmpInfoDao.selectByLoginId */
+		select
+			<include refid="CmmtEmpInfo_cols">
+				<property name="alias" value="a" />
+			</include>
+		from auth_api.cmmt_emp_info a
+		where
+			a.login_id = #{loginId}
+	</select>
+
+	<select id="select" resultType="aicluster.member.common.entity.CmmtEmpInfo">
+		/** CmmtEmpInfoDao.select */
+		select
+			<include refid="CmmtEmpInfo_cols">
+				<property name="alias" value="a" />
+			</include>
+		from auth_api.cmmt_emp_info a
+		where
+			a.mber_id = #{memberId}
+	</select>
+
+	<select id="selectByRefreshToken" resultType="aicluster.member.common.entity.CmmtEmpInfo">
+		/** CmmtEmpInfoDao.selectByRefreshToken */
+		select
+			<include refid="CmmtEmpInfo_cols">
+				<property name="alias" value="a" />
+			</include>
+		from auth_api.cmmt_emp_info a
+		where
+			a.refresh_token = #{refreshToken}
+	</select>
+
+	<select id="selectCountByAuthorityId" resultType="Long">
+		/** CmmtEmpInfoDao.selectCountByAuthorityId */
+		select
+			count(mber_id) as cnt
+		from auth_api.cmmt_emp_info
+		where
+			author_id = #{authorityId}
+	</select>
+
+	<sql id="selectList_where">
+		1=1
+		<if test='param.loginId != null and param.loginId != ""'>
+			and login_id = #{param.loginId}
+		</if>
+		<if test='param.memberNm != null and param.memberNm != ""'>
+			and mber_nm like '%'|| #{param.memberNm} ||'%'
+		</if>
+		<if test='param.memberSt != null and param.memberSt != ""'>
+			and mber_sttus_code = #{param.memberSt}
+		</if>
+		<if test='param.authorityId != null and param.authorityId != ""'>
+			and author_id = #{param.authorityId}
+		</if>
+		<if test='param.deptNm != null and param.deptNm != ""'>
+			and dept_code = #{param.deptNm}
+		</if>
+	</sql>
+
+	<select id="selectCount" resultType="Long">
+		/** CmmtEmpInfoDao.selectCount */
+		select
+			count(login_id) as cnt
+		from auth_api.cmmt_emp_info a
+		where
+			<include refid="selectList_where" />
+	</select>
+
+	<select id="selectList" resultType="aicluster.member.common.dto.InsiderDto">
+		/** CmmtEmpInfoDao.selectList */
+		select
+			<include refid="CmmtEmpInfo_cols">
+				<property name="alias" value="a" />
+			</include>
+			,row_number() over (order by a.mber_nm, a.login_id) as rn
+		from auth_api.cmmt_emp_info a
+		where
+			<include refid="selectList_where" />
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+	<insert id="insert">
+		/** CmmtEmpInfoDao.insert */
+		insert into auth_api.cmmt_emp_info (
+			 mber_id
+			,login_id
+			,encpt_password
+			,password_change_dt
+			,password_initl_at
+			,mber_nm
+			,ncnm
+			,sexdstn_code
+			,dept_code
+			,clsf_nm
+			,author_id
+			,mber_sttus_code
+			,mber_sttus_change_dt
+			,encpt_telno
+			,encpt_mbtlnum
+			,encpt_email
+			,mber_ip_set
+			,refresh_token
+			,last_login_dt
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{memberId}
+			,#{loginId}
+			,#{encPasswd}
+			,#{passwdDt}
+			,#{passwdInit}
+			,#{memberNm}
+			,#{nickname}
+			,#{gender}
+			,#{deptNm}
+			,#{positionNm}
+			,#{authorityId}
+			,#{memberSt}
+			,#{memberStDt}
+			,#{encTelNo}
+			,#{encMobileNo}
+			,#{encEmail}
+			,#{memberIps}
+			,#{refreshToken}
+			,#{lastLoginDt}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** CmmtEmpInfoDao.update */
+		update auth_api.cmmt_emp_info set
+			 login_id				= #{loginId}
+			,encpt_password			= #{encPasswd}
+			,password_change_dt		= #{passwdDt}
+			,password_initl_at		= #{passwdInit}
+			,mber_nm				= #{memberNm}
+			,ncnm					= #{nickname}
+			,sexdstn_code			= #{gender}
+			,dept_code				= #{deptNm}
+			,clsf_nm				= #{positionNm}
+			,author_id				= #{authorityId}
+			,mber_sttus_code		= #{memberSt}
+			,mber_sttus_change_dt	= #{memberStDt}
+			,encpt_telno			= #{encTelNo}
+			,encpt_mbtlnum			= #{encMobileNo}
+			,encpt_email			= #{encEmail}
+			,mber_ip_set			= #{memberIps}
+			,refresh_token			= #{refreshToken}
+			,last_login_dt			= #{lastLoginDt}
+			,creatr_id				= #{creatorId}
+			,creat_dt				= #{createdDt}
+			,updusr_id				= #{updaterId}
+			,updt_dt				= #{updatedDt}
+		where
+			mber_id = #{memberId}
+	</update>
+
+	<sql id="selectSrchPicList_where">
+		1=1
+		and mber_sttus_code = 'NORMAL'
+		<if test='param.memberNm != null and param.memberNm != ""'>
+			and mber_nm like '%'||#{param.memberNm}||'%'
+		</if>
+		<if test='param.loginId != null and param.loginId != ""'>
+			and login_id = #{param.loginId}
+		</if>
+		<if test='param.deptNm != null and param.deptNm != ""'>
+			and fn_cmm_get_code_nm('DEPT_CD', dept_code) like '%'||#{param.deptNm}||'%'
+		</if>
+	</sql>
+
+	<select id="selectSrchPicCount" resultType="Long">
+		/** CmmtEmpInfoDao.selectCount */
+		select
+			count(*) as cnt
+		from auth_api.cmmt_emp_info
+		where
+			<include refid="selectSrchPicList_where" />
+	</select>
+
+	<select id="selectSrchPicList" resultType="aicluster.member.api.insider.dto.SrchPicItemDto">
+		/** CmmtEmpInfoDao.selectSrchPicList */
+		select
+			 a.mber_id									as member_id
+			,a.login_id									as login_id
+			,a.mber_nm									as member_nm
+			,fn_cmm_get_code_nm('DEPT_CD', a.dept_code)	as dept_nm
+			,a.clsf_nm									as position_nm
+			,b.author_nm								as authority_nm
+			,a.encpt_email								as enc_email
+			,row_number() over (order by fn_cmm_get_code_nm('DEPT_CD', a.dept_code), a.mber_nm) as rn
+		from auth_api.cmmt_emp_info a
+		join auth_api.cmmt_author b
+		  on a.author_id = b.author_id
+		where
+			<include refid="selectSrchPicList_where" />
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+</mapper>

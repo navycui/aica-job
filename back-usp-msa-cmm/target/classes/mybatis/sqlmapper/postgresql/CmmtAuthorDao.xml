@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtAuthorDao">
+
+	<sql id="CmmtAuthor_cols">
+		author_id			as authority_id
+		,author_nm			as authority_nm
+		,prpos_code			as purpose
+		,creatr_id			as creator_id
+		,creat_dt			as created_dt
+		,updusr_id			as updater_id
+		,updt_dt			as updated_dt
+	</sql>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtAuthor">
+		/** CmmtAuthorDao.select */
+		select
+			<include refid="CmmtAuthor_cols"/>
+		from auth_api.cmmt_author
+		where
+			author_id = #{authorityId}
+	</select>
+</mapper>

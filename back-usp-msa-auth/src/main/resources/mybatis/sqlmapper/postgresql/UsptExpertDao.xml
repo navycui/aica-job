@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.UsptExpertDao">
+
+	<select id="selectList_expertNm" resultType="aicluster.member.common.entity.UsptExpert">
+		/** UsptExpertDao.selectList_expertNm */
+		select
+			expert_id
+			,expert_nm
+			,encpt_brthdy	as enc_brthdy
+			,encpt_mbtlnum	as enc_mbtlnum
+			,encpt_email	as enc_email
+			,expert_reqst_process_sttus_code	as expert_reqst_process_sttus_cd
+		from usp_api.uspt_expert
+		where
+			expert_nm = #{expertNm}
+			and expert_reqst_process_sttus_code = 'ERPS02'
+	</select>
+
+</mapper>

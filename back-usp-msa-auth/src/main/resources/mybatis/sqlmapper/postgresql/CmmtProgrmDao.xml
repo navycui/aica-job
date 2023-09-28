@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtProgrmDao">
+
+	<sql id="CmmtProgrm_cols">
+		 progrm_id		as program_id
+		,progrm_nm		as program_nm
+		,sys_id			as system_id
+		,http_method	as http_method
+		,url_pttrn		as url_pattern
+		,inspct_ordr	as check_order
+		,creatr_id		as creator_id
+		,creat_dt		as created_dt
+		,updusr_id		as updater_id
+		,updt_dt		as updated_dt
+	</sql>
+
+	<select id="select"  resultType="aicluster.member.common.entity.CmmtProgrm">
+		/** CmmtProgrmDao.select */
+		select
+		    <include refid="CmmtProgrm_cols" />
+		    ,(select string_agg(role_id, ',') from auth_api.cmmt_progrm_role where progrm_id = a.progrm_id) as role_ids
+		from auth_api.cmmt_progrm a
+		where
+			progrm_id = #{programId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.member.common.entity.CmmtProgrm">
+		/** CmmtProgrmDao.selectList */
+		select
+		    <include refid="CmmtProgrm_cols" />
+		    ,(select string_agg(role_id, ',') from auth_api.cmmt_progrm_role where progrm_id = a.progrm_id) as role_ids
+		from auth_api.cmmt_progrm a
+		where
+			1=1
+			and sys_id = #{systemId}
+			<if test="programNm != null and !programNm.equals('')">
+		    	and progrm_nm like '%' || #{programNm} || '%'
+		    </if>
+		    <if test="urlPattern != null and !urlPattern.equals('')">
+		    	and url_pttrn like '%' || #{urlPattern} || '%'
+		    </if>
+	</select>
+
+	<select id="selectByName" resultType="aicluster.member.common.entity.CmmtProgrm">
+		/** CmmtProgrmDao.selectByName */
+		select
+		    <include refid="CmmtProgrm_cols" />
+		    ,(select string_agg(ROLE_ID, ',') from auth_api.cmmt_progrm_role where progrm_id = a.progrm_id) as role_ids
+		from auth_api.cmmt_progrm a
+		where
+			sys_id = #{systemId}
+			and progrm_nm = #{programNm}
+	</select>
+
+	<select id="selectByUrlPattern" resultType="aicluster.member.common.entity.CmmtProgrm">
+		/** CmmtProgrmDao.selectByUrlPattern */
+		select
+		    <include refid="CmmtProgrm_cols" />
+		    ,(select string_agg(ROLE_ID, ',') from auth_api.cmmt_progrm_role where progrm_id = a.progrm_id) as role_ids
+		from auth_api.cmmt_progrm a
+		where
+			sys_id = #{systemId}
+			and http_method = #{httpMethod}
+			and url_pttrn = #{urlPattern}
+	</select>
+
+	<update id="incCheckOrder">
+		/** CmmtProgrmDao.incCheckOrder */
+		update auth_api.cmmt_progrm set
+			inspct_ordr = inspct_ordr + 1
+		where
+			inspct_ordr >= #{checkOrder}
+	</update>
+
+	<insert id="insert">
+		/** CmmtProgrmDao.insert */
+		insert into auth_api.cmmt_progrm (
+		    progrm_id
+			,progrm_nm
+			,sys_id
+			,http_method
+			,url_pttrn
+			,inspct_ordr
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+		    #{programId}
+			,#{programNm}
+			,#{systemId}
+			,#{httpMethod}
+			,#{urlPattern}
+			,#{checkOrder}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** CmmtProgrmDao.update */
+		update auth_api.cmmt_progrm set
+			progrm_nm   = #{programNm}
+			,sys_id	 = #{systemId}
+			,http_method = #{httpMethod}
+			,url_pttrn = #{urlPattern}
+			,inspct_ordr = #{checkOrder}
+			,updusr_id  = #{updaterId}
+			,updt_dt  = #{updatedDt}
+		where
+			progrm_id = #{programId}
+	</update>
+
+	<select id="selectByRoleId" resultType="aicluster.member.common.entity.CmmtProgrmRole">
+		/** CmmtProgrmDao.selectByRoleId */
+        SELECT b.progrm_id		as program_id
+             , b.role_id		as role_id
+             , b.creatr_id		as creator_id
+             , b.creat_dt		as created_dt
+          FROM auth_api.cmmt_progrm a
+          JOIN auth_api.cmmt_progrm_role b
+            ON a.progrm_id = b.progrm_id
+         WHERE b.role_id = #{roldId}
+	</select>
+
+	<delete id="deleteProgramId">
+		/** CmmtProgrmRoleDao.deleteList */
+		delete from auth_api.cmmt_progrm
+		where
+			progrm_id = #{programId}
+	</delete>
+
+	<select id="selectTotalCount" resultType="Long">
+		/** CmmtProgrmDao.selectTotalCount */
+		select
+			count(*) as cnt
+		from auth_api.cmmt_progrm
+	</select>
+</mapper>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtBannerDao">
+
+	<sql id="cmmtBanner_cols">
+		banner_id
+		,banner_nm
+		,sys_id					as system_id
+		,banner_ty_code			as banner_type
+		,begin_dt
+		,end_dt
+		,trget_url				as target_url
+		,new_window_at			as new_window
+		,anm_at					as animation
+		,text_html_cn			as text_html
+		,pcom_image_file_id		as pc_image_file_id
+		,mobile_image_file_id
+		,image_replc_cn			as image_alt_cn
+		,sort_ordr				as sort_order
+		,use_at					as enabled
+		,creatr_id				as creator_id
+		,creat_dt				as created_dt
+		,updusr_id				as updater_id
+		,updt_dt				as updated_dt
+	</sql>
+
+	<sql id="selectList-where">
+		1=1
+		and sys_id = #{param.systemId}
+			<if test='param.beginDay != null and param.beginDay != "" and param.endDay != null and param.endDay != ""'>
+			<![CDATA[
+				 and (
+				 	begin_dt between to_timestamp(#{param.beginDay} || '0000', 'YYYYMMDDHH24MI') and to_timestamp(#{param.endDay} || '2359', 'YYYYMMDDHH24MI')
+				 	or end_dt between to_timestamp(#{param.beginDay} || '0000', 'YYYYMMDDHH24MI') and to_timestamp(#{param.endDay} || '2359', 'YYYYMMDDHH24MI')
+				 	or (
+				 		begin_dt < to_timestamp(#{param.beginDay} || '0000', 'YYYYMMDDHH24MI')
+						and end_dt > to_timestamp(#{param.endDay} || '2359', 'YYYYMMDDHH24MI')
+				 	)
+				 )
+			]]>
+			</if>
+		<if test='param.enabled != null'>
+			<choose>
+				<when test="param.enabled">
+					and use_at = #{param.enabled}
+				</when>
+				<otherwise>
+					and (use_at = #{param.enabled} or use_at is null)
+				</otherwise>
+			</choose>
+		</if>
+		<if test='param.bannerNm != null and param.bannerNm != ""'>
+		and banner_nm like '%'||#{param.bannerNm}||'%'
+		</if>
+	</sql>
+
+	<insert id="insert">
+		/** CmmtBannerDao.insert */
+		insert into com_api.cmmt_banner (
+			banner_id
+			,banner_nm
+			,sys_id
+			,banner_ty_code
+			,begin_dt
+			,end_dt
+			,trget_url
+			,new_window_at
+			,anm_at
+			,text_html_cn
+			,pcom_image_file_id
+			,mobile_image_file_id
+			,image_replc_cn
+			,sort_ordr
+			,use_at
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{bannerId}
+			,#{bannerNm}
+			,#{systemId}
+			,#{bannerType}
+			,#{beginDt}
+			,#{endDt}
+			,#{targetUrl}
+			,#{newWindow}
+			,#{animation}
+			,#{textHtml}
+			,#{pcImageFileId}
+			,#{mobileImageFileId}
+			,#{imageAltCn}
+			,#{sortOrder}
+			,#{enabled}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+
+	</insert>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtBanner">
+		/** CmmtBannerDao.select */
+		select
+			<include refid="cmmtBanner_cols"/>
+		from com_api.cmmt_banner
+		where
+			banner_id = #{banner_Id}
+	</select>
+
+	<update id="update" >
+		/** CmmtBannerDao.update */
+		update com_api.cmmt_banner set
+			 banner_id              = #{bannerId}
+			,banner_nm              = #{bannerNm}
+			,sys_id                 = #{systemId}
+			,banner_ty_code         = #{bannerType}
+			,begin_dt               = #{beginDt}
+			,end_dt                 = #{endDt}
+			,trget_url              = #{targetUrl}
+			,new_window_at          = #{newWindow}
+			,anm_at                 = #{animation}
+			,text_html_cn           = #{textHtml}
+			,pcom_image_file_id     = #{pcImageFileId}
+			,mobile_image_file_id   = #{mobileImageFileId}
+			,image_replc_cn         = #{imageAltCn}
+			,sort_ordr              = #{sortOrder}
+			,use_at                 = #{enabled}
+			,creatr_id              = #{creatorId}
+			,creat_dt               = #{createdDt}
+			,updusr_id              = #{updaterId}
+			,updt_dt                = #{updatedDt}
+		where
+			banner_id = #{bannerId}
+
+	</update>
+	<delete id="delete">
+		/** CmmtBannerDao.delete */
+		delete from com_api.cmmt_banner
+		where
+			banner_id = #{bannerId}
+	</delete>
+
+	<select id = "selectList_count" resultType="Long">
+		/** CmmtBannerDao.selectList_count */
+		select
+			 count(*) as cnt
+		from com_api.cmmt_banner
+		where
+			<include refid="selectList-where" />
+	</select>
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtBanner">
+		/** CmmtBannerDao.selectList */
+		select
+			<include refid="cmmtBanner_cols"/>
+			,#{totalItems} + 1 - (row_number() over(order by creat_dt desc)) as rn
+		from com_api.cmmt_banner
+		where
+			<include refid="selectList-where" />
+		order by
+			creat_dt desc
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+ 	<select id="selectList_today" resultType="aicluster.common.common.entity.CmmtBanner">
+ 		/** CmmtBannerDao.selectList_today */
+		select
+			<include refid="cmmtBanner_cols"/>
+		from com_api.cmmt_banner
+		where
+			use_at = true
+			and sys_id = #{systemId}
+			<![CDATA[and begin_dt <= now() and end_dt >= now()]]>
+		order by sort_ordr
+ 	</select>
+
+</mapper>

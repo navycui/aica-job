@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtQnaDao">
+
+	<sql id="cmmtQna_cols">
+		qna_id
+		,qna_nm
+		,sys_id					as system_id
+		,bbsctt_co				as article_cnt
+		,ctgry_use_at			as category
+		,ctgry_code_group_id	as category_code_group
+		,atch_perm_at			as attachable
+		,atchmnfl_lmtt_size		as attachment_size
+		,atchmnfl_extsn_set		as attachment_ext
+		,use_at					as enabled
+		,creatr_id				as creator_id
+		,creat_dt				as created_dt
+		,updusr_id				as updater_id
+		,updt_dt				as updated_dt
+	</sql>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtQna">
+		/** CmmtQnaDao.select */
+		select
+			<include refid="cmmtQna_cols" />
+		from com_api.cmmt_qna
+		where
+			qna_id = #{qnaId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtQna">
+		/** CmmtQnaDao.selectList */
+		select
+			<include refid="cmmtQna_cols" />
+		from com_api.cmmt_qna
+		where
+			1=1
+			<if test='systemId != null and systemId != ""'>
+				and sys_id = #{systemId}
+			</if>
+			<if test='qnaId != null and qnaId != ""'>
+				and qna_id = #{qnaId}
+			</if>
+			<if test='qnaNm != null and qnaNm != ""'>
+				and qna_nm like '%' || #{qnaNm} || '%'
+			</if>
+			<if test='enabled != null'>
+				and use_at = #{enabled}
+			</if>
+		order by
+			qna_id
+	</select>
+
+	<insert id="insert">
+		/** CmmtQnaDao.insert */
+		insert into com_api.cmmt_qna (
+			 qna_id
+			,qna_nm
+			,sys_id
+			,bbsctt_co
+			,ctgry_use_at
+			,ctgry_code_group_id
+			,atch_perm_at
+			,atchmnfl_lmtt_size
+			,atchmnfl_extsn_set
+			,use_at
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{qnaId}
+			,#{qnaNm}
+			,#{systemId}
+			,#{articleCnt}
+			,#{category}
+			,#{categoryCodeGroup}
+			,#{attachable}
+			,#{attachmentSize}
+			,#{attachmentExt}
+			,#{enabled}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** CmmtQnaDao.update */
+		update com_api.cmmt_qna set
+			 qna_nm					= #{qnaNm}
+			,sys_id					= #{systemId}
+			,bbsctt_co				= #{articleCnt}
+			,ctgry_use_at			= #{category}
+			,ctgry_code_group_id	= #{categoryCodeGroup}
+			,atch_perm_at			= #{attachable}
+			,atchmnfl_lmtt_size		= #{attachmentSize}
+			,atchmnfl_extsn_set		= #{attachmentExt}
+			,use_at					= #{enabled}
+			,updusr_id				= #{updaterId}
+			,updt_dt				= #{updatedDt}
+		where
+			qna_id = #{qnaId}
+	</update>
+
+	<delete id="delete">
+		/** CmmtQnaDao.delete */
+		delete from com_api.cmmt_qna
+		where
+			qna_id = #{qnaId}
+	</delete>
+
+	<select id="selectQuestSt_count" resultType="aicluster.common.common.dto.QnaQuestStatusCountItem">
+		/** CmmtQnaDao.selectQuestSt_count */
+		select
+			a.qna_id
+			,b.request_count
+			,b.receipt_count
+			,b.answer_count
+			,b.confirm_count
+		from com_api.cmmt_qna a
+		join (
+			select
+				qna_id
+				, sum(case quest_sttus_code when 'REQUEST' then 1 else 0 end) as request_count
+				, sum(case quest_sttus_code when 'RECEIPT' then 1 else 0 end) as receipt_count
+				, sum(case quest_sttus_code when 'ANSWER' then 1 else 0 end) as answer_count
+				, sum(case quest_sttus_code when 'CONFIRM' then 1 else 0 end) as confirm_count
+			from com_api.cmmt_qna_quest
+			group by qna_id
+			) b
+		  on a.qna_id = b.qna_id
+		where a.use_at = true
+	</select>
+	
+	<select id="getQnaExtsn" resultType="aicluster.common.api.qna.dto.QnaExtsnResponseParam">
+		/** CmmtQnaDao.getQnaExtsn */
+		select
+			atchmnfl_extsn_set
+		from
+			com_api.cmmt_qna
+		where
+			qna_id = #{qnaId}
+	</select>
+</mapper>

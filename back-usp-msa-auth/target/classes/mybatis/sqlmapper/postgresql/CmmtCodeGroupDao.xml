@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.member.common.dao.CmmtCodeGroupDao">
+
+	<sql id="cmmtCodeGroup_cols">
+		code_group_id	as code_group
+		,code_group_nm	as code_group_nm
+		,rm				as remark
+		,use_at			as enabled
+		,creatr_id		as creator_id
+		,creat_dt		as created_dt
+		,updusr_id		as updater_id
+		,updt_dt		as updated_dt
+	</sql>
+
+	<select id="selectList" resultType="aicluster.member.common.entity.CmmtCodeGroup">
+		/** CmmtCodeGroupDao.selectList */
+		select
+			<include refid="cmmtCodeGroup_cols"/>
+		from com_api.cmmt_code_group
+		where
+			1=1
+			<if test='codeGroup != null and codeGroup != ""'>
+				and code_group_id like '%' || upper(#{codeGroup}) || '%'
+			</if>
+			<if test='codeGroupNm != null and codeGroupNm != ""'>
+				and code_group_nm like '%' || upper(#{codeGroupNm}) || '%'
+			</if>
+	</select>
+
+	<select id="select" resultType="aicluster.member.common.entity.CmmtCodeGroup">
+		/** CmmtCodeGroupDao.select */
+		select
+			<include refid="cmmtCodeGroup_cols"/>
+		from com_api.cmmt_code_group
+		where
+			code_group_id = upper(#{codeGroup})
+	</select>
+
+	<insert id="insert">
+		/** CmmtCodeGroupDao.insert */
+		insert into com_api.cmmt_code_group (
+			code_group_id
+			,code_group_nm
+			,rm
+			,use_at
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			upper(#{codeGroup})
+			,upper(#{codeGroupNm})
+			,#{remark}
+			,#{enabled}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** CmmtCodeGroupDao.update */
+		update com_api.cmmt_code_group set
+			code_group_nm	= upper(#{codeGroupNm})
+			,rm				= #{remark}
+			,use_at			= #{enabled}
+			,creatr_id		= #{creatorId}
+			,creat_dt		= #{createdDt}
+			,updusr_id		= #{updaterId}
+			,updt_dt		= #{updatedDt}
+		where
+			code_group_id = upper(#{codeGroup})
+	</update>
+
+	<delete id="delete">
+		/** CmmtCodeGroupDao.delete */
+		delete from com_api.cmmt_code_group
+		where
+			code_group_id = upper(#{codeGroup})
+	</delete>
+</mapper>

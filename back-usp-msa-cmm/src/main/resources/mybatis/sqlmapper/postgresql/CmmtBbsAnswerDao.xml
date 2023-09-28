@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.common.common.dao.CmmtBbsAnswerDao">
+
+	<sql id="CmmtBbsAnswer_cols">
+		 bbsctt_id		as article_id
+		,answer_id		as cmmnt_id
+		,answer_cn		as cmmnt
+		,creatr_id		as creator_id
+		,creat_dt		as created_dt
+		,updusr_id		as updater_id
+		,updt_dt		as updated_dt
+	</sql>
+
+	<delete id="deleteList">
+		/** CmmtBbsAnswerDao.deleteList */
+		delete from com_api.cmmt_bbs_answer
+		where
+			bbsctt_id = #{articleId}
+	</delete>
+
+	<select id="selectList_count" resultType="Long">
+		/** CmmtBbsAnswerDao.selectList_count */
+		select
+			count(*) as cnt
+		from com_api.cmmt_bbs_answer
+		where
+			bbsctt_id = #{articleId}
+	</select>
+
+	<select id="selectList" resultType="aicluster.common.common.entity.CmmtBbsAnswer">
+		/** CmmtBbsAnswerDao.selectList */
+		select
+			<include refid="CmmtBbsAnswer_cols" />
+			<if test="latest == true">
+				,#{totalItems} + 1 - (row_number() over (order by creat_dt desc)) as rn
+			</if>
+			<if test="latest == false">
+				,row_number() over (order by creat_dt) as rn
+			</if>
+		from com_api.cmmt_bbs_answer
+		where
+			bbsctt_id = #{articleId}
+		offset #{beginRowNum} -1
+		limit #{itemsPerPage}
+	</select>
+
+	<insert id="insert">
+		/** CmmtBbsAnswerDao.insert */
+		insert into com_api.cmmt_bbs_answer (
+			 bbsctt_id
+			,answer_id
+			,answer_cn
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{articleId}
+			,#{cmmntId}
+			,#{cmmnt}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<select id="select" resultType="aicluster.common.common.entity.CmmtBbsAnswer">
+		/** CmmtBbsAnswerDao.select */
+		select
+			<include refid="CmmtBbsAnswer_cols" />
+		from com_api.cmmt_bbs_answer
+		where
+			bbsctt_id = #{articleId}
+			and answer_id = #{cmmntId}
+	</select>
+
+	<update id="update">
+		/** CmmtBbsAnswerDao.update */
+		update com_api.cmmt_bbs_answer set
+			 answer_cn = #{cmmnt}
+			,updusr_id = #{updaterId}
+			,updt_dt = #{updatedDt}
+		where
+			bbsctt_id = #{articleId}
+			and answer_id = #{cmmntId}
+	</update>
+
+	<delete id="delete">
+		/** CmmtBbsAnswerDao.delete */
+		delete from com_api.cmmt_bbs_answer
+		where
+			bbsctt_id = #{articleId}
+			and answer_id = #{cmmntId}
+	</delete>
+</mapper>

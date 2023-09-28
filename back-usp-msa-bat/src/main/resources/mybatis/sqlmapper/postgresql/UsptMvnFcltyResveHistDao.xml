@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.batch.common.dao.UsptMvnFcltyResveHistDao">
+
+	<insert id="insertList">
+		/** UsptMvnFcltyResveHistDao.insert */
+		insert into mvn_api.uspt_mvn_fclty_resve_hist (
+			 hist_id
+			,hist_dt
+			,resve_id
+			,opert_ty_nm
+			,opert_cn
+			,opertor_id
+		) values
+		<foreach item="item" collection="list" separator=",">
+		(
+			  #{item.histId}
+			, #{item.histDt}
+			, #{item.reserveId}
+			, #{item.workTypeNm}
+			, #{item.workCn}
+			, #{item.workerId}
+		)
+		</foreach>
+	</insert>
+
+</mapper>

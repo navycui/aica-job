@@ -1,0 +1,125 @@
+#################################
+# TOMCAT
+#################################
+server:
+   port: 8088
+   tomcat:
+      keep-alive-timeout: 100
+      max-connections: 8192
+      threads:
+         min: 100
+         max: 200
+         min-spare: 10
+      accept-count: 100
+
+#server.error.path=
+#server.servlet.session.timeout=
+
+#################################
+# DBCP
+#################################
+spring:
+   main:
+      allow-bean-definition-overriding: "true"
+   
+   datasource:
+      hikari:
+         driver-class-name: "org.postgresql.Driver"
+         jdbc-url: "jdbc:postgresql://172.22.3.27:5430/cmmdb?currentSchema=com_api&serverTimezone=Asia/Seoul"
+         username: "thenet"
+         password: "thenet1!"
+
+         auto-commit: false
+         maximum-pool-size: 100 
+         connectionTimeout: 30000
+         idleTimeout: 600000
+         maxLifetime: 1800000
+         connection-test-query: "SELECT 1"
+
+#################################
+# LOGGING
+#################################
+logging:
+   pattern:
+      #default log pattern
+      #console: '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx'
+      #custom log pattern
+      #console: '%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%4line]){magenta} %clr(%-40.40logger{39}){cyan} %clr(:){red} %m%n%wEx'
+      file: '%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%4line]){magenta} %clr(%-40.40logger{39}){cyan} %clr(:){red} %m%n%wEx'
+      #rolling-file-name: "/log1/app/API_BATCH/app.%d{yyyy-MM-dd}.%i"
+   logback:
+      rollingpolicy:
+         file-name-pattern: "/log1/app/API_BATCH/app.%d{yyyy-MM-dd}.%i"
+   file:
+      name: "/log1/app/API_BATCH/app.log"
+      max-history: 30
+   level:
+      root: info
+      aicluster: debug
+      jdbc:
+         resultset: error
+         audit: error
+
+#################################
+# 환경설정
+#################################
+env:
+   cors:
+      origins:
+         - "http://pc.atops.or.kr:5500"
+         - "http://atops.or.kr"
+         - "http://www.atops.or.kr"
+         - "http://portal.atops.or.kr"
+         - "http://admin.atops.or.kr"
+         - "https://atops.or.kr"
+         - "https://www.atops.or.kr"
+         - "https://portal.atops.or.kr"
+         - "https://admin.atops.or.kr"
+      headers:
+         - "Content-Disposition"
+         - "Content-Language"
+         - "Content-Transfer-Encoding"
+         - "Content-Type"
+      methods:
+         - "*"
+      pattern: "/**"
+   cookie: 
+      domain: "atops.or.kr"
+      #max-age = jwt.refreshTokenExpireTime / 1000 이어야 한다.
+      max-age: 1800
+      secure: false
+      httpOnly: true
+      path: "/"
+   dir:
+      core-log: "/logs_data/logs1/core"
+      upload: "/aica_data/data/ai-cluster/upload"
+
+
+##################################################################
+### 모니터링 ######################################################
+##################################################################
+opentracing:
+   jaeger:
+      service-name: ai-batch-svc # jaeger service name
+      http-sender:
+         url: http://jaeger-collector.istio-system.svc:14268/api/traces 
+      enabled: true
+      const-sampler:
+         decision: true
+      log-spans: true   
+      enable-b3-propagation: true
+      enable-w3c-propagation: true 
+      metrics:
+         exporter:
+            http:
+               path: "/metrics"  
+         
+# actuator 설정 metric
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics, info, health, prometheus
+  metrics:
+    tags:    
+      application: ai-batch
