@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.FwLogDao">
+
+	<insert id="insertLogtLoginLogs">
+		/** LogDao.insertLogtLoginLogs */
+		insert into com_api.logt_login_log (
+			 log_id
+			,api_sys_id
+			,log_dt
+			,mber_id
+			,login_id
+			,mber_nm
+			,mber_ty_code
+			,sexdstn_code
+			,age
+			,mber_ip
+			,clsf_nm
+			,dept_nm
+			,pstinst_nm
+		) values
+		<foreach item="item" collection="logs" separator=",">
+			(
+				 #{item.logId}
+				,#{item.apiSystemId}
+				,#{item.logDt}
+				,#{item.memberId}
+				,#{item.loginId}
+				,#{item.memberNm}
+				,#{item.memberType}
+				,#{item.gender}
+				,#{item.age}
+				,#{item.memberIp}
+				,#{item.positionNm}
+				,#{item.deptNm}
+				,#{item.pstinstNm}
+			)
+		</foreach>
+	</insert>
+
+	<insert id="insertLogtAccessLogs">
+		/** LogDao.insertLogtAccessLogs */
+		insert into com_api.logt_conect_log (
+			 log_id
+			,api_sys_id
+			,log_dt
+			,link_url
+			,mber_id
+			,login_id
+			,mber_nm
+			,mber_ty_code
+			,sexdstn_code
+			,age
+			,mber_ip
+			,clsf_nm
+			,dept_nm
+			,pstinst_nm
+		) values
+		<foreach item="item" collection="logs" separator=",">
+			(
+				 #{item.logId}
+				,#{item.apiSystemId}
+				,#{item.logDt}
+				,#{item.url}
+				,#{item.memberId}
+				,#{item.loginId}
+				,#{item.memberNm}
+				,#{item.memberType}
+				,#{item.gender}
+				,#{item.age}
+				,#{item.memberIp}
+				,#{item.positionNm}
+				,#{item.deptNm}
+				,#{item.pstinstNm}
+			)
+		</foreach>
+	</insert>
+
+	<insert id="insertLogtErrorLogs">
+		/** LogDao.insertLogtErrorLogs */
+		insert into com_api.logt_error_log (
+			 log_id
+			,api_sys_id
+			,log_dt
+			,error_code
+			,error_mssage
+			,link_url
+			,mber_id
+			,login_id
+			,mber_nm
+			,mber_ty_code
+			,sexdstn_code
+			,age
+			,mber_ip
+			,clsf_nm
+			,dept_nm
+			,pstinst_nm
+		) values
+		<foreach item="item" collection="logs" separator=",">
+			(
+				 #{item.logId}
+				,#{item.apiSystemId}
+				,#{item.logDt}
+				,#{item.errorCode}
+				,#{item.errorMsg}
+				,#{item.url}
+				,#{item.memberId}
+				,#{item.loginId}
+				,#{item.memberNm}
+				,#{item.memberType}
+				,#{item.gender}
+				,#{item.age}
+				,#{item.memberIp}
+				,#{item.positionNm}
+				,#{item.deptNm}
+				,#{item.pstinstNm}
+			)
+		</foreach>
+	</insert>
+
+	<insert id="insertLogtBatchLogs">
+		/** LogDao.insertLogtBatchLogs */
+		insert into com_api.logt_batch_log (
+			 log_id
+			,api_sys_id
+			,batch_nm
+			,batch_method
+			,begin_dt
+			,elapse_time
+			,batch_sttus_code
+			,result_cn
+			,error_code
+			,error_mssage
+		) values
+		<foreach item="item" collection="logs" separator=",">
+			(
+				 #{item.logId}
+				,#{item.apiSystemId}
+				,#{item.batchName}
+				,#{item.batchMethod}
+				,#{item.beginDt}
+				,#{item.elapsedTime}
+				,#{item.batchSt}
+				,#{item.resultCn}
+				,#{item.errorCode}
+				,#{item.errorMsg}
+			)
+		</foreach>
+	</insert>
+
+	<insert id="insertLogtElapsedTimeLog">
+		/** LogDao.insertLogtElapsedTimeLog */
+		insert into com_api.logt_elapse_time_log (
+			 log_id
+			,log_dt
+			,link_url
+			,elapse_time
+			,api_sys_id
+		) values (
+			 #{logId}
+			,#{logDt}
+			,#{url}
+			,#{elapsedTime}
+			,#{apiSystemId}
+		)
+	</insert>
+
+	<delete id="deleteLogtElapsedTimeLog">
+	<![CDATA[
+		/** LogDao.deleteLogtElapsedTimeLog */
+		delete from com_api.logt_elapse_time_log
+		where
+			log_dt <= #{removeTime}
+	]]>
+	</delete>
+
+	<select id="selectLogtDayMemberLog" resultType="aicluster.framework.common.entity.LogtDeUnitConnectMberLog">
+		/** LogDao.selectLogtDayMemberLog */
+		select
+			 ymd_id		as ymd
+			,mber_id	as memberId
+		from com_api.logt_de_unit_connect_mber_log
+		where
+			ymd_id = #{ymd}
+			and mber_id = #{memberId}
+	</select>
+
+	<delete id="deleteLogtDayMemberLog">
+	<![CDATA[
+		/** LogDao.deleteLogtDayMemberLog */
+		delete from com_api.logt_de_unit_connect_mber_log
+		where
+			ymd_id <= #{removeYmd}
+	]]>
+	</delete>
+
+	<insert id="insertLogtDayMemberLog">
+		/** LogDao.insertLogtDayMemberLog */
+		insert into com_api.logt_de_unit_connect_mber_log (
+			 ymd_id
+			,mber_id
+		) values (
+			 #{ymd}
+			,#{memberId}
+		)
+	</insert>
+
+	<insert id="insertLogtIndvdlinfoDwldLog">
+		/** LogDao.insertLogtIndvdlinfoDwldLog */
+		insert into com_api.logt_indvdlinfo_dwld_log (
+			log_id
+			,log_dt
+			,mber_id
+			,mber_ip
+			,opert_ty_nm
+			,opert_cn
+			,menu_id
+			,menu_nm
+			,menu_url
+			,api_url
+			,paramtr
+			,sys_ip
+			,api_sys_id
+			,file_nm
+		) values (
+			 #{logId}
+			,#{logDt}
+			,#{mberId}
+			,#{mberIp}
+			,#{opertTyNm}
+			,#{opertCn}
+			,#{menuId}
+			,#{menuNm}
+			,#{menuUrl}
+			,#{apiUrl}
+			,#{paramtr}
+			,#{sysIp}
+			,#{apiSysId}
+			,#{fileNm}
+		)
+	</insert>
+
+	<insert id="insertLogtIndvdlinfoDwldTrget">
+		/** LogDao.insertLogtIndvdlinfoDwldTrget */
+		insert into com_api.logt_indvdlinfo_dwld_trget (
+			log_id
+			,trgter_id
+			,trgter_nm
+			,encpt_email
+			,encpt_brthdy
+			,encpt_mbtlnum
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+			 #{item.logId}
+			,#{item.trgterId}
+			,#{item.trgterNm}
+			,#{item.encptEmail}
+			,#{item.encptBrthdy}
+			,#{item.encptMbtlnum}
+		)
+		</foreach>
+	</insert>
+
+	<insert id="insertLogtIndvdlinfoConectLog">
+		/** LogDao.insertLogtIndvdlinfoConectLog */
+		insert into com_api.logt_indvdlinfo_conect_log (
+			 log_id
+			,log_dt
+			,mber_id
+			,mber_ip
+			,opert_ty_nm
+			,opert_cn
+			,menu_url
+			,api_url
+			,paramtr
+			,sys_ip
+			,api_sys_id
+			,trgter_id
+			,trgter_nm
+			,encpt_email
+			,encpt_brthdy
+			,encpt_mbtlnum
+		) values (
+			 #{logId}
+			,#{logDt}
+			,#{memberId}
+			,#{memberIp}
+			,#{workTypeNm}
+			,#{workCn}
+			,#{menuUrl}
+			,#{apiUrl}
+			,#{paramtr}
+			,#{sysIp}
+			,#{apiSysId}
+			,#{trgterId}
+			,#{trgterNm}
+			,#{encptEmail}
+			,#{encptBrthdy}
+			,#{encptMbtlnum}
+		)
+	</insert>
+
+</mapper>

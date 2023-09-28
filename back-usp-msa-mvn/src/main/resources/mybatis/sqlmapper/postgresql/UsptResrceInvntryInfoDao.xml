@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.mvn.common.dao.UsptResrceInvntryInfoDao">
+
+	<insert id="insertList">
+		/** UsptResrceInvntryInfoDao.insertList */
+		insert into mvn_api.uspt_resrce_invntry_info (
+			  resrce_id
+			, resrce_group_code
+			, resrce_ty_nm
+			, resrce_ty_unit_code
+			, invntry_qy
+			, tot_qy
+			, resrce_calqy
+			, creatr_id
+			, creat_dt
+			, updusr_id
+			, updt_dt
+		) values
+		<foreach item="item" collection="list" separator=",">
+		(
+			  #{item.rsrcId}
+			, #{item.rsrcGroupCd}
+			, #{item.rsrcTypeNm}
+			, #{item.rsrcTypeUnitCd}
+			, #{item.invtQy}
+			, #{item.totalQy}
+			, #{item.rsrcCalcQy}
+			, #{item.creatorId}
+			, #{item.createdDt}
+			, #{item.updaterId}
+			, #{item.updatedDt}
+		)
+		</foreach>
+	</insert>
+
+	<select id="selectList" resultType="aicluster.mvn.common.entity.UsptResrceInvntryInfo">
+		/** UsptResrceInvntryInfoDao.selectList */
+		select
+			  a.resrce_id			as rsrc_id
+			, a.resrce_group_code	as rsrc_group_cd
+			, b.code_nm				as rsrc_group_nm
+			, a.resrce_ty_nm		as rsrc_type_nm
+			, a.resrce_ty_unit_code	as rsrc_type_unit_cd
+			, fn_cmm_get_code_nm('RSRC_TYPE_UNIT', a.resrce_ty_unit_code) as rsrc_type_unit_nm
+			, a.invntry_qy			as invt_qy
+			, (select sum(resrce_dstb_qy) from mvn_api.uspt_resrce_asgn_dstb where resrce_id = a.resrce_id and resrce_use_at = true group by resrce_id) as dstb_qy
+			, a.tot_qy				as total_qy
+			, a.resrce_calqy		as rsrc_calc_qy
+			, a.creatr_id			as creator_id
+			, a.creat_dt			as created_dt
+			, a.updusr_id			as updater_id
+			, a.updt_dt				as updated_dt
+		from mvn_api.uspt_resrce_invntry_info a
+		join com_api.cmmt_code b
+		  on a.resrce_group_code = b.code
+		     and b.code_group_id = 'RSRC_GROUP'
+		order by
+			  b.sort_ordr
+			, a.resrce_ty_nm
+			, a.resrce_id
+	</select>
+
+	<update id="updateList">
+		/** UsptResrceInvntryInfoDao.updateList */
+		update mvn_api.uspt_resrce_invntry_info as x set
+			  resrce_group_code = u.resrce_group_code
+			, resrce_ty_nm = u.resrce_ty_nm
+			, resrce_ty_unit_code = u.resrce_ty_unit_code
+			, invntry_qy = u.invntry_qy
+			, tot_qy = u.tot_qy
+			, resrce_calqy = u.resrce_calqy
+			, creatr_id = u.creatr_id
+			, creat_dt = u.creat_dt::timestamp
+			, updusr_id = u.updusr_id
+			, updt_dt = u.updt_dt::timestamp
+		from (
+		values
+		<foreach item="item" collection="list" separator=",">
+		(
+			  #{item.rsrcId}
+			, #{item.rsrcGroupCd}
+			, #{item.rsrcTypeNm}
+			, #{item.rsrcTypeUnitCd}
+			, #{item.invtQy}
+			, #{item.totalQy}
+			, #{item.rsrcCalcQy}
+			, #{item.creatorId}
+			, #{item.createdDt}
+			, #{item.updaterId}
+			, #{item.updatedDt}
+		)
+		</foreach>
+		) as u (
+			  resrce_id
+			, resrce_group_code
+			, resrce_ty_nm
+			, resrce_ty_unit_code
+			, invntry_qy
+			, tot_qy
+			, resrce_calqy
+			, creatr_id
+			, creat_dt
+			, updusr_id
+			, updt_dt
+		)
+		where
+			u.resrce_id = x.resrce_id
+	</update>
+
+	<update id="updateInvtQy">
+		/** UsptResrceInvntryInfoDao.updateInvtQy */
+		update mvn_api.uspt_resrce_invntry_info set
+			 invntry_qy = #{invtQy}
+			,tot_qy = #{totalQy}
+			,updusr_id = #{updaterId}
+			,updt_dt = now()
+		where resrce_id = #{rsrcId}
+	</update>
+
+	<delete id="delete">
+		/** UsptResrceInvntryInfoDao.delete */
+		delete from mvn_api.uspt_resrce_invntry_info
+		where
+			resrce_id = #{rsrcId}
+	</delete>
+
+	<select id="select" resultType="aicluster.mvn.common.entity.UsptResrceInvntryInfo">
+		/** UsptResrceInvntryInfoDao.select */
+		select
+			  x.resrce_id			as rsrc_id
+			, x.resrce_group_code	as rsrc_group_cd
+			, fn_cmm_get_code_nm('RSRC_GROUP', x.resrce_group_code) as rsrc_group_nm
+			, x.resrce_ty_nm		as rsrc_type_nm
+			, x.resrce_ty_unit_code	as rsrc_type_unit_cd
+			, fn_cmm_get_code_nm('RSRC_TYPE_UNIT', x.resrce_ty_unit_code) as rsrc_type_unit_nm
+			, x.invntry_qy			as invt_qy
+			, coalesce(y.dstb_qy, 0) as dstb_qy
+			, x.tot_qy				as total_qy
+			, x.resrce_calqy		as rsrc_calc_qy
+			, x.creatr_id			as creator_id
+			, x.creat_dt			as created_dt
+			, x.updusr_id			as updater_id
+			, x.updt_dt				as updated_dt
+		from mvn_api.uspt_resrce_invntry_info x
+		left join (
+					select
+						d.resrce_id
+						,sum(d.resrce_dstb_qy) as dstb_qy
+					from mvn_api.uspt_resrce_asgn_entrps c
+					join mvn_api.uspt_resrce_asgn_dstb d
+						on c.resrce_asgn_id = d.resrce_asgn_id
+					where c.resrce_asgn_sttus_code = 'GOING'
+						and d.resrce_use_at = true
+					group by d.resrce_id
+				) y
+			on x.resrce_id = y.resrce_id
+		where
+			x.resrce_id = #{rsrcId}
+	</select>
+
+	<select id="selectRsrcCodeList" resultType="aicluster.mvn.common.dto.AlrsrcFninfRsrcDto">
+		/** UsptResrceInvntryInfoDao.selectRsrcCodeList */
+		select
+			  resrce_id		as rsrc_id
+			, resrce_ty_nm	as rsrc_type_nm
+		from mvn_api.uspt_resrce_invntry_info
+		where
+			resrce_group_code = #{rsrcGroupCd}
+	</select>
+
+	<select id="selectStatusList" resultType="aicluster.mvn.common.dto.AlrsrcFninfStatusDto">
+		/** UsptResrceInvntryInfoDao.selectStatusList */
+		select
+			  y.resrce_id			as rsrc_id
+			, y.resrce_group_code	as rsrc_group_cd
+			, fn_cmm_get_code_nm('RSRC_GROUP', y.resrce_group_code) as rsrc_group_nm
+			, y.resrce_ty_nm		as rsrc_type_nm
+			, y.resrce_ty_unit_code	as rsrc_type_unit_cd
+			, fn_cmm_get_code_nm('RSRC_TYPE_UNIT', y.resrce_ty_unit_code) as rsrc_type_unit_nm
+			, y.invntry_qy			as invt_qy
+			, x.dstb_qy
+			, y.tot_qy				as total_qy
+			, x.dstb_qy * y.resrce_calqy as total_calc_qy
+		from (
+			select
+				   i.resrce_id
+				 , sum(i.resrce_dstb_qy) as dstb_qy
+			from mvn_api.uspt_resrce_asgn_entrps a
+			join usp_api.uspt_bsns_slctn_trget b
+			  on a.bsns_slctn_trget_id = b.bsns_slctn_trget_id
+			join usp_api.uspt_last_slctn_trget c
+			  on a.last_slctn_trget_id = c.last_slctn_trget_id
+			join usp_api.uspt_bsns_pblanc_applcnt d
+			  on c.apply_id = d.apply_id
+			join usp_api.uspt_bsns_pblanc_rcept e
+			  on d.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+			join usp_api.uspt_bsns_pblanc h
+			  on e.pblanc_id = h.pblanc_id
+			join mvn_api.uspt_resrce_asgn_dstb i
+			  on a.resrce_asgn_id = i.resrce_asgn_id
+			where
+				(
+					a.resrce_asgn_bgnde between #{param.alrsrcBgngDay} and #{param.alrsrcEndDay}
+					or a.resrce_asgn_endde between #{param.alrsrcBgngDay} and #{param.alrsrcEndDay}
+					<![CDATA[or (a.resrce_asgn_bgnde < #{param.alrsrcBgngDay} and a.resrce_asgn_endde > #{param.alrsrcEndDay})]]>
+				)
+				and i.resrce_use_at = true
+				<if test='param.ordtmRcrit != null'>
+				and h.ordtm_rcrit = #{param.ordtmRcrit}
+				</if>
+				<if test='param.cmpnyNm != null and param.cmpnyNm != ""'>
+				and fn_cmm_get_member_nm(a.entrps_id) like '%'||#{param.cmpnyNm}||'%'
+				</if>
+			group by
+				i.resrce_id
+			) x
+		join mvn_api.uspt_resrce_invntry_info y
+		  on x.resrce_id = y.resrce_id
+		where y.resrce_group_code in ('GPU', 'STORAGE')
+	</select>
+</mapper>

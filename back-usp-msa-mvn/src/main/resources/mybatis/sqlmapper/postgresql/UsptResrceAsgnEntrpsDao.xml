@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.mvn.common.dao.UsptResrceAsgnEntrpsDao">
+
+	<sql id="selectList-where">
+			(
+				a.resrce_asgn_bgnde between #{param.alrsrcBgngDay} and #{param.alrsrcEndDay}
+				or a.resrce_asgn_endde between #{param.alrsrcBgngDay} and #{param.alrsrcEndDay}
+				<![CDATA[or (a.resrce_asgn_bgnde < #{param.alrsrcBgngDay} and a.resrce_asgn_endde > #{param.alrsrcEndDay})]]>
+			)
+			<if test='param.bsnsYear != null and param.bsnsYear != ""'>
+			and i.bsns_year = #{param.bsnsYear}
+			</if>
+			<if test='param.alrsrcSt != null and param.alrsrcSt != ""'>
+			and a.resrce_asgn_sttus_code = #{param.alrsrcSt}
+			</if>
+			<if test='param.ordtmRcrit != null'>
+			and h.ordtm_rcrit_at = #{param.ordtmRcrit}
+			</if>
+			<if test='param.searchType != null and param.searchType != "" and param.searchCn != null and param.searchCn != ""'>
+				<choose>
+					<when test='param.searchType eq "CMPNY_NM"'>
+			and fn_cmm_get_member_nm(a.entrps_id) like '%'||#{param.searchCn}||'%'
+					</when>
+					<when test='param.searchType eq "RECEIPT_NO"'>
+			and d.rcept_no = #{param.searchCn}
+					</when>
+					<when test='param.searchType eq "PBLANC_NM"'>
+			and h.pblanc_nm like '%'||#{param.searchCn}||'%'
+					</when>
+					<otherwise>
+					</otherwise>
+				</choose>
+			</if>
+	</sql>
+
+	<sql id="selectStatusList-where">
+			(
+				a.resrce_asgn_bgnde between #{param.alrsrcBgngDay} and #{param.alrsrcEndDay}
+				or a.resrce_asgn_endde between #{param.alrsrcBgngDay} and #{param.alrsrcEndDay}
+				<![CDATA[or (a.resrce_asgn_bgnde < #{param.alrsrcBgngDay} and a.resrce_asgn_endde > #{param.alrsrcEndDay})]]>
+			)
+			<if test='param.ordtmRcrit != null'>
+			and h.ordtm_rcrit_at = #{param.ordtmRcrit}
+			</if>
+			<if test='param.cmpnyNm != null and param.cmpnyNm != ""'>
+			and fn_cmm_get_member_nm(a.entrps_id) like '%'||#{param.cmpnyNm}||'%'
+			</if>
+	</sql>
+
+	<sql id="selectUserList-where">
+			a.entrps_id = #{param.cmpnyId}
+			and (
+				a.resrce_asgn_bgnde between #{param.alrsrcBgngDay} and #{param.alrsrcEndDay}
+				or a.resrce_asgn_endde between #{param.alrsrcBgngDay} and #{param.alrsrcEndDay}
+				<![CDATA[or (a.resrce_asgn_bgnde < #{param.alrsrcBgngDay} and a.resrce_asgn_endde > #{param.alrsrcEndDay})]]>
+			)
+			<if test='param.alrsrcSt != null and param.alrsrcSt != ""'>
+			and resrce_asgn_sttus_code = #{param.alrsrcSt}
+			</if>
+	</sql>
+
+	<insert id="insertList">
+		/** UsptResrceAsgnEntrpsDao.insertList */
+		insert into mvn_api.uspt_resrce_asgn_entrps (
+			 resrce_asgn_id
+			,evl_last_slctn_id
+			,last_slctn_trget_id
+			,bsns_slctn_trget_id
+			,rcept_no
+			,entrps_id
+			,resrce_asgn_bgnde
+			,resrce_asgn_endde
+			,resrce_asgn_sttus_code
+			,resrce_asgn_sttus_change_dt
+			,resn
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values
+		<foreach item="item" collection="list" separator=",">
+		(
+			  #{item.alrsrcId}
+			, #{item.evlLastSlctnId}
+			, #{item.lastSlctnTrgetId}
+			, #{item.bsnsSlctnId}
+			, #{item.receiptNo}
+			, #{item.cmpnyId}
+			, #{item.alrsrcBgngDay}
+			, #{item.alrsrcEndDay}
+			, #{item.alrsrcSt}
+			, #{item.alrsrcStDt}
+			, #{item.reasonCn}
+			, #{item.creatorId}
+			, #{item.createdDt}
+			, #{item.updaterId}
+			, #{item.updatedDt}
+		)
+		</foreach>
+	</insert>
+
+	<select id="select" resultType="aicluster.mvn.common.entity.UsptResrceAsgnEntrps">
+		/** UsptResrceAsgnEntrpsDao.select */
+		select
+			  a.resrce_asgn_id			as alrsrc_id
+			, a.evl_last_slctn_id
+			, a.last_slctn_trget_id
+			, a.bsns_slctn_trget_id		as bsns_slctn_id
+			, a.rcept_no				as receipt_no
+			, a.entrps_id				as cmpny_id
+			, j.mber_nm 				as cmpny_nm
+			, h.ordtm_rcrit_at			as ordtm_rcrit
+			, h.pblanc_nm
+			, j.ceo_nm
+			, j.bizrno
+			, j.jurirno
+			, j.charger_nm
+			, j.encpt_mbtlnum			as enc_mobile_no
+			, j.encpt_email				as enc_email
+			, a.resrce_asgn_bgnde		as alrsrc_bgng_day
+			, a.resrce_asgn_endde		as alrsrc_end_day
+			, a.resrce_asgn_sttus_code	as alrsrc_st
+			, fn_cmm_get_code_nm('ALRSRC_ST', a.resrce_asgn_sttus_code) as alrsrc_st_nm
+			, a.resrce_asgn_sttus_change_dt	as alrsrc_st_dt
+			, a.resn					as reason_cn
+			, a.creatr_id				as creator_id
+			, a.creat_dt				as created_dt
+			, a.updusr_id				as updater_id
+			, a.updt_dt					as updated_dt
+		from mvn_api.uspt_resrce_asgn_entrps a
+		join usp_api.uspt_last_slctn_trget c
+		  on a.last_slctn_trget_id = c.last_slctn_trget_id and a.evl_last_slctn_id = c.evl_last_slctn_id
+		join usp_api.uspt_bsns_pblanc_applcnt d
+		  on c.apply_id = d.apply_id
+		join usp_api.uspt_bsns_pblanc_rcept e
+		  on d.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		join usp_api.uspt_bsns_pblanc h
+		  on e.pblanc_id = h.pblanc_id
+		join usp_api.uspt_bsns i
+		  on h.bsns_code = i.bsns_code
+		join auth_api.cmmt_mber_info j
+		  on a.entrps_id = j.mber_id
+		where
+			a.resrce_asgn_id = #{alrsrcId}
+	</select>
+
+	<update id="update">
+		/** UsptResrceAsgnEntrpsDao.update */
+		update mvn_api.uspt_resrce_asgn_entrps set
+			 resrce_asgn_bgnde				= #{alrsrcBgngDay}
+			,resrce_asgn_endde				= #{alrsrcEndDay}
+			,resrce_asgn_sttus_code			= #{alrsrcSt}
+			,resrce_asgn_sttus_change_dt	= #{alrsrcStDt}
+			,resn							= #{reasonCn}
+			,updusr_id						= #{updaterId}
+			,updt_dt						= #{updatedDt}
+		where
+			resrce_asgn_id = #{alrsrcId}
+	</update>
+
+	<select id="selectList_count" resultType="Long">
+		/** UsptResrceAsgnEntrpsDao.selectList_count */
+		select
+			 count(*) as cnt
+		from mvn_api.uspt_resrce_asgn_entrps a
+		join usp_api.uspt_bsns_slctn_trget b
+		  on a.bsns_slctn_trget_id = b.bsns_slctn_trget_id
+		join usp_api.uspt_last_slctn_trget c
+		  on a.last_slctn_trget_id = c.last_slctn_trget_id
+		join usp_api.uspt_bsns_pblanc_applcnt d
+		  on c.apply_id = d.apply_id
+		join usp_api.uspt_bsns_pblanc_rcept e
+		  on d.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		join usp_api.uspt_bsns_pblanc h
+		  on e.pblanc_id = h.pblanc_id
+		join usp_api.uspt_bsns i
+		  on h.bsns_code = i.bsns_code
+		where
+			<include refid="selectList-where"></include>
+	</select>
+
+	<select id="selectList" resultType="aicluster.mvn.common.dto.AlrsrcCmpnyListItemDto">
+		/** UsptResrceAsgnEntrpsDao.selectList */
+		select
+			  a.resrce_asgn_id			as alrsrc_id
+			, a.evl_last_slctn_id
+			, a.last_slctn_trget_id
+			, a.bsns_slctn_trget_id		as bsns_slctn_id
+			, a.rcept_no				as receipt_no
+			, a.entrps_id				as cmpny_id
+			, fn_cmm_get_member_nm(a.entrps_id) as cmpny_nm
+			, h.ordtm_rcrit_at			as ordtm_rcrit
+			, h.pblanc_nm
+			, a.resrce_asgn_bgnde		as alrsrc_bgng_day
+			, a.resrce_asgn_endde		as alrsrc_end_day
+			, a.resrce_asgn_sttus_code	as alrsrc_st
+			, fn_cmm_get_code_nm('ALRSRC_ST', a.resrce_asgn_sttus_code) as alrsrc_st_nm
+			, (
+			  select
+					case when uad.resrce_use_at = true then uaf.resrce_ty_nm || '(' || uad.resrce_dstb_qy || fn_cmm_get_code_nm('RSRC_TYPE_UNIT', uaf.resrce_ty_unit_code) || ')' else '사용안함' end
+			  from mvn_api.uspt_resrce_asgn_dstb uad
+			  join mvn_api.uspt_resrce_invntry_info uaf
+			    on uad.resrce_id = uaf.resrce_id
+			  where uad.resrce_asgn_id = a.resrce_asgn_id
+			  		and uaf.resrce_group_code = 'GPU'
+			) as gpu_alrsrc_cn
+			, (
+			  select
+					case when uad.resrce_use_at = true then uaf.resrce_ty_nm || '(' || uad.resrce_dstb_qy || fn_cmm_get_code_nm('RSRC_TYPE_UNIT', uaf.resrce_ty_unit_code) || ')' else '사용안함' end
+			  from mvn_api.uspt_resrce_asgn_dstb uad
+			  join mvn_api.uspt_resrce_invntry_info uaf
+			    on uad.resrce_id = uaf.resrce_id
+			  where uad.resrce_asgn_id = a.resrce_asgn_id
+			  		and uaf.resrce_group_code = 'STORAGE'
+			) as strg_alrsrc_cn
+			, (
+			  select
+					case when uad.resrce_use_at = true then '사용' else '사용안함' end
+			  from mvn_api.uspt_resrce_asgn_dstb uad
+			  join mvn_api.uspt_resrce_invntry_info uaf
+			    on uad.resrce_id = uaf.resrce_id
+			  where uad.resrce_asgn_id = a.resrce_asgn_id
+			  		and uaf.resrce_group_code = 'SAAS'
+			) as saas_alrsrc_cn
+			, (
+			  select
+					case when uad.resrce_use_at = true then '사용' else '사용안함' end
+			  from mvn_api.uspt_resrce_asgn_dstb uad
+			  join mvn_api.uspt_resrce_invntry_info uaf
+			    on uad.resrce_id = uaf.resrce_id
+			  where uad.resrce_asgn_id = a.resrce_asgn_id
+			  		and uaf.resrce_group_code = 'DATALAKE'
+			) as dtlk_alrsrc_cn
+			, #{totalItems} + 1 - (row_number() over(order by a.creat_dt desc)) as rn
+		from mvn_api.uspt_resrce_asgn_entrps a
+		join usp_api.uspt_bsns_slctn_trget b
+		  on a.bsns_slctn_trget_id = b.bsns_slctn_trget_id
+		join usp_api.uspt_last_slctn_trget c
+		  on a.last_slctn_trget_id = c.last_slctn_trget_id and a.evl_last_slctn_id = c.evl_last_slctn_id
+		join usp_api.uspt_bsns_pblanc_applcnt d
+		  on c.apply_id = d.apply_id
+		join usp_api.uspt_bsns_pblanc_rcept e
+		  on d.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		join usp_api.uspt_bsns_pblanc h
+		  on e.pblanc_id = h.pblanc_id
+		join usp_api.uspt_bsns i
+		  on h.bsns_code = i.bsns_code
+		where
+			<include refid="selectList-where"></include>
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="selectStatusList_count" resultType="Long">
+		/** UsptResrceAsgnEntrpsDao.selectStatusList_count */
+		select
+			 count(*) as cnt
+		from mvn_api.uspt_resrce_asgn_entrps a
+		join usp_api.uspt_bsns_slctn_trget b
+		  on a.bsns_slctn_trget_id = b.bsns_slctn_trget_id
+		join usp_api.uspt_last_slctn_trget c
+		  on a.last_slctn_trget_id = c.last_slctn_trget_id and a.evl_last_slctn_id = c.evl_last_slctn_id
+		join usp_api.uspt_bsns_pblanc_applcnt d
+		  on c.apply_id = d.apply_id
+		join usp_api.uspt_bsns_pblanc_rcept e
+		  on d.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		join usp_api.uspt_bsns_pblanc h
+		  on e.pblanc_id = h.pblanc_id
+		join usp_api.uspt_bsns i
+		  on h.bsns_code = i.bsns_code
+		where
+			<include refid="selectStatusList-where"></include>
+	</select>
+
+	<select id="selectStatusList" resultType="aicluster.mvn.common.dto.AlrsrcStatusListItemDto">
+		/** UsptResrceAsgnEntrpsDao.selectStatusList */
+		select
+			  a.resrce_asgn_id			as alrsrc_id
+			, a.evl_last_slctn_id
+			, a.last_slctn_trget_id
+			, a.bsns_slctn_trget_id		as bsns_slctn_id
+			, a.rcept_no				as receipt_no
+			, a.entrps_id				as cmpny_id
+			, fn_cmm_get_member_nm(a.entrps_id) as cmpny_nm
+			, h.ordtm_rcrit_at			as ordtm_rcrit
+			, h.pblanc_nm
+			, a.resrce_asgn_bgnde		as alrsrc_bgng_day
+			, a.resrce_asgn_endde		as alrsrc_end_day
+			, a.resrce_asgn_sttus_code	as alrsrc_st
+			, fn_cmm_get_code_nm('ALRSRC_ST', a.resrce_asgn_sttus_code) as alrsrc_st_nm
+			, #{totalItems} + 1 - (row_number() over(order by a.creat_dt desc)) as rn
+		from mvn_api.uspt_resrce_asgn_entrps a
+		join usp_api.uspt_bsns_slctn_trget b
+		  on a.bsns_slctn_trget_id = b.bsns_slctn_trget_id
+		join usp_api.uspt_last_slctn_trget c
+		  on a.last_slctn_trget_id = c.last_slctn_trget_id and a.evl_last_slctn_id = c.evl_last_slctn_id
+		join usp_api.uspt_bsns_pblanc_applcnt d
+		  on c.apply_id = d.apply_id
+		join usp_api.uspt_bsns_pblanc_rcept e
+		  on d.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		join usp_api.uspt_bsns_pblanc h
+		  on e.pblanc_id = h.pblanc_id
+		join usp_api.uspt_bsns i
+		  on h.bsns_code = i.bsns_code
+		where
+			<include refid="selectStatusList-where"></include>
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="selectUserList_count" resultType="Long">
+		/** UsptResrceAsgnEntrpsDao.selectUserList_count */
+		select
+			 count(*) as cnt
+		from mvn_api.uspt_resrce_asgn_entrps a
+		join usp_api.uspt_bsns_slctn_trget b
+		  on a.bsns_slctn_trget_id = b.bsns_slctn_trget_id
+		join usp_api.uspt_last_slctn_trget c
+		  on a.last_slctn_trget_id = c.last_slctn_trget_id and a.evl_last_slctn_id = c.evl_last_slctn_id
+		join usp_api.uspt_bsns_pblanc_applcnt d
+		  on c.apply_id = d.apply_id
+		join usp_api.uspt_bsns_pblanc_rcept e
+		  on d.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		join usp_api.uspt_bsns_pblanc h
+		  on e.pblanc_id = h.pblanc_id
+		join usp_api.uspt_bsns i
+		  on h.bsns_code = i.bsns_code
+		where
+			<include refid="selectUserList-where"></include>
+	</select>
+
+	<select id="selectUserList" resultType="aicluster.mvn.common.dto.AlrsrcUserListItemDto">
+		/** UsptResrceAsgnEntrpsDao.selectUserList */
+		select
+			  a.resrce_asgn_id			as alrsrc_id
+			, a.evl_last_slctn_id
+			, a.last_slctn_trget_id
+			, a.bsns_slctn_trget_id		as bsns_slctn_id
+			, a.rcept_no				as receipt_no
+			, a.entrps_id				as cmpny_id
+			, fn_cmm_get_member_nm(a.entrps_id)	as cmpny_nm
+			, h.ordtm_rcrit_at			as ordtm_rcrit
+			, h.pblanc_nm
+			, a.resrce_asgn_bgnde		as alrsrc_bgng_day
+			, a.resrce_asgn_endde		as alrsrc_end_day
+			, a.resrce_asgn_sttus_code	as alrsrc_st
+			, fn_cmm_get_code_nm('ALRSRC_ST', a.resrce_asgn_sttus_code) as alrsrc_st_nm
+			, #{totalItems} + 1 - (row_number() over(order by a.creat_dt desc)) as rn
+		from mvn_api.uspt_resrce_asgn_entrps a
+		join usp_api.uspt_bsns_slctn_trget b
+		  on a.bsns_slctn_trget_id = b.bsns_slctn_trget_id
+		join usp_api.uspt_last_slctn_trget c
+		  on a.last_slctn_trget_id = c.last_slctn_trget_id and a.evl_last_slctn_id = c.evl_last_slctn_id
+		join usp_api.uspt_bsns_pblanc_applcnt d
+		  on c.apply_id = d.apply_id
+		join usp_api.uspt_bsns_pblanc_rcept e
+		  on d.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		join usp_api.uspt_bsns_pblanc h
+		  on e.pblanc_id = h.pblanc_id
+		join usp_api.uspt_bsns i
+		  on h.bsns_code = i.bsns_code
+		where
+			<include refid="selectUserList-where"></include>
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="selectUser" resultType="aicluster.mvn.common.dto.AlrsrcUserDto">
+		/** UsptResrceAsgnEntrpsDao.selectUser */
+		select
+			  a.resrce_asgn_id			as alrsrc_id
+			, a.evl_last_slctn_id
+			, a.last_slctn_trget_id
+			, a.bsns_slctn_trget_id		as bsns_slctn_id
+			, a.rcept_no				as receipt_no
+			, h.ordtm_rcrit_at			as ordtm_rcrit
+			, h.pblanc_nm
+			, a.resrce_asgn_bgnde		as alrsrc_bgng_day
+			, a.resrce_asgn_endde		as alrsrc_end_day
+			, a.resrce_asgn_sttus_code	as alrsrc_st
+			, fn_cmm_get_code_nm('ALRSRC_ST', a.resrce_asgn_sttus_code) as alrsrc_st_nm
+		from mvn_api.uspt_resrce_asgn_entrps a
+		join usp_api.uspt_bsns_slctn_trget b
+		  on a.bsns_slctn_trget_id = b.bsns_slctn_trget_id
+		join usp_api.uspt_last_slctn_trget c
+		  on a.last_slctn_trget_id = c.last_slctn_trget_id and a.evl_last_slctn_id = c.evl_last_slctn_id
+		join usp_api.uspt_bsns_pblanc_applcnt d
+		  on c.apply_id = d.apply_id
+		join usp_api.uspt_bsns_pblanc_rcept e
+		  on d.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		join usp_api.uspt_bsns_pblanc h
+		  on e.pblanc_id = h.pblanc_id
+		join usp_api.uspt_bsns i
+		  on h.bsns_code = i.bsns_code
+		where
+			a.entrps_id = #{cmpnyId}
+			and a.resrce_asgn_id = #{alrsrcId}
+	</select>
+
+	<select id="selectList_slctnId" resultType="aicluster.mvn.common.dto.AlrsrcCmpnySlctnDto">
+		/** UsptResrceAsgnEntrpsDao.selectList_slctnId */
+		select
+			  a.resrce_asgn_id					as alrsrc_id
+			, a.evl_last_slctn_id
+			, a.last_slctn_trget_id
+			, a.bsns_slctn_trget_id				as bsns_slctn_id
+			, a.rcept_no						as receipt_no
+			, a.entrps_id						as cmpny_id
+			, fn_cmm_get_member_nm(a.entrps_id)	as cmpny_nm
+			, a.resrce_asgn_bgnde				as alrsrc_bgng_day
+			, a.resrce_asgn_endde				as alrsrc_end_day
+			, a.resrce_asgn_sttus_code			as alrsrc_st
+			, fn_cmm_get_code_nm('ALRSRC_ST', a.resrce_asgn_sttus_code) as alrsrc_st_nm
+		from mvn_api.uspt_resrce_asgn_entrps a
+		join usp_api.uspt_bsns_slctn_trget b
+		  on a.bsns_slctn_trget_id = b.bsns_slctn_trget_id
+		join usp_api.uspt_last_slctn_trget c
+		  on a.last_slctn_trget_id = c.last_slctn_trget_id and a.evl_last_slctn_id = c.evl_last_slctn_id
+		join usp_api.uspt_bsns_pblanc_applcnt d
+		  on c.apply_id = d.apply_id
+		join usp_api.uspt_bsns_pblanc_rcept e
+		  on d.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		join usp_api.uspt_bsns_pblanc h
+		  on e.pblanc_id = h.pblanc_id
+		join usp_api.uspt_bsns i
+		  on h.bsns_code = i.bsns_code
+		join usp_api.uspt_stdr_bsns j
+		  on i.stdr_bsns_code = j.stdr_bsns_code
+		where j.bsns_ty_code = 'ALREC'
+			and a.evl_last_slctn_id = #{evlLastSlctnId}
+	</select>
+
+</mapper>

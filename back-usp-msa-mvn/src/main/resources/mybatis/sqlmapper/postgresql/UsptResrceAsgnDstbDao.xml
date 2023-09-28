@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.mvn.common.dao.UsptResrceAsgnDstbDao">
+
+	<insert id="insertList">
+		/** UsptResrceAsgnDstbDao.insertList */
+		insert into mvn_api.uspt_resrce_asgn_dstb (
+			 resrce_asgn_id
+			,resrce_id
+			,resrce_use_at
+			,resrce_dstb_qy
+			,resrce_dstb_cn
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values
+		<foreach item="item" collection="list" separator=",">
+		(
+			  #{item.alrsrcId}
+			, #{item.rsrcId}
+			, #{item.rsrcUseYn}
+			, #{item.rsrcDstbQy}
+			, #{item.rsrcDstbCn}
+			, #{item.creatorId}
+			, #{item.createdDt}
+			, #{item.updaterId}
+			, #{item.updatedDt}
+		)
+		</foreach>
+	</insert>
+
+	<update id="updateList">
+		/** UsptResrceAsgnDstbDao.updateList */
+		update mvn_api.uspt_resrce_asgn_dstb as x set
+			  resrce_use_at = u.resrce_use_at
+			, resrce_dstb_qy = u.resrce_dstb_qy
+			, resrce_dstb_cn = u.resrce_dstb_cn
+			, creatr_id = u.creatr_id
+			, creat_dt = u.creat_dt::timestamp
+			, updusr_id = u.updusr_id
+			, updt_dt = u.updt_dt::timestamp
+		from (
+		values
+		<foreach item="item" collection="list" separator=",">
+		(
+			  #{item.alrsrcId}
+			, #{item.rsrcId}
+			, #{item.rsrcUseYn}
+			, #{item.rsrcDstbQy}
+			, #{item.rsrcDstbCn}
+			, #{item.creatorId}
+			, #{item.createdDt}
+			, #{item.updaterId}
+			, #{item.updatedDt}
+		)
+		</foreach>
+		) as u (
+			  resrce_asgn_id
+			, resrce_id
+			, resrce_use_at
+			, resrce_dstb_qy
+			, resrce_dstb_cn
+			, creatr_id
+			, creat_dt
+			, updusr_id
+			, updt_dt
+		)
+		where
+			u.resrce_asgn_id = x.resrce_asgn_id
+			and u.resrce_id = x.resrce_id
+	</update>
+
+	<delete id="delete">
+		/** UsptResrceAsgnDstbDao.delete */
+		delete from mvn_api.uspt_resrce_asgn_dstb
+		where
+			resrce_asgn_id = #{alrsrcId}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.mvn.common.entity.UsptResrceAsgnDstb">
+		/** UsptResrceAsgnDstbDao.selectList */
+		select
+			  a.resrce_asgn_id		as alrsrc_id
+			, a.resrce_id			as rsrc_id
+			, b.resrce_group_code	as rsrc_group_cd
+			, c.code_nm 			as rsrc_group_nm
+			, b.resrce_ty_nm		as rsrc_type_nm
+			, a.resrce_use_at		as rsrc_use_yn
+			, a.resrce_dstb_qy		as rsrc_dstb_qy
+			, a.resrce_dstb_cn		as rsrc_dstb_cn
+			, a.creatr_id			as creator_id
+			, a.creat_dt			as created_dt
+			, a.updusr_id			as updater_id
+			, a.updt_dt				as updated_dt
+		from mvn_api.uspt_resrce_asgn_dstb a
+		join mvn_api.uspt_resrce_invntry_info b
+		  on a.resrce_id = b.resrce_id
+		join com_api.cmmt_code c
+		  on b.resrce_group_code = c.code
+		     and c.code_group_id = 'RSRC_GROUP'
+		where
+			resrce_asgn_id = #{alrsrcId}
+		order by
+			  c.sort_ordr
+			, b.resrce_ty_nm
+	</select>
+
+	<select id="selectStatusList" resultType="aicluster.mvn.common.dto.AlrsrcDstbStatusDto">
+		/** UsptResrceAsgnDstbDao.selectStatusList */
+		select
+			  a.resrce_asgn_id		as alrsrc_id
+			, a.resrce_id			as rsrc_id
+			, b.resrce_group_code	as rsrc_group_cd
+			, c.code_nm				as rsrc_group_nm
+			, b.resrce_ty_nm		as rsrc_type_nm
+			, a.resrce_use_at		as rsrc_use_yn
+			, a.resrce_dstb_qy		as rsrc_dstb_qy
+			, a.resrce_dstb_qy * b.resrce_calqy	as total_calc_qy
+		from mvn_api.uspt_resrce_asgn_dstb a
+		join mvn_api.uspt_resrce_invntry_info b
+		  on a.resrce_id = b.resrce_id
+		join com_api.cmmt_code c
+		  on b.resrce_group_code = c.code
+		     and c.code_group_id = 'RSRC_GROUP'
+		where
+			a.resrce_asgn_id = #{alrsrcId}
+			and a.resrce_use_at = true
+			and b.resrce_group_code in ('GPU', 'STORAGE')
+		order by
+			  c.sort_ordr
+			, b.resrce_ty_nm
+	</select>
+
+	<select id="selectUserList" resultType="aicluster.mvn.common.dto.AlrsrcDstbUserDto">
+		/** UsptResrceAsgnDstbDao.selectUserList */
+		select
+			  a.resrce_asgn_id		as alrsrc_id
+			, a.resrce_id			as rsrc_id
+			, b.resrce_group_code	as rsrc_group_cd
+			, c.code_nm				as rsrc_group_nm
+			, b.resrce_ty_nm		as rsrc_type_nm
+			, b.resrce_ty_unit_code	as rsrc_type_unit_cd
+			, fn_cmm_get_code_nm('RSRC_TYPE_UNIT', b.resrce_ty_unit_code) as rsrc_type_unit_nm
+			, a.resrce_use_at		as rsrc_use_yn
+			, a.resrce_dstb_qy		as rsrc_dstb_qy
+			, a.resrce_dstb_cn		as rsrc_dstb_cn
+		from mvn_api.uspt_resrce_asgn_dstb a
+		join mvn_api.uspt_resrce_invntry_info b
+		  on a.resrce_id = b.resrce_id
+		join com_api.cmmt_code c
+		  on b.resrce_group_code = c.code
+		     and c.code_group_id = 'RSRC_GROUP'
+		where
+			a.resrce_asgn_id = #{alrsrcId}
+		order by
+			  c.sort_ordr
+			, b.resrce_ty_nm
+			, a.resrce_id
+	</select>
+
+</mapper>

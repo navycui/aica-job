@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.mvn.common.dao.UsptMvnFcltyResveDao">
+
+	<sql id="UsptMvnFcltyResve-cols">
+			 resve_id				as reserve_id
+			,mvn_fclty_id			as mvn_fc_id
+			,rsvctm_id
+			,rsvde					as rsvt_day
+			,resve_begin_tm			as rsvt_bgng_tm
+			,resve_end_tm			as rsvt_end_tm
+			,resve_nmpr				as rsvt_nope
+			,utztn_purps_cn			as utztn_purpose
+			,mvn_at					as mvn_yn
+			,resve_requst_dt		as rsvt_req_dt
+			,case
+				when resve_sttus_code = 'APRV' then
+					case
+						when now() <![CDATA[<]]> to_timestamp(rsvde||resve_begin_tm, 'yyyymmddhh24mi') then 'STNDB'
+						when now() between to_timestamp(rsvde||resve_begin_tm, 'yyyymmddhh24mi') and to_timestamp(rsvde||resve_end_tm, 'yyyymmddhh24mi') then 'GOING'
+						when now() <![CDATA[>]]> to_timestamp(rsvde||resve_end_tm, 'yyyymmddhh24mi') then 'CLOSE'
+						else resve_sttus_code
+					end
+				else resve_sttus_code
+			 end as reserve_st
+			,case
+				when resve_sttus_code = 'APRV' then
+					case
+						when now() <![CDATA[<]]> to_timestamp(rsvde||resve_begin_tm, 'yyyymmddhh24mi') then fn_cmm_get_code_nm('RESERVE_ST', 'STNDB')
+						when now() between to_timestamp(rsvde||resve_begin_tm, 'yyyymmddhh24mi') and to_timestamp(rsvde||resve_end_tm, 'yyyymmddhh24mi') then fn_cmm_get_code_nm('RESERVE_ST', 'GOING')
+						when now() <![CDATA[>]]> to_timestamp(rsvde||resve_end_tm, 'yyyymmddhh24mi') then fn_cmm_get_code_nm('RESERVE_ST', 'CLOSE')
+						else fn_cmm_get_code_nm('RESERVE_ST', resve_sttus_code)
+					end
+				else fn_cmm_get_code_nm('RESERVE_ST', resve_sttus_code)
+			 end as reserve_st_nm
+			,resve_sttus_change_dt	as reserve_st_dt
+			,return_resn			as reject_reason_cn
+			,creatr_id				as creator_id
+			,creat_dt				as created_dt
+			,updusr_id				as updater_id
+			,updt_dt				as updated_dt
+	</sql>
+
+	<sql id="MvnFcRsvtList-cols">
+			  a.resve_id			as reserve_id
+			, a.mvn_fclty_id		as mvn_fc_id
+			, a.resve_sttus_code	as reserve_st
+			, fn_cmm_get_code_nm('RESERVE_ST', a.resve_sttus_code) as reserve_st_nm
+			, case
+				when a.resve_sttus_code = 'APRV' then
+					case
+						when now() <![CDATA[<]]> to_timestamp(a.rsvde||a.resve_begin_tm, 'yyyymmddhh24mi') then 'STNDB'
+						when now() between to_timestamp(a.rsvde||a.resve_begin_tm, 'yyyymmddhh24mi') and to_timestamp(a.rsvde||a.resve_end_tm, 'yyyymmddhh24mi') then 'GOING'
+						when now() <![CDATA[>]]> to_timestamp(a.rsvde||a.resve_end_tm, 'yyyymmddhh24mi') then 'CLOSE'
+						else a.resve_sttus_code
+					end
+				else a.resve_sttus_code
+			  end as reserve_st
+			, case
+				when a.resve_sttus_code = 'APRV' then
+					case
+						when now() <![CDATA[<]]> to_timestamp(a.rsvde||a.resve_begin_tm, 'yyyymmddhh24mi') then fn_cmm_get_code_nm('RESERVE_ST', 'STNDB')
+						when now() between to_timestamp(a.rsvde||a.resve_begin_tm, 'yyyymmddhh24mi') and to_timestamp(a.rsvde||a.resve_end_tm, 'yyyymmddhh24mi') then fn_cmm_get_code_nm('RESERVE_ST', 'GOING')
+						when now() <![CDATA[>]]> to_timestamp(a.rsvde||a.resve_end_tm, 'yyyymmddhh24mi') then fn_cmm_get_code_nm('RESERVE_ST', 'CLOSE')
+						else fn_cmm_get_code_nm('RESERVE_ST', a.resve_sttus_code)
+					end
+				else fn_cmm_get_code_nm('RESERVE_ST', a.resve_sttus_code)
+			  end as reserve_st_nm
+			, b.mvn_fclty_dlyp_code	as mvn_fc_dtype
+			, fn_cmm_get_code_nm('MVN_FC_DTYPE', b.mvn_fclty_dlyp_code) as mvn_fc_dtype_nm
+			, b.mvn_fclty_nm		as mvn_fc_nm
+			, b.resve_ty_code		as reserve_type
+			, fn_cmm_get_code_nm('RESERVE_TYPE', b.resve_ty_code) as reserve_type_nm
+			, a.rsvde				as rsvt_day
+			, a.resve_begin_tm		as rsvt_bgng_tm
+			, a.resve_end_tm		as rsvt_end_tm
+			, a.resve_nmpr			as rsvt_nope
+			, a.rsvctm_id
+			, fn_cmm_get_member_nm(a.rsvctm_id) as rsvctm_nm
+			, a.mvn_at				as mvn_yn
+			, a.resve_requst_dt		as rsvt_req_dt
+	</sql>
+
+	<insert id="insert">
+		/** UsptMvnFcltyResveDao.insert */
+		insert into mvn_api.uspt_mvn_fclty_resve (
+			 resve_id
+			,mvn_fclty_id
+			,rsvctm_id
+			,rsvde
+			,resve_begin_tm
+			,resve_end_tm
+			,resve_nmpr
+			,utztn_purps_cn
+			,mvn_at
+			,resve_requst_dt
+			,resve_sttus_code
+			,resve_sttus_change_dt
+			,return_resn
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{reserveId}
+			,#{mvnFcId}
+			,#{rsvctmId}
+			,#{rsvtDay}
+			,#{rsvtBgngTm}
+			,#{rsvtEndTm}
+			,#{rsvtNope}
+			,#{utztnPurpose}
+			,#{mvnYn}
+			,#{rsvtReqDt}
+			,#{reserveSt}
+			,#{reserveStDt}
+			,#{rejectReasonCn}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<select id="select" resultType="aicluster.mvn.common.entity.UsptMvnFcltyResve">
+		/** UsptMvnFcltyResveDao.select */
+		select
+			<include refid="UsptMvnFcltyResve-cols"/>
+		from mvn_api.uspt_mvn_fclty_resve
+		where
+			resve_id = #{reserveId}
+	</select>
+
+	<update id="update">
+		/** UsptMvnFcltyResveDao.update */
+		update mvn_api.uspt_mvn_fclty_resve set
+			 resve_id				= #{reserveId}
+			,mvn_fclty_id			= #{mvnFcId}
+			,rsvctm_id				= #{rsvctmId}
+			,rsvde					= #{rsvtDay}
+			,resve_begin_tm			= #{rsvtBgngTm}
+			,resve_end_tm			= #{rsvtEndTm}
+			,resve_nmpr				= #{rsvtNope}
+			,utztn_purps_cn			= #{utztnPurpose}
+			,mvn_at					= #{mvnYn}
+			,resve_requst_dt		= #{rsvtReqDt}
+			,resve_sttus_code		= #{reserveSt}
+			,resve_sttus_change_dt	= #{reserveStDt}
+			,return_resn			= #{rejectReasonCn}
+			,creatr_id				= #{creatorId}
+			,creat_dt				= #{createdDt}
+			,updusr_id				= #{updaterId}
+			,updt_dt				= #{updatedDt}
+		where
+			resve_id = #{reserveId}
+	</update>
+
+	<sql id="where-selectList">
+		1=1
+		<if test='param.reserveSt != null and param.reserveSt != ""'>
+			<choose>
+				<when test='param.reserveSt.equals("STNDB")'>
+		and a.resve_sttus_code = 'APRV'
+		and now() <![CDATA[<]]> to_timestamp(rsvde||resve_begin_tm, 'yyyymmddhh24mi')
+				</when>
+				<when test='param.reserveSt.equals("GOING")'>
+		and a.resve_sttus_code = 'APRV'
+		and now() between to_timestamp(rsvde||resve_begin_tm, 'yyyymmddhh24mi') and to_timestamp(rsvde||resve_end_tm, 'yyyymmddhh24mi')
+				</when>
+				<when test='param.reserveSt.equals("CLOSE")'>
+		and a.resve_sttus_code = 'CLOSE' or ( a.resve_sttus_code = 'APRV' and now() <![CDATA[>]]> to_timestamp(rsvt_day||resve_end_tm, 'yyyymmddhh24mi') )
+				</when>
+				<otherwise>
+		and a.resve_sttus_code = #{param.reserveSt}
+				</otherwise>
+			</choose>
+		</if>
+		<if test='param.mvnFcDtype != null and param.mvnFcDtype != ""'>
+		and b.mvn_fclty_dlyp_code = #{param.mvnFcDtype}
+		</if>
+		<if test='param.reserveType != null and param.reserveType != ""'>
+		and b.resve_ty_code = #{param.reserveType}
+		</if>
+		<if test='param.rsvtBeginDay != null and param.rsvtBeginDay != "" and param.rsvtEndDay != null and param.rsvtEndDay != ""'>
+		and a.rsvde between #{param.rsvtBeginDay} and #{param.rsvtEndDay}
+		</if>
+		<if test='param.mvnYn != null'>
+		and a.mvn_at = #{param.mvnYn}
+		</if>
+		<if test='param.mvnFcNm != null and param.mvnFcNm != ""'>
+		and b.mvn_fclty_nm like '%'||#{param.mvnFcNm}||'%'
+		</if>
+		<if test='param.memberNm != null and param.memberNm != ""'>
+		and a.rsvctm_id in (select mber_id from auth_api.cmmt_mber_info where mber_nm = #{param.memberNm})
+		</if>
+	</sql>
+
+	<select id="selectList_count" resultType="Long">
+		/** UsptMvnFcltyResveDao.selectList_count */
+		select
+			 count(*) as cnt
+		from mvn_api.uspt_mvn_fclty_resve a
+		join mvn_api.uspt_mvn_fclty_info b
+		  on a.mvn_fclty_id = b.mvn_fclty_id
+		left join mvn_api.uspt_mvn_entrps_info c
+		  on a.rsvctm_id = c.entrps_id and c.mvn_entrps_sttus_code = 'GOING'
+		where
+			<include refid="where-selectList"/>
+	</select>
+
+	<select id="selectList" resultType="aicluster.mvn.common.dto.MvnFcRsvtListItemDto">
+		/** UsptMvnFcltyResveDao.selectList */
+		select
+			<include refid="MvnFcRsvtList-cols"/>
+			, #{totalItems} + 1 - (row_number() over(order by a.creat_dt desc)) as rn
+		from mvn_api.uspt_mvn_fclty_resve a
+		join mvn_api.uspt_mvn_fclty_info b
+		  on a.mvn_fclty_id = b.mvn_fclty_id
+		left join mvn_api.uspt_mvn_entrps_info c
+		  on a.rsvctm_id = c.entrps_id and c.mvn_entrps_sttus_code = 'GOING'
+		where
+			<include refid="where-selectList"/>
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<sql id="where-selectUserList">
+		a.rsvctm_id = #{rsvctmId}
+		and a.rsvde between #{rsvtBeginDay} and #{rsvtEndDay}
+		<if test='reserveSt != null and reserveSt != ""'>
+			<choose>
+				<when test='reserveSt.equals("STNDB")'>
+		and a.resve_sttus_code = 'APRV'
+		and now() <![CDATA[<]]> to_timestamp(rsvde||resve_begin_tm, 'yyyymmddhh24mi')
+				</when>
+				<when test='reserveSt.equals("GOING")'>
+		and a.resve_sttus_code = 'APRV'
+		and now() between to_timestamp(rsvde||resve_begin_tm, 'yyyymmddhh24mi') and to_timestamp(rsvde||resve_end_tm, 'yyyymmddhh24mi')
+				</when>
+				<when test='reserveSt.equals("CLOSE")'>
+		and a.resve_sttus_code = 'CLOSE' or ( a.resve_sttus_code = 'APRV' and now() between to_timestamp(rsvde||resve_begin_tm, 'yyyymmddhh24mi') and to_timestamp(rsvde||resve_end_tm, 'yyyymmddhh24mi') )
+				</when>
+				<otherwise>
+		and a.resve_sttus_code = #{reserveSt}
+				</otherwise>
+			</choose>
+		</if>
+		<if test='mvnFcNm != null and mvnFcNm != ""'>
+		and b.mvn_fclty_nm like '%'||#{mvnFcNm}||'%'
+		</if>
+	</sql>
+
+	<select id="selectUserList_count" resultType="Long">
+		/** UsptMvnFcltyResveDao.selectUserList_count */
+		select
+			 count(*) as cnt
+		from mvn_api.uspt_mvn_fclty_resve a
+		join mvn_api.uspt_mvn_fclty_info b
+		  on a.mvn_fclty_id = b.mvn_fclty_id
+		left join mvn_api.uspt_mvn_entrps_info c
+		  on a.rsvctm_id = c.entrps_id and c.mvn_entrps_sttus_code = 'GOING'
+		where
+			<include refid="where-selectUserList"/>
+	</select>
+
+	<select id="selectUserList" resultType="aicluster.mvn.common.dto.MvnFcRsvtListItemDto">
+		/** UsptMvnFcltyResveDao.selectUserList */
+		select
+			<include refid="MvnFcRsvtList-cols"/>
+			, #{totalItems} + 1 - (row_number() over(order by a.creat_dt desc)) as rn
+		from mvn_api.uspt_mvn_fclty_resve a
+		join mvn_api.uspt_mvn_fclty_info b
+		  on a.mvn_fclty_id = b.mvn_fclty_id
+		left join mvn_api.uspt_mvn_entrps_info c
+		  on a.rsvctm_id = c.entrps_id and c.mvn_entrps_sttus_code = 'GOING'
+		where
+			<include refid="where-selectUserList"/>
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="selectCount_validRsvtDt" resultType="Long">
+		/** UsptMvnFcltyResveDao.selectCount_validRsvtDt */
+		select
+			 count(*) as cnt
+		from mvn_api.uspt_mvn_fclty_resve
+		where
+			mvn_fclty_id = #{mvnFcId}
+			and rsvde = #{rsvtDay}
+			and (resve_begin_tm between #{rsvtBgngTm} and #{rsvtEndTm} or resve_end_tm between #{rsvtBgngTm} and #{rsvtEndTm})
+	</select>
+
+	<select id="selectCutoffTime" resultType="aicluster.mvn.common.entity.UsptMvnFcltyResve">
+		/** UsptMvnFcltyResveDao.selectCutoffTime */
+		select
+			<include refid="UsptMvnFcltyResve-cols"/>
+		from mvn_api.uspt_mvn_fclty_resve
+		where
+			mvn_fclty_id = #{mvnFcId}
+			and rsvde = #{rsvtDay}
+			and resve_sttus_code in ('APLY', 'APRV')
+	</select>
+
+	<select id="selectReserveSt_count" resultType="aicluster.mvn.common.dto.MvnFcReserveStCountDto">
+		/** UsptMvnFcltyResveDao.selectReserveSt_count */
+		select
+			coalesce(sum(case resve_sttus_code when 'APLY' then 1 else 0 end), 0) as aply_count
+			,coalesce(sum(case resve_sttus_code when 'RJCT' then 1 else 0 end), 0) as rjct_count
+			,coalesce(sum(case resve_sttus_code when 'APRV' then 1 else 0 end), 0) as aply_count
+			,coalesce(sum(case resve_sttus_code when 'RSVT_RTRCN' then 1 else 0 end), 0) as rsvt_rtrcn_count
+			,coalesce(sum(case resve_sttus_code when 'APRV_RTRCN' then 1 else 0 end), 0) as aprv_rtrcn_count
+		from mvn_api.uspt_mvn_fclty_resve
+	</select>
+
+</mapper>

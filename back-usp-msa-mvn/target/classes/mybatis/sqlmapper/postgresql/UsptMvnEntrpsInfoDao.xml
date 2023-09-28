@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.mvn.common.dao.UsptMvnEntrpsInfoDao">
+
+	<sql id="UsptMvnEntrpsInfo-cols">
+              ${alias}.mvn_id
+            , ${alias}.bsns_code					as bsns_cd
+			, ${alias}.evl_last_slctn_id
+			, ${alias}.last_slctn_trget_id
+            , ${alias}.bsns_slctn_trget_id			as bsns_slctn_id
+            , ${alias}.mvn_fclty_id					as mvn_fc_id
+            , ${alias}.mvn_bgnde					as mvn_begin_day
+            , ${alias}.mvn_endde					as mvn_end_day
+            , ${alias}.entrps_id					as cmpny_id
+            , fn_cmm_get_member_nm(${alias}.entrps_id) as cmpny_nm
+            , ${alias}.ceo_nm
+            , ${alias}.bizrno
+            , ${alias}.jurirno
+            , ${alias}.eqpmn_provd_dtls				as equip_pvdtl
+            , ${alias}.mvn_et_numt					as mvn_et_num
+            , ${alias}.mvn_entrps_sttus_code		as mvn_cmpny_st
+            , fn_cmm_get_code_nm('MVN_CMPNY_ST', ${alias}.mvn_entrps_sttus_code) as mvn_cmpny_st_nm
+            , ${alias}.mvn_entrps_sttus_change_dt	as mvn_cmpny_st_dt
+            , ${alias}.mvn_asign_sttus_code			as mvn_allocate_st
+            , fn_cmm_get_code_nm('MVN_ALLOCATE_ST', ${alias}.mvn_asign_sttus_code) as mvn_allocate_st_nm
+            , ${alias}.mvn_asign_sttus_change_dt	as mvn_allocate_st_dt
+            , ${alias}.creatr_id					as creator_id
+            , ${alias}.creat_dt						as created_dt
+            , ${alias}.updusr_id					as updater_id
+            , ${alias}.updt_dt						as updated_dt
+	</sql>
+
+	<insert id="insertList">
+		/** UsptMvnEntrpsInfoDao.insertList */
+		insert into mvn_api.uspt_mvn_entrps_info (
+			 mvn_id
+			,bsns_code
+			,evl_last_slctn_id
+			,last_slctn_trget_id
+			,bsns_slctn_trget_id
+			,mvn_fclty_id
+			,mvn_bgnde
+			,mvn_endde
+			,entrps_id
+			,ceo_nm
+			,bizrno
+			,jurirno
+			,eqpmn_provd_dtls
+			,mvn_et_numt
+			,mvn_entrps_sttus_code
+			,mvn_entrps_sttus_change_dt
+			,mvn_asign_sttus_code
+			,mvn_asign_sttus_change_dt
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values
+		<foreach item="item" collection="list" separator=",">
+		(
+			  #{item.mvnId}
+			, #{item.bsnsCd}
+			, #{item.evlLastSlctnId}
+			, #{item.lastSlctnTrgetId}
+			<!--, #{item.rsltIdxId}-->
+			, #{item.bsnsSlctnId}
+			, #{item.mvnFcId}
+			, #{item.mvnBeginDay}
+			, #{item.mvnEndDay}
+			, #{item.cmpnyId}
+			, #{item.ceoNm}
+			, #{item.bizrno}
+			, #{item.jurirno}
+			, #{item.equipPvdtl}
+			, #{item.mvnEtNum}
+			, #{item.mvnCmpnySt}
+			, #{item.mvnCmpnyStDt}
+			, #{item.mvnAllocateSt}
+			, #{item.mvnAllocateStDt}
+			, #{item.creatorId}
+			, #{item.createdDt}
+			, #{item.updaterId}
+			, #{item.updatedDt}
+		)
+		</foreach>
+	</insert>
+
+	<select id="select" resultType="aicluster.mvn.common.entity.UsptMvnEntrpsInfo">
+		/** UsptMvnEntrpsInfoDao.select */
+        select
+			<include refid="UsptMvnEntrpsInfo-cols">
+				<property name="alias" value="a" />
+			</include>
+			, b.bulddong_code		as bno_cd
+			, fn_cmm_get_code_nm('BNO', b.bulddong_code) as bno_nm
+			, b.room_no
+			, d.apply_id
+		from mvn_api.uspt_mvn_entrps_info a
+		left join mvn_api.uspt_mvn_fclty_info b
+		  on a.mvn_fclty_id = b.mvn_fclty_id
+		join usp_api.uspt_bsns_slctn_trget c
+		  on a.bsns_slctn_trget_id = c.bsns_slctn_trget_id
+		join usp_api.uspt_last_slctn_trget d
+		  on c.last_slctn_trget_id = d.last_slctn_trget_id
+		where
+			a.mvn_id = #{mvnId}
+	</select>
+
+	<update id="update">
+        /** UsptMvnEntrpsInfoDao.update */
+		update mvn_api.uspt_mvn_entrps_info set
+		      mvn_fclty_id					= #{mvnFcId}
+		    , mvn_bgnde						= #{mvnBeginDay}
+		    , mvn_endde						= #{mvnEndDay}
+		    , entrps_id						= #{cmpnyId}
+		    , ceo_nm						= #{ceoNm}
+		    , bizrno						= #{bizrno}
+		    , jurirno						= #{jurirno}
+		    , eqpmn_provd_dtls				= #{equipPvdtl}
+		    , mvn_et_numt					= #{mvnEtNum}
+		    , mvn_entrps_sttus_code			= #{mvnCmpnySt}
+		    , mvn_entrps_sttus_change_dt	= #{mvnCmpnyStDt}
+		    , mvn_asign_sttus_code			= #{mvnAllocateSt}
+		    , mvn_asign_sttus_change_dt		= #{mvnAllocateStDt}
+		    , updusr_id						= #{updaterId}
+		    , updt_dt						= #{updatedDt}
+		where
+		    mvn_id = #{mvnId}
+    </update>
+
+	<sql id="selectList-where">
+			1=1
+			<if test='param.mvnCmpnySt != null and param.mvnCmpnySt != ""'>
+			and a.mvn_entrps_sttus_code = #{param.mvnCmpnySt}
+			</if>
+			<if test='param.mvnAllocateSt != null and param.mvnAllocateSt != ""'>
+			and a.mvn_asign_sttus_code = #{param.mvnAllocateSt}
+			</if>
+			<if test='param.bnoRoomNo != null and param.bnoRoomNo != ""'>
+			and b.bulddong_code = split_part(#{param.bnoRoomNo}, '|-|', 1)
+			and b.room_no like split_part(#{param.bnoRoomNo}, '|-|', 2)
+			</if>
+			<if test='param.cmpnyNm != null and param.cmpnyNm != ""'>
+			and fn_cmm_get_member_nm(a.entrps_id) like '%'||#{param.cmpnyNm}||'%'
+			</if>
+	</sql>
+
+	<select id="selectList_count" resultType="Long">
+		/** UsptMvnEntrpsInfoDao.selectList_count */
+		select
+			 count(a.*) as cnt
+		from mvn_api.uspt_mvn_entrps_info a
+		left join mvn_api.uspt_mvn_fclty_info b
+		  on a.mvn_fclty_id = b.mvn_fclty_id
+		where
+			<include refid="selectList-where"/>
+	</select>
+
+	<select id="selectList" resultType="aicluster.mvn.common.dto.MvnCmpnyListItemDto">
+		/** UsptMvnEntrpsInfoDao.selectList */
+		select
+			  a.mvn_id
+			, a.entrps_id					as cmpny_id
+			, fn_cmm_get_member_nm(a.entrps_id) as cmpny_nm
+			, b.bulddong_code				as bno_cd
+			, fn_cmm_get_code_nm('BNO', b.bulddong_code) as bno_nm
+			, b.room_no
+			, a.mvn_bgnde					as mvn_begin_day
+			, a.mvn_endde					as mvn_end_day
+			, a.mvn_entrps_sttus_code		as mvn_cmpny_st
+			, fn_cmm_get_code_nm('MVN_CMPNY_ST', a.mvn_entrps_sttus_code) as mvn_cmpny_st_nm
+			, a.mvn_asign_sttus_code		as mvn_allocate_st
+			, fn_cmm_get_code_nm('MVN_ALLOCATE_ST', a.mvn_asign_sttus_code) as mvn_allocate_st_nm
+			, #{totalItems} + 1 - (row_number() over(order by a.creat_dt desc)) as rn
+		from mvn_api.uspt_mvn_entrps_info a
+		left join mvn_api.uspt_mvn_fclty_info b
+		  on a.mvn_fclty_id = b.mvn_fclty_id
+		where
+			<include refid="selectList-where"/>
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="select_mvnFcId" resultType="aicluster.mvn.common.entity.UsptMvnEntrpsInfo">
+		/** UsptMvnEntrpsInfoDao.select_mvnFcId */
+        select
+			<include refid="UsptMvnEntrpsInfo-cols">
+				<property name="alias" value="a" />
+			</include>
+		from mvn_api.uspt_mvn_entrps_info a
+        where
+            mvn_fclty_id = #{mvnFcId}
+            and mvn_entrps_sttus_code != 'CLOSE'
+	</select>
+
+	<select id="selectUser" resultType="aicluster.mvn.common.dto.UserMvnCmpnyDto">
+		/** UsptMvnEntrpsInfoDao.selectUser */
+		select
+			  a.mvn_id
+			, a.bsns_code					as bsns_cd
+			, a.evl_last_slctn_id
+			, a.last_slctn_trget_id
+			, a.bsns_slctn_trget_id			as bsns_slctn_id
+			, d.apply_id
+			, a.entrps_id					as cmpny_id
+			, fn_cmm_get_member_nm(a.entrps_id) as cmpny_nm
+			, a.mvn_bgnde					as mvn_begin_day
+			, a.mvn_endde					as mvn_end_day
+			, a.mvn_et_numt					as mvn_et_num
+			, a.mvn_fclty_id				as mvn_fc_id
+			, b.mvn_fclty_nm				as mvn_fc_nm
+			, b.bulddong_code				as bno_cd
+			, fn_cmm_get_code_nm('BNO', b.bulddong_code) as bno_nm
+			, b.room_no
+			, b.mvn_fclty_aceptnc_nmpr		as mvn_fc_capacity
+			, b.mvn_fclty_ar				as mvn_fcar
+			, b.mvn_sttus_code				as mvn_st
+			, fn_cmm_get_code_nm('MVN_ST', b.mvn_sttus_code) as mvn_st_nm
+			, a.mvn_entrps_sttus_code		as mvn_cmpny_st
+			, fn_cmm_get_code_nm('MVN_CMPNY_ST', a.mvn_entrps_sttus_code) as mvn_cmpny_st_nm
+			, a.mvn_asign_sttus_code		as mvn_allocate_st
+			, fn_cmm_get_code_nm('MVN_ALLOCATE_ST', a.mvn_asign_sttus_code) as mvn_allocate_st_nm
+			, (
+				select
+					max(presentn_ym)
+				from mvn_api.uspt_mvn_entrps_pfmc
+				where mvn_id = a.mvn_id
+			  ) as recent_presentn_ym
+		from mvn_api.uspt_mvn_entrps_info a
+		join mvn_api.uspt_mvn_fclty_info b
+		  on a.mvn_fclty_id = b.mvn_fclty_id
+		join usp_api.uspt_bsns_slctn_trget c
+		  on a.bsns_slctn_trget_id = c.bsns_slctn_trget_id
+		join usp_api.uspt_last_slctn_trget d
+		  on a.last_slctn_trget_id = d.last_slctn_trget_id
+		where
+			a.entrps_id = #{cmpnyId}
+			<choose>
+				<when test="mvnGoingYn != null and mvnGoingYn == true">
+			and a.mvn_entrps_sttus_code = 'GOING'
+				</when>
+				<otherwise>
+			and a.mvn_entrps_sttus_code != 'STNDB'
+				</otherwise>
+			</choose>
+			and a.updt_dt in (select max(updt_dt) from mvn_api.uspt_mvn_entrps_info where entrps_id = #{cmpnyId})
+	</select>
+
+	<select id="selectSyncTgrtList" resultType="aicluster.mvn.common.entity.UsptMvnEntrpsInfo">
+    	/** UsptMvnEntrpsInfoDao.selectSyncTgrtList */
+		select
+			  b.bsns_code			as bsns_cd
+			, f.evl_last_slctn_id
+			, g.last_slctn_trget_id
+			, g.bsns_slctn_trget_id	as bsns_slctn_id
+			, c.bsns_bgnde			as mvn_begin_day
+			, c.bsns_endde			as mvn_end_day
+			, e.mber_id				as cmpny_id
+			, h.ceo_nm
+			, h.bizrno
+			, h.jurirno
+		from usp_api.uspt_stdr_bsns a
+		join usp_api.uspt_bsns b
+		  on a.stdr_bsns_code = b.stdr_bsns_code
+		join usp_api.uspt_bsns_pblanc c
+		  on b.bsns_code = c.bsns_code
+		join usp_api.uspt_bsns_pblanc_rcept d
+		  on c.pblanc_id = d.pblanc_id
+		join usp_api.uspt_bsns_pblanc_applcnt e
+		  on c.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		left join usp_api.uspt_bsns_pblanc_applcnt_entrprs i
+		  on e.apply_id = i.apply_id
+		join usp_api.uspt_last_slctn_trget f
+		  on e.apply_id = f.apply_id
+		join usp_api.uspt_bsns_slctn_trget g
+		  on f.last_slctn_trget_id = g.last_slctn_trget_id
+		join auth_api.cmmt_mber_info h
+		  on e.mber_id = h.mber_id
+		where
+			a.bsns_ty_code = 'MVN'
+			and g.bsns_slctn_trget_id not in (select bsns_slctn_trget_id from mvn_api.uspt_mvn_entrps_info)
+    </select>
+
+	<select id="selectSendTgrtList" resultType="aicluster.mvn.common.dto.MvnCmpnyAlarmDto">
+    	/** UsptMvnEntrpsInfoDao.selectSendTgrtList */
+		select
+			  a.entrps_id			as cmpny_id
+			, b.mber_nm				as cmpny_nm
+			, b.encpt_email			as enc_email
+			, c.bulddong_code		as bno_cd
+			, fn_cmm_get_code_nm('BNO', c.bulddong_code) as bno_nm
+			, c.room_no
+			, a.mvn_bgnde			as mvn_begin_day
+			, a.mvn_endde			as mvn_end_day
+		from mvn_api.uspt_mvn_entrps_info a
+		join auth_api.cmmt_mber_info b
+		  on a.entrps_id = b.mber_id
+		join mvn_api.uspt_mvn_fclty_info c
+		  on a.mvn_fclty_id = c.mvn_fclty_id
+		where a.mvn_id in 
+		<foreach collection="mvnIds" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+    </select>
+
+    <select id="selectGoing_count" resultType="Long">
+    	/** UsptMvnEntrpsInfoDao.selectGoing_count */
+		select
+			  count(*) as cnt
+		from mvn_api.uspt_mvn_entrps_info
+		where
+			entrps_id = #{cmpnyId}
+			and mvn_id != #{mvnId}
+			and mvn_entrps_sttus_code = 'GOING'
+    </select>
+
+    <select id="selectMvnUser" resultType="aicluster.mvn.common.dto.MvnUserDto">
+    	/** UsptMvnEntrpsInfoDao.selectMvnUser */
+		select
+			a.entrps_id			as cmpny_id
+			,b.mber_nm			as cmpny_nm
+			,a.bizrno
+			,a.ceo_nm
+			,b.charger_nm
+			,b.encpt_mbtlnum	as enc_charger_mobile_no
+			,b.encpt_email		as enc_charger_email
+		from mvn_api.uspt_mvn_entrps_info a
+		join auth_api.cmmt_mber_info b
+		  on a.entrps_id = b.mber_id
+		where a.mvn_id = #{mvnId}
+    </select>
+    
+    <select id="selectPblancBsnsEndDt" resultType="String">
+    	/** UsptMvnEntrpsInfoDao.selectPblancBsnsEndDt */
+    	select
+			c.bsns_endde
+		from usp_api.uspt_bsns_pblanc c
+		join usp_api.uspt_bsns_pblanc_rcept d
+		  on c.pblanc_id = d.pblanc_id
+		join usp_api.uspt_bsns_pblanc_applcnt e
+		  on c.pblanc_id = e.pblanc_id and d.rcept_ordr = e.rcept_ordr
+		left join usp_api.uspt_bsns_pblanc_applcnt_entrprs i
+		  on e.apply_id = i.apply_id
+		join usp_api.uspt_last_slctn_trget f
+		  on e.apply_id = f.apply_id
+		where f.last_slctn_trget_id = #{lastSlctnTrgetId}
+    </select>
+
+</mapper>

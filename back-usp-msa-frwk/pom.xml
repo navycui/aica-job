@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.6.7</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>aicluster</groupId>
+	<artifactId>ai-framework</artifactId>
+	<version>3.1.10</version>
+	<name>ai-framework</name>
+	<description>AICA Framework</description>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<bnet-library.version>1.9.10</bnet-library.version>
+	</properties>
+
+<!-- 	<distributionManagement> -->
+<!-- 		<repository> -->
+<!-- 			<id>releases</id> -->
+<!-- 			<name>releases</name> -->
+<!-- 			<url>http://fw.thenet-global.com:8081/repository/maven-releases/</url> -->
+<!-- 		</repository> -->
+<!-- 	</distributionManagement> -->
+
+	<repositories>
+		<repository>
+			<id>mvn2s</id>
+			<url>https://repo.maven.apache.org/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+
+		<!-- B.net Maven Nexus repository  -->
+<!-- 		<repository> -->
+<!-- 			<id>releases</id> -->
+<!-- 			<url>http://fw.thenet-global.com:8081/repository/maven-releases/</url> -->
+<!-- 			<releases> -->
+<!-- 				<enabled>true</enabled> -->
+<!-- 			</releases> -->
+<!-- 			<snapshots> -->
+<!-- 				<enabled>false</enabled> -->
+<!-- 			</snapshots> -->
+<!-- 		</repository> -->
+
+		<!-- AICA Maven Nexus repository -->
+		<repository>
+			<id>releases</id>
+			<url>http://133.186.152.147:8081/repository/maven-aica-aisp-release/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+		<!-- @ConfigurationProperties warning을 제거하기 위해 필요 -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-configuration-processor</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis.spring.boot</groupId>
+			<artifactId>mybatis-spring-boot-starter</artifactId>
+			<version>2.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- JWT -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.2</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.2</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- LOG4JDBC -->
+		<dependency>
+			<groupId>org.bgee.log4jdbc-log4j2</groupId>
+			<artifactId>log4jdbc-log4j2-jdbc4.1</artifactId>
+			<version>1.16</version>
+		</dependency>
+		<dependency>
+			<groupId>org.lazyluke</groupId>
+			<artifactId>log4jdbc-remix</artifactId>
+			<version>0.2.7</version>
+		</dependency>
+
+		<!-- B.NET LIBRARY -->
+		<dependency>
+			<groupId>bnet</groupId>
+			<artifactId>bnet-library</artifactId>
+			<version>${bnet-library.version}</version>
+		</dependency>
+
+		<!-- NICE-ID -->
+		<dependency>
+			<groupId>3rd-party</groupId>
+			<artifactId>nice-id</artifactId>
+			<version>1.1</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+		<!-- Boot jar 형태로 만들때 사용된다. -->
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.springframework.boot</groupId> -->
+<!-- 				<artifactId>spring-boot-maven-plugin</artifactId> -->
+<!-- 				<configuration> -->
+<!-- 					<excludes> -->
+<!-- 						<exclude> -->
+<!-- 							<groupId>org.projectlombok</groupId> -->
+<!-- 							<artifactId>lombok</artifactId> -->
+<!-- 						</exclude> -->
+<!-- 					</excludes> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
+
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-clean-plugin</artifactId>
+			</plugin>
+            <plugin>
+            	<groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                    <forkMode>once</forkMode>
+                    <reportFormat>xml</reportFormat>
+                </configuration>
+            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <source>1.8</source>
+                </configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- JAR 생성시 불필요한 파일들을 빼도록 한다 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>aicluster/sample/**</exclude>
+				    	<exclude>*.yml</exclude>
+				    	<exclude>form/**</exclude>
+				    	<exclude>static/**</exclude>
+				    	<exclude>templates/**</exclude>
+				    	<exclude>mybatis/mybatis-config.xml</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<!-- Deploy -->
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.apache.maven.plugins</groupId> -->
+<!-- 				<artifactId>maven-deploy-plugin</artifactId> -->
+<!-- 				<configuration> -->
+<!-- 					<skip>true</skip> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.sonatype.plugins</groupId> -->
+<!-- 			    <artifactId>nexus-staging-maven-plugin</artifactId> -->
+<!-- 			    <version>1.6.13</version> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 					<id>default-deploy</id> -->
+<!-- 					<phase>deploy</phase> -->
+<!-- 					<goals> -->
+<!-- 						<goal>deploy</goal> -->
+<!-- 					</goals> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 				<configuration> -->
+<!-- 					<serverId>nexus</serverId> -->
+<!-- 					<nexusUrl>http://localhost:8081/nexus/</nexusUrl> -->
+<!-- 					<skipStaging>true</skipStaging> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
+		</plugins>
+	</build>
+
+</project>

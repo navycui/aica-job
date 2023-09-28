@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.CmmtEmailSndngDtlsDao">
+
+	<insert id="insert">
+		/** CmmtEmailSndngDtlsDao.insert */
+		insert into com_api.cmmt_email_sndng_dtls (
+			 email_id
+			,sj_nm
+			,email_cn
+			,html_at
+			,sndr_email
+			,sndr_nm
+			,creat_dt
+		) values (
+			 #{emailId}
+			,#{title}
+			,#{emailCn}
+			,#{html}
+			,#{senderEmail}
+			,#{senderNm}
+			,#{createdDt}
+		)
+	</insert>
+</mapper>

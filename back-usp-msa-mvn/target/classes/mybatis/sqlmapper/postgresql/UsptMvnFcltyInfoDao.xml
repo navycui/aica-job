@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.mvn.common.dao.UsptMvnFcltyInfoDao">
+
+	<sql id="UsptMvnFcltyInfo_columns">
+		mvn_fclty_id				as mvn_fc_id
+		, mvn_fclty_nm				as mvn_fc_nm
+		, mvn_fclty_ty_code			as mvn_fc_type
+		, fn_cmm_get_code_nm('MVN_FC_TYPE', mvn_fclty_ty_code) as mvn_fc_type_nm
+		, mvn_fclty_dlyp_code		as mvn_fc_dtype
+		, fn_cmm_get_code_nm('MVN_FC_DTYPE', mvn_fclty_dlyp_code) as mvn_fc_dtype_nm
+		, mvn_fclty_cn				as mvn_fc_cn
+		, bulddong_code				as bno_cd
+		, fn_cmm_get_code_nm('BNO', bulddong_code) as bno_nm
+		, room_no
+		, mvn_fclty_aceptnc_nmpr	as mvn_fc_capacity
+		, mvn_fclty_ar				as mvn_fcar
+		, resve_ty_code				as reserve_type
+		, fn_cmm_get_code_nm('RESERVE_TYPE', resve_ty_code) as reserve_type_nm
+		, hr24_at					as hr24_yn
+		, utztn_begin_hour			as utztn_begin_hh
+		, utztn_end_hour			as utztn_end_hh
+		, main_fclty_cn				as main_fc
+		, image_file_id
+		, image_replc_cn			as image_alt_cn
+		, use_at					as enabled
+		, mvn_sttus_code			as mvn_st
+		, fn_cmm_get_code_nm('MVN_ST', mvn_sttus_code) as mvn_st_nm
+		, mvn_sttus_change_dt		as mvn_st_dt
+		, now_mvn_mber_id			as cur_occupant_id
+		, creatr_id					as creator_id
+		, creat_dt					as created_dt
+		, updusr_id					as updater_id
+		, updt_dt					as updated_dt
+	</sql>
+
+	<insert id="insert">
+		/** UsptMvnFcltyInfoDao.insert */
+		insert into mvn_api.uspt_mvn_fclty_info (
+			mvn_fclty_id
+			,mvn_fclty_nm
+			,mvn_fclty_ty_code
+			,mvn_fclty_dlyp_code
+			,mvn_fclty_cn
+			,bulddong_code
+			,room_no
+			,mvn_fclty_aceptnc_nmpr
+			,mvn_fclty_ar
+			,resve_ty_code
+			,hr24_at
+			,utztn_begin_hour
+			,utztn_end_hour
+			,main_fclty_cn
+			,image_file_id
+			,image_replc_cn
+			,use_at
+			,mvn_sttus_code
+			,mvn_sttus_change_dt
+			,now_mvn_mber_id
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			#{mvnFcId}
+			,#{mvnFcNm}
+			,#{mvnFcType}
+			,#{mvnFcDtype}
+			,#{mvnFcCn}
+			,#{bnoCd}
+			,#{roomNo}
+			,#{mvnFcCapacity}
+			,#{mvnFcar}
+			,#{reserveType}
+			,#{hr24Yn}
+			,#{utztnBeginHh}
+			,#{utztnEndHh}
+			,#{mainFc}
+			,#{imageFileId}
+			,#{imageAltCn}
+			,#{enabled}
+			,#{mvnSt}
+			,#{mvnStDt}
+			,#{curOccupantId}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+    </insert>
+
+	<select id="select" resultType="aicluster.mvn.common.entity.UsptMvnFcltyInfo">
+		/** UsptMvnFcltyInfoDao.select */
+		select
+			<include refid="UsptMvnFcltyInfo_columns" />
+		from mvn_api.uspt_mvn_fclty_info
+		where
+			mvn_fclty_id = #{mvnFcId}
+	</select>
+
+	<update id="update">
+		/** UsptMvnFcltyInfoDao.update */
+		update mvn_api.uspt_mvn_fclty_info set
+			mvn_fclty_id			= #{mvnFcId}
+			,mvn_fclty_nm			= #{mvnFcNm}
+			,mvn_fclty_ty_code		= #{mvnFcType}
+			,mvn_fclty_dlyp_code	= #{mvnFcDtype}
+			,mvn_fclty_cn			= #{mvnFcCn}
+			,bulddong_code			= #{bnoCd}
+			,room_no				= #{roomNo}
+			,mvn_fclty_aceptnc_nmpr	= #{mvnFcCapacity}
+			,mvn_fclty_ar			= #{mvnFcar}
+			,resve_ty_code			= #{reserveType}
+			,hr24_at				= #{hr24Yn}
+			,utztn_begin_hour		= #{utztnBeginHh}
+			,utztn_end_hour			= #{utztnEndHh}
+			,main_fclty_cn			= #{mainFc}
+			,image_file_id			= #{imageFileId}
+			,image_replc_cn			= #{imageAltCn}
+			,use_at					= #{enabled}
+			,mvn_sttus_code			= #{mvnSt}
+			,mvn_sttus_change_dt	= #{mvnStDt}
+			,now_mvn_mber_id		= #{curOccupantId}
+			,creatr_id				= #{creatorId}
+			,creat_dt				= #{createdDt}
+			,updusr_id				= #{updaterId}
+			,updt_dt				= #{updatedDt}
+		where
+			mvn_fclty_id = #{mvnFcId}
+    </update>
+
+	<delete id="delete">
+		/** UsptMvnFcltyInfoDao.delete */
+		delete from mvn_api.uspt_mvn_fclty_info
+		where
+			mvn_fclty_id = #{mvnFcId}
+    </delete>
+
+	<sql id="selectList-where">
+			1=1
+			<if test='param.mvnFcNm != null and param.mvnFcNm != ""'>
+			and mvn_fclty_nm like '%'||#{param.mvnFcNm}||'%'
+			</if>
+			<if test='param.mvnFcType != null and param.mvnFcType != ""'>
+			and mvn_fclty_ty_code = #{param.mvnFcType}
+			</if>
+			<if test='param.mvnFcDtype != null and param.mvnFcDtype != ""'>
+			and mvn_fclty_dlyp_code = #{param.mvnFcDtype}
+			</if>
+			<if test='param.enabled != null'>
+			and use_at = #{param.enabled}
+			</if>
+	</sql>
+
+	<select id="selectList_count" resultType="Long">
+		/** UsptMvnFcltyInfoDao.selectList_count */
+		select
+			count(*) as cnt
+		from mvn_api.uspt_mvn_fclty_info
+		where
+			<include refid="selectList-where" />
+	</select>
+
+	<select id="selectList" resultType="aicluster.mvn.common.entity.UsptMvnFcltyInfo">
+		/** UsptMvnFcltyInfoDao.selectList_count */
+		select
+			<include refid="UsptMvnFcltyInfo_columns" />
+			, #{totalItems} + 1 - (row_number() over(order by creat_dt desc)) as rn
+		from mvn_api.uspt_mvn_fclty_info
+		where
+			<include refid="selectList-where" />
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<sql id="selectCurrStateList-where">
+			a.mvn_fclty_ty_code = 'OFFICE'
+			<if test='param.mvnSt != null and param.mvnSt != ""'>
+			and a.mvn_sttus_code = #{param.mvnSt}
+			</if>
+			<if test='param.bnoCd != null and param.bnoCd != ""'>
+			and a.bulddong_code = #{param.bnoCd}
+			</if>
+			<if test='param.mvnFcCapacity != null'>
+			and a.mvn_fclty_aceptnc_nmpr = #{param.mvnFcCapacity}
+			</if>
+			<if test='param.mvnFcar != null and param.mvnFcar != ""'>
+			and a.mvn_fclty_ar = #{param.mvnFcar}
+			</if>
+	</sql>
+
+	<select id="selectCurrStateList_count" resultType="Long">
+		/** UsptMvnFcltyInfoDao.selectCurrStateList_count */
+		select
+			count(*) as cnt
+		from mvn_api.uspt_mvn_fclty_info a
+		left join mvn_api.uspt_mvn_entrps_info b
+		on a.mvn_fclty_id = b.mvn_fclty_id and b.mvn_entrps_sttus_code != 'CLOSE'
+		left join auth_api.cmmt_mber_info c
+		on b.entrps_id = c.mber_id
+		where
+			<include refid="selectCurrStateList-where" />
+	</select>
+
+	<select id="selectCurrStateList" resultType="aicluster.mvn.common.dto.MvnFcStatsListItemDto">
+		/** UsptMvnFcltyInfoDao.selectCurrStateList */
+		select
+			a.mvn_fclty_id				as mvn_fc_id
+			, b.mvn_id
+			, b.entrps_id				as cmpny_id
+			, c.mber_nm					as cmpny_nm
+			, b.bizrno
+			, b.jurirno
+			, c.encpt_mbtlnum			as enc_mobile_no
+			, c.encpt_email				as enc_email
+			, b.mvn_bgnde				as mvn_begin_day
+			, b.mvn_endde				as mvn_end_day
+			, a.bulddong_code			as bno_cd
+			, fn_cmm_get_code_nm('BNO', a.bulddong_code) as bno_nm
+			, a.room_no
+			, a.mvn_fclty_aceptnc_nmpr	as mvn_fc_capacity
+			, a.mvn_fclty_ar			as mvn_fcar
+			, a.mvn_sttus_code			as mvn_st
+			, fn_cmm_get_code_nm('MVN_ST', a.mvn_sttus_code) as mvn_st_nm
+			, #{totalItems} + 1 - (row_number() over(order by a.creat_dt desc)) as rn
+		from mvn_api.uspt_mvn_fclty_info a
+		left join mvn_api.uspt_mvn_entrps_info b
+		on a.mvn_fclty_id = b.mvn_fclty_id and b.mvn_entrps_sttus_code != 'CLOSE'
+		left join auth_api.cmmt_mber_info c
+		on b.entrps_id = c.mber_id
+		where
+			<include refid="selectCurrStateList-where" />
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="selectEnable" resultType="aicluster.mvn.common.entity.UsptMvnFcltyInfo">
+		/** UsptMvnFcltyInfoDao.selectEnable */
+		select
+			<include refid="UsptMvnFcltyInfo_columns" />
+		from mvn_api.uspt_mvn_fclty_info
+		where
+			mvn_fclty_ty_code = #{mvnFcType}
+			and use_at = true
+			and mvn_fclty_id = #{mvnFcId}
+	</select>
+
+	<sql id="enableShare_where">
+			mvn_fclty_ty_code = 'SHARE'
+			and use_at = true
+			<if test='mvnFcDtype != null and mvnFcDtype != ""'>
+			and mvn_fclty_dlyp_code = #{mvnFcDtype}
+			</if>
+	</sql>
+
+	<select id="selectEnableShareList_count" resultType="Long">
+		/** UsptMvnFcltyInfoDao.selectEnableShareList_count */
+		select
+			count(*) as cnt
+		from mvn_api.uspt_mvn_fclty_info
+		where
+			<include refid="enableShare_where" />
+	</select>
+
+	<select id="selectEnableShareList" resultType="aicluster.mvn.common.entity.UsptMvnFcltyInfo">
+		/** UsptMvnFcltyInfoDao.selectEnableShareList */
+		select
+			<include refid="UsptMvnFcltyInfo_columns" />
+			, #{totalItems} + 1 - (row_number() over(order by mvn_fclty_dlyp_code)) as rn
+		from mvn_api.uspt_mvn_fclty_info
+		where
+			<include refid="enableShare_where" />
+		order by mvn_fclty_dlyp_code
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<sql id="enableOffice_where">
+			mvn_fclty_ty_code = 'OFFICE'
+			and mvn_sttus_code = 'EMPTY'
+			and use_at = true
+			<if test='bnoRoomNo != null and bnoRoomNo != ""'>
+			and bulddong_code = split_part(#{bnoRoomNo}, '|-|', 1)
+			and room_no like split_part(#{bnoRoomNo}, '|-|', 2)
+			</if>
+			<if test='mvnFcCapacity != null and mvnFcCapacity != 0'>
+			and mvn_fclty_aceptnc_nmpr = #{mvnFcCapacity}
+			</if>
+			<if test='mvnFcar != null and mvnFcar != ""'>
+			and mvn_fclty_ar = #{mvnFcar}
+			</if>
+	</sql>
+
+	<select id="selectEnableOfficeList_count" resultType="Long">
+		/** UsptMvnFcltyInfoDao.selectEnableOfficeList_count */
+		select
+			count(*) as cnt
+		from mvn_api.uspt_mvn_fclty_info
+		where
+			<include refid="enableOffice_where" />
+	</select>
+
+
+	<select id="selectEnableOfficeList" resultType="aicluster.mvn.common.entity.UsptMvnFcltyInfo">
+		/** UsptMvnFcltyInfoDao.selectEnableOfficeList */
+		select
+			<include refid="UsptMvnFcltyInfo_columns" />
+			, #{totalItems} + 1 - (row_number() over(order by bulddong_code, room_no)) as rn
+		from mvn_api.uspt_mvn_fclty_info umf
+		where
+			<include refid="enableOffice_where" />
+		order by bulddong_code, room_no
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="selectBnoRoomCodeList" resultType="aicluster.mvn.common.dto.MvnFcOfficeRoomDto">
+		/** UsptMvnFcltyInfoDao.selectBnoRoomCodeList */
+		select bulddong_code || '|-|' || room_no  as bno_room_no
+			, fn_cmm_get_code_nm('BNO', bulddong_code) || ' ' || room_no as bno_room_nm
+		from mvn_api.uspt_mvn_fclty_info
+		where
+			mvn_fclty_ty_code = 'OFFICE'
+    </select>
+
+   	<select id="selectCapacityCodeList" resultType="aicluster.mvn.common.dto.MvnFcCodeDto">
+		/** UsptMvnFcltyInfoDao.selectCapacityCodeList */
+		select a.mvn_fclty_aceptnc_nmpr as code
+			, a.mvn_fclty_aceptnc_nmpr||'명' as code_nm
+		from mvn_api.uspt_mvn_fclty_info a
+		where
+			a.mvn_fclty_ty_code = 'OFFICE'
+		group by a.mvn_fclty_aceptnc_nmpr
+		order by a.mvn_fclty_aceptnc_nmpr
+   	</select>
+
+   	<select id="selectFcarCodeList" resultType="aicluster.mvn.common.dto.MvnFcCodeDto">
+		/** UsptMvnFcltyInfoDao.selectFcarCodeList */
+		select a.mvn_fclty_ar as code
+			, a.mvn_fclty_ar||'' as code_nm
+		from mvn_api.uspt_mvn_fclty_info a
+		where
+			a.mvn_fclty_ty_code = 'OFFICE'
+		group by a.mvn_fclty_ar
+		order by a.mvn_fclty_ar
+   	</select>
+
+</mapper>

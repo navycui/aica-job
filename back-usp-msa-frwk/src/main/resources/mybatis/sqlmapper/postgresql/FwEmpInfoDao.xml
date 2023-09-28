@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.FwEmpInfoDao">
+
+	<sql id="bnMember_cols">
+		mber_id				as member_id
+		,login_id			as login_id
+		,mber_nm			as member_nm
+		,'INSIDER' 			as member_type
+		,mber_sttus_code	as member_st
+		,sexdstn_code		as gender
+		,null 				as enc_birthday
+		,encpt_password		as enc_passwd
+		,fn_cmm_get_code_nm('DEPT_CD', dept_code) as dept_nm
+		,clsf_nm			as position_nm
+		,refresh_token		as refresh_token
+		,author_id			as authority_id
+		,case
+			when mber_sttus_code = 'NORMAL' then true
+		 	else false
+		 end as enabled
+	</sql>
+
+	<select id="selectBnMember_loginId" resultType="aicluster.framework.common.entity.BnMember">
+		/** FwEmpInfoDao.selectBnMember_loginId */
+		select
+			<include refid="bnMember_cols"/>
+		from auth_api.cmmt_emp_info a
+		where
+			login_id = #{loginId}
+	</select>
+
+	<select id="selectBnMember_refreshToken" resultType="aicluster.framework.common.entity.BnMember">
+		/** FwEmpInfoDao.selectBnMember_refreshToken */
+		select
+			<include refid="bnMember_cols"/>
+		from auth_api.cmmt_emp_info
+		where
+			refresh_token = #{refreshToken}
+	</select>
+
+	<update id="updateRefreshToken">
+		/** FwEmpInfoDao.updateRefreshToken */
+		update auth_api.cmmt_emp_info set
+			refresh_token = #{refreshToken}
+		where
+			mber_id = #{memberId}
+	</update>
+</mapper>

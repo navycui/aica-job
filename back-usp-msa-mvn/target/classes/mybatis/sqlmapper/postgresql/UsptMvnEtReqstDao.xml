@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.mvn.common.dao.UsptMvnEtReqstDao">
+
+	<sql id="UsptMvnEtReqst-cols">
+			  ${alias}.mvn_et_reqst_id					as mvn_et_req_id
+			, ${alias}.mvn_id
+			, ${alias}.mvn_et_reqst_dt					as mvn_et_req_dt
+			, ${alias}.mvn_et_endde						as mvn_et_end_day
+			, ${alias}.mvn_et_reqst_cn					as mvn_et_req_cn
+			, ${alias}.mvn_et_reqst_sttus_code			as mvn_et_req_st
+            , fn_cmm_get_code_nm('MVN_ET_REQ_ST', ${alias}.mvn_et_reqst_sttus_code) as mvn_et_req_st_nm
+			, ${alias}.mvn_et_reqst_sttus_dt			as mvn_et_req_st_dt
+			, ${alias}.atchmnfl_group_id				as attachment_group_id
+			, ${alias}.splemnt_requst_cn				as makeup_req_cn
+			, ${alias}.dlbrt_de							as dlbrt_day
+			, ${alias}.dlbrt_confm_endde				as dlbrt_aprv_end_day
+			, ${alias}.dlbrt_result_detail_cn			as dlbrt_result_dtl_cn
+			, ${alias}.dlbrt_result_atchmnfl_group_id	as dlbrt_atch_group_id
+			, ${alias}.creatr_id						as creator_id
+			, ${alias}.creat_dt							as created_dt
+			, ${alias}.updusr_id						as updater_id
+			, ${alias}.updt_dt							as updated_dt
+	</sql>
+
+	<insert id="insert">
+		/** UsptMvnEtReqstDao.insert */
+		insert into mvn_api.uspt_mvn_et_reqst (
+			 mvn_et_reqst_id
+			,mvn_id
+			,mvn_et_reqst_dt
+			,mvn_et_endde
+			,mvn_et_reqst_cn
+			,mvn_et_reqst_sttus_code
+			,mvn_et_reqst_sttus_dt
+			,atchmnfl_group_id
+			,splemnt_requst_cn
+			,dlbrt_de
+			,dlbrt_confm_endde
+			,dlbrt_result_detail_cn
+			,dlbrt_result_atchmnfl_group_id
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{mvnEtReqId}
+			,#{mvnId}
+			,#{mvnEtReqDt}
+			,#{mvnEtEndDay}
+			,#{mvnEtReqCn}
+			,#{mvnEtReqSt}
+			,#{mvnEtReqStDt}
+			,#{attachmentGroupId}
+			,#{makeupReqCn}
+			,#{dlbrtDay}
+			,#{dlbrtAprvEndDay}
+			,#{dlbrtResultDtlCn}
+			,#{dlbrtAtchGroupId}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<select id="select" resultType="aicluster.mvn.common.entity.UsptMvnEtReqst">
+		/** UsptMvnEtReqstDao.select */
+		select
+			<include refid="UsptMvnEtReqst-cols"><property name="alias" value="a"/></include>
+		from mvn_api.uspt_mvn_et_reqst a
+		where
+			a.mvn_et_reqst_id = #{mvnEtReqId}
+	</select>
+
+	<update id="update">
+		/** UsptMvnEtReqstDao.update */
+		update mvn_api.uspt_mvn_et_reqst set
+			 mvn_et_reqst_dt				= #{mvnEtReqDt}
+			,mvn_et_endde					= #{mvnEtEndDay}
+			,mvn_et_reqst_cn				= #{mvnEtReqCn}
+			,mvn_et_reqst_sttus_code		= #{mvnEtReqSt}
+			,mvn_et_reqst_sttus_dt			= #{mvnEtReqStDt}
+			,atchmnfl_group_id				= #{attachmentGroupId}
+			,splemnt_requst_cn				= #{makeupReqCn}
+			,dlbrt_de						= #{dlbrtDay}
+			,dlbrt_confm_endde				= #{dlbrtAprvEndDay}
+			,dlbrt_result_detail_cn			= #{dlbrtResultDtlCn}
+			,dlbrt_result_atchmnfl_group_id	= #{dlbrtAtchGroupId}
+			,creatr_id						= #{creatorId}
+			,creat_dt						= #{createdDt}
+			,updusr_id						= #{updaterId}
+			,updt_dt						= #{updatedDt}
+		where
+			mvn_et_reqst_id = #{mvnEtReqId}
+	</update>
+
+	<sql id="selectList-where">
+			1=1
+			and a.mvn_et_reqst_sttus_code != 'RTRCN' <!-- 입주연장신청상태가 '취소'인 건은 제외 -->
+			<if test='param.mvnEtReqSt != null and param.mvnEtReqSt != "" and param.mvnEtReqSt != "RTRCN"'>
+			and a.mvn_et_reqst_sttus_code = #{param.mvnEtReqSt}
+			</if>
+			<if test='param.bnoRoomNo != null and param.bnoRoomNo != ""'>
+			and d.bulddong_code = split_part(#{param.bnoRoomNo}, '|-|', 1)
+			and d.room_no like split_part(#{param.bnoRoomNo}, '|-|', 2)
+			</if>
+			<if test='param.memberNm != null and param.memberNm != ""'>
+			and c.mber_nm like '%'||#{param.memberNm}||'%'
+			</if>
+	</sql>
+
+	<select id="selectList_count" resultType="Long">
+		/** UsptMvnEtReqstDao.selectList_count */
+		select
+			 count(*) as cnt
+		from mvn_api.uspt_mvn_et_reqst a
+		join mvn_api.uspt_mvn_entrps_info b
+		  on a.mvn_id = b.mvn_id
+		join auth_api.cmmt_mber_info c
+		  on b.entrps_id = c.mber_id
+		join mvn_api.uspt_mvn_fclty_info d
+		  on b.mvn_fclty_id = d.mvn_fclty_id
+		where
+			<include refid="selectList-where"/>
+	</select>
+
+	<select id="selectList" resultType="aicluster.mvn.common.dto.MvnEtReqListItemDto">
+		/** UsptMvnEtReqstDao.selectList */
+		select
+			  a.mvn_et_reqst_id				as mvn_et_req_id
+			, a.mvn_et_reqst_dt				as mvn_et_req_dt
+			, a.mvn_et_endde				as mvn_et_end_day
+			, a.mvn_et_reqst_sttus_code		as mvn_et_req_st
+			, fn_cmm_get_code_nm('MVN_ET_REQ_ST', a.mvn_et_reqst_sttus_code) as mvn_et_req_st_nm
+			, a.mvn_et_reqst_sttus_dt		as mvn_et_req_st_dt
+			, a.mvn_id
+			, b.mvn_bgnde					as mvn_begin_day
+			, b.mvn_endde					as mvn_end_day
+			, b.entrps_id					as cmpny_id
+			, c.mber_nm 					as cmpny_nm
+			, c.charger_nm
+			, b.ceo_nm
+			, b.mvn_fclty_id				as mvn_fc_id
+			, d.mvn_fclty_nm				as mvn_fc_nm
+			, d.bulddong_code				as bno_cd
+			, fn_cmm_get_code_nm('BNO', d.bulddong_code) as bno_nm
+			, d.room_no
+			, d.mvn_sttus_code				as mvn_st
+			, fn_cmm_get_code_nm('MVN_ST', d.mvn_sttus_code) as mvn_st_nm
+			, b.mvn_entrps_sttus_code		as mvn_cmpny_st
+			, fn_cmm_get_code_nm('MVN_CMPNY_ST', b.mvn_entrps_sttus_code) as mvn_cmpny_st_nm
+			, #{totalItems} + 1 - (row_number() over(order by a.creat_dt desc)) as rn
+		from mvn_api.uspt_mvn_et_reqst a
+		join mvn_api.uspt_mvn_entrps_info b
+		  on a.mvn_id = b.mvn_id
+		join auth_api.cmmt_mber_info c
+		  on b.entrps_id = c.mber_id
+		join mvn_api.uspt_mvn_fclty_info d
+		  on b.mvn_fclty_id = d.mvn_fclty_id
+		where
+			<include refid="selectList-where"/>
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="select_lastMvnEtReq" resultType="aicluster.mvn.common.entity.UsptMvnEtReqst">
+		/** UsptMvnEtReqstDao.select_lastMvnEtReq */
+		select
+			<include refid="UsptMvnEtReqst-cols"><property name="alias" value="umer"/></include>
+		from mvn_api.uspt_mvn_et_reqst umer
+		join mvn_api.uspt_mvn_entrps_info umc
+		  on umer.mvn_id = umc.mvn_id
+		where
+			umer.mvn_id = #{mvnId}
+			and umc.entrps_id = #{cmpnyId}
+			and umer.mvn_et_reqst_dt = (select max(mvn_et_reqst_dt) from mvn_api.uspt_mvn_et_reqst where mvn_id = #{mvnId})
+	</select>
+
+    <select id="selectGoing_MvnId" resultType="aicluster.mvn.common.entity.UsptMvnEtReqst">
+		/** UsptMvnEtReqstDao.selectGoing_MvnId */
+		select
+			<include refid="UsptMvnEtReqst-cols"><property name="alias" value="umer"/></include>
+		from mvn_api.uspt_mvn_et_reqst umer
+		join mvn_api.uspt_mvn_entrps_info umc
+		  on umer.mvn_id = umc.mvn_id
+		where
+			umer.mvn_id = #{mvnId}
+			and umer.mvn_et_reqst_sttus_code not in ('RJCT', 'APRV') <!-- 현재 진행 중인 연장신청 건을 조회한다.(연장반려/연장승인이 아닌 건) -->
+    </select>
+
+	<select id="selectMvnEtReqSt_count" resultType="aicluster.mvn.common.dto.MvnEtReqStCountDto">
+		/** UsptMvnEtReqstDao.selectMvnEtReqSt_count */
+		select
+			coalesce(sum(case mvn_et_reqst_sttus_code when 'APLY' then 1 else 0 end), 0) as aply_count
+			,coalesce(sum(case mvn_et_reqst_sttus_code when 'SPLMNT' then 1 else 0 end), 0) as splmnt_count
+			,coalesce(sum(case mvn_et_reqst_sttus_code when 'RCPT' then 1 else 0 end), 0) as rcpt_count
+			,coalesce(sum(case mvn_et_reqst_sttus_code when 'RJCT' then 1 else 0 end), 0) as rjct_count
+			,coalesce(sum(case mvn_et_reqst_sttus_code when 'APRV' then 1 else 0 end), 0) as aply_count
+			,coalesce(sum(case mvn_et_reqst_sttus_code when 'RTRCN' then 1 else 0 end), 0) as rtrcn_count
+		from mvn_api.uspt_mvn_et_reqst
+	</select>
+
+</mapper>

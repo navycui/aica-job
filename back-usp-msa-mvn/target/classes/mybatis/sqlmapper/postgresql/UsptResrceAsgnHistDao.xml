@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.mvn.common.dao.UsptResrceAsgnHistDao">
+
+	<insert id="insert">
+		/** UsptResrceAsgnHistDao.insert */
+		insert into mvn_api.uspt_resrce_asgn_hist (
+			 hist_id
+			,hist_dt
+			,resrce_asgn_id
+			,opert_ty_nm
+			,opert_cn
+			,opertor_id
+		) values (
+			 #{histId}
+			,#{histDt}
+			,#{alrsrcId}
+			,#{workTypeNm}
+			,#{workCn}
+			,#{workerId}
+		)
+	</insert>
+
+	<select id="selectList" resultType="aicluster.mvn.common.entity.UsptResrceAsgnHist">
+		/** UsptResrceAsgnHistDao.selectList */
+		select
+			  hist_id
+			, hist_dt
+			, resrce_asgn_id	as alrsrc_id
+			, opert_ty_nm		as work_type_nm
+			, opert_cn			as work_cn
+			, opertor_id		as worker_id
+			, fn_cmm_get_member(opertor_id) as worker_nm
+		from mvn_api.uspt_resrce_asgn_hist
+		where
+			resrce_asgn_id = #{alrsrcId}
+		order by
+			hist_dt desc
+	</select>
+
+</mapper>

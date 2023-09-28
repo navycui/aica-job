@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.CmmtSesionInfoDao">
+
+	<select id="select" flushCache="true" useCache="false" resultType="aicluster.framework.common.entity.CmmtSesionInfo">
+	<![CDATA[
+		/** CmmtSesionInfoDao.select */
+		select
+			 sesion_id		as session_id
+			,sesion_value	as session_value
+			,expry_dt		as expired_dt
+			,creat_dt		as created_dt
+		from auth_api.cmmt_sesion_info
+		where
+			sesion_id = #{sessionId}
+			and expry_dt >= clock_timestamp()
+	]]>
+	</select>
+
+	<select id="selectById" flushCache="true" useCache="false" resultType="aicluster.framework.common.entity.CmmtSesionInfo">
+		/** CmmtSesionInfoDao.selectById */
+		select
+			 sesion_id		as session_id
+			,sesion_value	as session_value
+			,expry_dt		as expired_dt
+			,creat_dt		as created_dt
+		from auth_api.cmmt_sesion_info
+		where
+			sesion_id = #{sessionId}
+	</select>
+
+	<insert id="insert">
+		/** CmmtSesionInfoDao.insert */
+		insert into auth_api.cmmt_sesion_info (
+			 sesion_id
+			,sesion_value
+			,expry_dt
+			,creat_dt
+		) values (
+			 #{sessionId}
+			,#{sessionValue}
+			,#{expiredDt}
+			,#{createdDt}
+		)
+	</insert>
+
+	<update id="update">
+		/** CmmtSesionInfoDao.update */
+		update auth_api.cmmt_sesion_info set
+			 sesion_value = #{sessionValue}
+			,expry_dt    = #{expiredDt}
+			,creat_dt    = #{createdDt}
+		where
+			sesion_id = #{sessionId}
+	</update>
+
+	<update id="updateExpiredDt">
+		/** CmmtSesionInfoDao.updateExpiredDt */
+		update auth_api.cmmt_sesion_info set
+			expry_dt = #{expiredDt}
+		where
+			sesion_id = #{sessionId}
+	</update>
+
+	<delete id="deleteExpired">
+	<![CDATA[
+		/** CmmtSesionInfoDao.insert */
+		delete from auth_api.cmmt_sesion_info
+		where
+			expry_dt < clock_timestamp()
+	]]>
+	</delete>
+
+	<delete id="delete">
+		/** CmmtSesionInfoDao.delete */
+		delete from auth_api.cmmt_sesion_info
+		where
+			sesion_id = #{sessionId}
+	</delete>
+</mapper>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.FwStplatAgreDtlsDao">
+
+	<sql id="select_cols">
+			 stplat_ty_code	as terms_type
+			,bgnde			as begin_day
+			,essntl_at		as required
+			,mber_id		as member_id
+			,agre_dt		as consent_dt
+			,hold_exprde	as possess_expired_day
+			,agre_at		as consent_yn
+	</sql>
+
+	<insert id="insertList">
+		/** FwStplatAgreDtlsDao.insert */
+		insert into com_api.cmmt_stplat_agre_dtls (
+			 stplat_ty_code
+			,bgnde
+			,essntl_at
+			,mber_id
+			,agre_dt
+			,hold_exprde
+			,agre_at
+		) values
+		<foreach item="item" collection="list" separator=",">
+		(
+			 #{item.termsType}
+			,#{item.beginDay}
+			,#{item.required}
+			,#{item.memberId}
+			,#{item.consentDt}
+			,#{item.possessExpiredDay}
+			,#{item.consentYn}
+		)
+		</foreach>
+	</insert>
+
+	<delete id="delete">
+		/** FwStplatAgreDtlsDao.delete */
+		delete from com_api.cmmt_stplat_agre_dtls
+		where
+			stplat_ty_code = #{termsType}
+			and mber_id = #{memberId}
+	</delete>
+
+	<select id="selectList" resultType="aicluster.framework.common.entity.CmmtStplatAgreDtls">
+		/** FwStplatAgreDtlsDao.selectList */
+		select
+			<include refid="select_cols"/>
+		from com_api.cmmt_stplat_agre_dtls
+		where
+			stplat_ty_code = #{termsType}
+			<if test='beginDay != null and beginDay != ""'>
+			and bgnde = #{beginDay}
+			</if>
+			<if test='required != null'>
+			and essntl_at = #{required}
+			</if>
+			<if test='memberId != null and memberId != ""'>
+			and mber_id = #{memberId}
+			</if>
+		order by agre_dt desc
+	</select>
+
+	<select id="selectExpiredList" resultType="aicluster.framework.common.entity.CmmtStplatAgreDtls">
+		/** FwStplatAgreDtlsDao.selectExpiredList */
+		select
+			<include refid="select_cols"/>
+		from com_api.cmmt_stplat_agre_dtls
+		where
+			1=1
+			<choose>
+				<when test="expiredCalType == 'DAY'">
+			and hold_exprde = to_char((now() + concat(#{expiredCalVal},' day')::interval), 'YYYYMMDD')
+				</when>
+				<when test="expiredCalType == 'MONTH'">
+			and hold_exprde = to_char((now() + concat(#{expiredCalVal},' month')::interval), 'YYYYMMDD')
+				</when>
+				<otherwise>
+			and hold_exprde = to_char(now(), 'YYYYMMDD')
+				</otherwise>
+			</choose>
+			<if test='termsType != null and termsType != ""'>
+			and stplat_ty_code = #{termsType}
+			</if>
+			<if test='beginDay != null and beginDay != ""'>
+			and bgnde = #{beginDay}
+			</if>
+			<if test='required != null'>
+			and essntl_at = #{required}
+			</if>
+		order by agre_dt
+	</select>
+</mapper>

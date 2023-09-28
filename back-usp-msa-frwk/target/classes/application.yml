@@ -1,0 +1,46 @@
+server:
+   servlet:
+      context-path: "/pc"
+   error: 
+      include-exception: false # 오류 응답에 exception의 내용을 포함할지 여부 
+      include-stacktrace: always # 오류 응답에 stacktrace 내용을 포함할 지 여부
+      whitelabel:
+         enabled: false
+
+spring:
+   devtools:
+      livereload:
+         enabled: true
+         
+   h2:
+      console:
+         enabled: true
+
+jwt:
+   secret: c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFsLWppd29vbi1zcHJpbmctYm9vdC1zZWN1cml0eS1qd3QtdHV0b3JpYWwKKK
+   # 10분(msec)
+   accessTokenExpireTime: 600000
+   # 30분(msec)
+   refreshTokenExpireTime: 1800000
+   exceptAutoRefreshTokenUriPattern: /member/api/login/refresh-token/*
+   
+env:
+   system-id: "API_FRAMEWORK"
+   
+email:
+   url: "https://api-mail.cloud.toast.com"
+   app-key: "lCQTV8avjXfRfmcU"
+   secret-key: "i8v3IvXg"
+   sender-email: "webmaster@atops.or.kr"
+   sender-name: "AICA 인공지능산업융합사업단"
+
+sms:
+   url: "https://api-sms.cloud.toast.com"
+   app-key: "SohASg9V5x6Sqp0E"
+   secret-key: "CXNCA6Iv"
+   sender-no: "0626103910"
+
+# 휴대폰 본인인증(Nice ID)  
+nice-id:
+   site-code: "BY099"
+   site-password: "VI6llMhRTL5A"

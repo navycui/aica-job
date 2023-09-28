@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.mvn.common.dao.UsptMvnEntrpsPfmcDao">
+
+	<sql id="selectList-where">
+			a.presentn_ym = #{param.sbmsnYm}
+			<if test='param.rsltSttusCd != null and param.rsltSttusCd != ""'>
+			and d.pfmc_sttus_code = #{param.rsltSttusCd}
+			</if>
+			<if test='param.bnoRoomNo != null and param.bnoRoomNo != ""'>
+			and c.bulddong_code = split_part(#{param.bnoRoomNo}, '|-|', 1)
+			and c.room_no like split_part(#{param.bnoRoomNo}, '|-|', 2)
+			</if>
+			<if test='param.cmpnyNm != null and param.cmpnyNm != ""'>
+			and fn_cmm_get_member_nm(b.entrps_id) like '%'||#{param.cmpnyNm}||'%'
+			</if>
+	</sql>
+
+	<insert id="insert">
+		/** UsptMvnEntrpsPfmcDao.insert */
+		insert into mvn_api.uspt_mvn_entrps_pfmc (
+			 mvn_id
+			,presentn_ym
+			,pfmc_id
+			,presentn_de
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			 #{mvnId}
+			,#{sbmsnYm}
+			,#{rsltId}
+			,#{sbmsnDay}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<select id="select" resultType="aicluster.mvn.common.entity.UsptMvnEntrpsPfmc">
+		/** UsptMvnEntrpsPfmcDao.select */
+		select
+			 mvn_id
+			,presentn_ym		as sbmsn_ym
+			,pfmc_id			as rslt_id
+			,presentn_de		as sbmsn_day
+			,creatr_id			as creator_id
+			,creat_dt			as created_dt
+			,updusr_id			as updater_id
+			,updt_dt			as updated_dt
+		from mvn_api.uspt_mvn_entrps_pfmc
+		where
+			mvn_id = #{mvnId}
+			and presentn_ym = #{sbmsnYm}
+	</select>
+
+	<delete id="delete">
+		/** UsptMvnEntrpsPfmcDao.delete */
+		delete from mvn_api.uspt_mvn_entrps_pfmc
+		where
+			mvn_id = #{mvnId}
+			and presentn_ym = #{sbmsnYm}
+	</delete>
+
+	<select id="selectList_count" resultType="long">
+		/** UsptMvnEntrpsPfmcDao.selectList_count */
+		select
+			 count(*) as cnt
+		from mvn_api.uspt_mvn_entrps_pfmc a
+		join mvn_api.uspt_mvn_entrps_info b
+		  on a.mvn_id = b.mvn_id
+		join mvn_api.uspt_mvn_fclty_info c
+		  on b.mvn_fclty_id = c.mvn_fclty_id
+		join usp_api.uspt_pfmc d
+		  on a.pfmc_id = d.pfmc_id
+		where
+			<include refid="selectList-where"></include>
+	</select>
+
+	<select id="selectList" resultType="aicluster.mvn.common.dto.CmpnyPrfrmListItemDto">
+		/** UsptMvnEntrpsPfmcDao.selectList */
+		select
+			  a.mvn_id
+			, b.entrps_id				as cmpny_id
+			, fn_cmm_get_member_nm(b.entrps_id) as cmpny_nm
+			, c.bulddong_code			as bno_cd
+			, fn_cmm_get_code_nm('BNO', c.bulddong_code) as bno_nm
+			, c.room_no
+			, b.mvn_entrps_sttus_code	as mvn_cmpny_st
+			, fn_cmm_get_code_nm('MVN_CMPNY_ST', b.mvn_entrps_sttus_code) as mvn_cmpny_st_nm
+			, a.presentn_ym				as sbmsn_ym
+			, a.presentn_de				as sbmsn_day
+			, d.pfmc_sttus_code			as rslt_sttus_cd
+			, fn_cmm_get_code_nm('RSLT_STTUS', d.pfmc_sttus_code) as rslt_sttus_nm
+			, #{totalItems} + 1 - (row_number() over(order by a.creat_dt desc)) as rn
+		from mvn_api.uspt_mvn_entrps_pfmc a
+		join mvn_api.uspt_mvn_entrps_info b
+		  on a.mvn_id = b.mvn_id
+		join mvn_api.uspt_mvn_fclty_info c
+		  on b.mvn_fclty_id = c.mvn_fclty_id
+		join usp_api.uspt_pfmc d
+		  on a.pfmc_id = d.pfmc_id
+		where
+			<include refid="selectList-where"></include>
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+
+	<select id="selectRslt" resultType="aicluster.mvn.common.entity.UsptRslt">
+		/** UsptMvnEntrpsPfmcDao.selectRslt */
+		select
+			  pfmc_id			as rslt_id
+			, apply_id
+			, pfmc_sttus_code	as rslt_sttus_cd
+			, splemnt_reqst_cn	as makeup_req_cn
+			, atchmnfl_group_id	as attachment_group_id
+			, creatr_id			as creator_id
+			, creat_dt			as created_dt
+			, updusr_id			as updater_id
+			, updt_dt			as updated_dt
+		from usp_api.uspt_pfmc
+		where
+			pfmc_id = #{rsltId}
+	</select>
+
+	<select id="selectRecentPresentnYm" resultType="String">
+		/** UsptMvnEntrpsPfmcDao.selectRecentPresentnYm */
+		select
+			max(presentn_ym) as recent_presentn_ym
+		from mvn_api.uspt_mvn_entrps_pfmc
+		where mvn_id = #{mvnId}
+	</select>
+
+	<select id="selectRsltSttusCd_count" resultType="aicluster.mvn.common.dto.MvnCmpnyRsltSttusCdCountDto">
+		/** UsptMvnEntrpsPfmcDao.selectRsltSttusCd_count */
+		select
+			coalesce(sum(case d.pfmc_sttus_code when 'PR' then 1 else 0 end), 0) as pr_count
+			,coalesce(sum(case d.pfmc_sttus_code when 'PS' then 1 else 0 end), 0) as ps_count
+			,coalesce(sum(case d.pfmc_sttus_code when 'SR' then 1 else 0 end), 0) as sr_count
+			,coalesce(sum(case d.pfmc_sttus_code when 'RC' then 1 else 0 end), 0) as rc_count
+		from mvn_api.uspt_mvn_entrps_pfmc a
+		join mvn_api.uspt_mvn_entrps_info b
+		  on a.mvn_id = b.mvn_id
+		join mvn_api.uspt_mvn_fclty_info c
+		  on b.mvn_fclty_id = c.mvn_fclty_id
+		join usp_api.uspt_pfmc d
+		  on a.pfmc_id = d.pfmc_id
+	</select>
+
+</mapper>

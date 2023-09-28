@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.FwUsptEvlMfcmmDao">
+
+	<select id="selectByExpertId" resultType="aicluster.framework.common.entity.EvlMfcmm">
+		/** FwUsptEvlMfcmmDao.selectByExpertId */
+		select
+			evl_mfcmm_id
+			,evl_cmit_id
+			,expert_id
+			,encpt_password		as enc_password
+			,use_bgnde
+			,use_endde
+			,refresh_token
+			,atend_sttus_code	as atend_sttus_cd
+			,atend_dt
+		from usp_api.uspt_evl_mfcmm
+		where
+			evl_cmit_id = #{evlCmitId}
+			and expert_id = #{expertId}
+	</select>
+
+	<select id="selectBnMember" resultType="aicluster.framework.common.entity.BnMember">
+	<![CDATA[
+		/** FwUsptEvlMfcmmDao.selectBnMember */
+		select
+			b.evl_mfcmm_id as member_id
+			,b.evl_mfcmm_id as login_id
+			,a.expert_nm as member_nm
+			,'EVALUATOR' as member_type
+			,'NORMAL' as member_st
+			,a.sexdstn_code as gender
+			,a.encpt_brthdy as enc_birthday
+			,b.encpt_password as enc_passwd
+			,a.wrc_nm as dept_nm
+			,a.ofcps_nm as position_nm
+			,b.refresh_token as refresh_token
+			,'EVL' as authority_id
+			,true as enabled
+		from usp_api.uspt_expert a,
+			usp_api.uspt_evl_mfcmm b
+		where
+			a.expert_id = b.expert_id
+			and b.evl_mfcmm_id = #{evlMfcmmId}
+			and b.use_bgnde <= to_char(now(), 'yyyymmdd')
+			and b.use_endde >= to_char(now(), 'yyyymmdd')
+	]]>
+	</select>
+
+	<select id="selectBnMember_refreshToken" resultType="aicluster.framework.common.entity.BnMember">
+	<![CDATA[
+		/** FwUsptEvlMfcmmDao.selectBnMember_refreshToken */
+		select
+			b.evl_mfcmm_id as member_id
+			,b.evl_mfcmm_id as login_id
+			,a.expert_nm as member_nm
+			,'EVALUATOR' as member_type
+			,'NORMAL' as member_st
+			,a.sexdstn_code as gender
+			,a.encpt_brthdy as enc_birthday
+			,b.encpt_password as enc_passwd
+			,a.wrc_nm as dept_nm
+			,a.ofcps_nm as position_nm
+			,b.refresh_token as refresh_token
+			,'EVL' as authority_id
+			,true as enabled
+		from usp_api.uspt_expert a,
+			usp_api.uspt_evl_mfcmm b
+		where
+			a.expert_id = b.expert_id
+			and b.refresh_token = #{refreshToken}
+			and b.use_bgnde <= to_char(now(), 'yyyymmdd')
+			and b.use_endde >= to_char(now(), 'yyyymmdd')
+	]]>
+	</select>
+
+	<select id="select" resultType="aicluster.framework.common.entity.EvlMfcmm">
+		/** FwUsptEvlMfcmmDao.select */
+		select
+			evl_mfcmm_id
+			,evl_cmit_id
+			,expert_id
+			,encpt_password		as enc_password
+			,use_bgnde
+			,use_endde
+			,refresh_token
+			,atend_sttus_code	as atend_sttus_cd
+			,atend_dt
+		from usp_api.uspt_evl_mfcmm
+		where
+			evl_mfcmm_id = #{evlMfcmmId}
+	</select>
+
+	<update id="updateRefreshToken">
+		/** FwUsptEvlMfcmmDao.updateRefreshToken */
+		update usp_api.uspt_evl_mfcmm set
+			refresh_token  = #{refreshToken}
+		where
+			evl_mfcmm_id = #{memberId}
+	</update>
+
+</mapper>

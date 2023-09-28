@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.FwAuthorDao">
+
+	<select id="selectAuthorityRoles" resultType="aicluster.framework.common.entity.BnAuthorityRole">
+		/** FwAuthorDao.selectAuthorityRoles */
+		select
+			author_id	as authority_id
+			,role_id	as role_id
+		from auth_api.cmmt_author_role
+		where
+			author_id = #{authorityId}
+	</select>
+
+	<select id="selectProgramRoles" resultType="aicluster.framework.common.entity.ProgramRole">
+		/** FwAuthorDao.selectProgramRoles */
+		select
+			a.http_method	as http_method
+			,a.url_pttrn	as url_pattern
+			,b.role_id		as role_id
+		from auth_api.cmmt_progrm a
+		join auth_api.cmmt_progrm_role b
+			on a.progrm_id = b.progrm_id
+		order by
+			a.inspct_ordr
+	</select>
+
+</mapper>

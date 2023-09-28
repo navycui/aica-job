@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.FwUserDao">
+
+	<sql id="cmmvUser_cols">
+		 mber_id			as member_id
+		,mber_nm			as member_nm
+		,ncnm				as nickname
+		,login_id			as login_id
+		,mber_ty_code		as member_type
+		,sexdstn_code		as gender
+		,dept_nm			as dept_nm
+		,clsf_nm			as position_nm
+		,author_id			as authority_id
+		,mber_sttus_code	as member_st
+		,encpt_email		as enc_email
+		,encpt_mbtlnum		as enc_mobile_no
+		,refresh_token		as refresh_token
+	</sql>
+
+	<select id="select" resultType="aicluster.framework.common.entity.UserDto">
+		/** FwUserDao.select */
+		select
+			<include refid="cmmvUser_cols"/>
+		from auth_api.cmmv_user
+		where
+			mber_id = #{memberId}
+	</select>
+
+</mapper>

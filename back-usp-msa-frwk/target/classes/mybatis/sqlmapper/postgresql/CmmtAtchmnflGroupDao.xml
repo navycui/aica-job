@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.CmmtAtchmnflGroupDao">
+
+	<sql id="CmmtAtchmnflGroup_cols">
+		atchmnfl_group_id	as attachment_group_id
+		,creatr_id			as creator_id
+		,creat_dt			as created_dt
+		,updusr_id			as updater_id
+		,updt_dt			as updated_dt
+	</sql>
+
+	<select id="select" resultType="aicluster.framework.common.entity.CmmtAtchmnflGroup">
+		/** CmmtAtchmnflGroupDao.select */
+		select
+			<include refid="CmmtAtchmnflGroup_cols"/>
+		from com_api.cmmt_atchmnfl_group
+		where
+			atchmnfl_group_id = #{attachmentGroupId}
+	</select>
+
+	<insert id="insert">
+		/** CmmtAtchmnflGroupDao.insert */
+		insert into com_api.cmmt_atchmnfl_group (
+			atchmnfl_group_id
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values (
+			#{attachmentGroupId}
+			,#{creatorId}
+			,#{createdDt}
+			,#{updaterId}
+			,#{updatedDt}
+		)
+	</insert>
+
+	<delete id="delete">
+		/** CmmtAtchmnflGroupDao.delete */
+		delete from com_api.cmmt_atchmnfl_group
+		where
+			atchmnfl_group_id = #{attachmentGroupId}
+	</delete>
+</mapper>

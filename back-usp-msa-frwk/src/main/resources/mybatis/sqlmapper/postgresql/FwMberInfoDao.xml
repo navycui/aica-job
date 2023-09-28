@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.FwMberInfoDao">
+
+	<sql id="bnMember_cols">
+		mber_id				as member_id
+		,login_id			as login_id
+		,mber_nm			as member_nm
+		,mber_ty_code		as member_type
+		,mber_sttus_code	as member_st
+		,sexdstn_code		as gender
+		,encpt_brthdy		as enc_birthday
+		,encpt_password		as enc_passwd
+		,null 				as dept_nm
+		,null 				as position_nm
+		,refresh_token		as refresh_token
+		,author_id			as authority_id
+		,case
+			when mber_sttus_code = 'NORMAL' then true
+		 	else false
+		 end as enabled
+	</sql>
+
+	<select id="selectBnMember_loginId" resultType="aicluster.framework.common.entity.BnMember">
+		/** FwMberInfoDao.selectBnMember_loginId */
+		select
+			<include refid="bnMember_cols"/>
+		from auth_api.cmmt_mber_info
+		where
+			login_id = #{loginId}
+	</select>
+
+	<select id="selectBnMember_refreshToken" resultType="aicluster.framework.common.entity.BnMember">
+		/** FwMberInfoDao.selectBnMember_refreshToken */
+		select
+			<include refid="bnMember_cols"/>
+		from auth_api.cmmt_mber_info
+		where
+			refresh_token = #{refreshToken}
+	</select>
+
+	<select id="selectBnMember_naverToken" resultType="aicluster.framework.common.entity.BnMember">
+		/** FwMberInfoDao.selectBnMember_naverToken */
+		select
+			<include refid="bnMember_cols"/>
+		from auth_api.cmmt_mber_info
+		where
+			naver_token = #{naverToken}
+	</select>
+
+	<update id="updateRefreshToken">
+		/** FwMberInfoDao.updateRefreshToken */
+		update auth_api.cmmt_mber_info set
+			refresh_token = #{refreshToken}
+		where
+			mber_id = #{memberId}
+	</update>
+</mapper>

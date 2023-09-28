@@ -1,0 +1,341 @@
+{
+  "groups": [
+    {
+      "name": "docs",
+      "type": "aicluster.framework.config.DocsConfig",
+      "sourceType": "aicluster.framework.config.DocsConfig"
+    },
+    {
+      "name": "email",
+      "type": "aicluster.framework.config.EmailConfig",
+      "sourceType": "aicluster.framework.config.EmailConfig"
+    },
+    {
+      "name": "env",
+      "type": "aicluster.framework.config.EnvConfig",
+      "sourceType": "aicluster.framework.config.EnvConfig"
+    },
+    {
+      "name": "env.cookie",
+      "type": "aicluster.framework.config.EnvConfig$Cookie",
+      "sourceType": "aicluster.framework.config.EnvConfig",
+      "sourceMethod": "public aicluster.framework.config.EnvConfig.Cookie getCookie() "
+    },
+    {
+      "name": "env.cors",
+      "type": "aicluster.framework.config.EnvConfig$Cors",
+      "sourceType": "aicluster.framework.config.EnvConfig",
+      "sourceMethod": "public aicluster.framework.config.EnvConfig.Cors getCors() "
+    },
+    {
+      "name": "env.dir",
+      "type": "aicluster.framework.config.EnvConfig$Dir",
+      "sourceType": "aicluster.framework.config.EnvConfig",
+      "sourceMethod": "public aicluster.framework.config.EnvConfig.Dir getDir() "
+    },
+    {
+      "name": "nice-id",
+      "type": "aicluster.framework.common.util.dto.NiceIdConfig",
+      "sourceType": "aicluster.framework.common.util.dto.NiceIdConfig"
+    },
+    {
+      "name": "sms",
+      "type": "aicluster.framework.config.SmsConfig",
+      "sourceType": "aicluster.framework.config.SmsConfig"
+    },
+    {
+      "name": "spring.datasource.hikari",
+      "type": "com.zaxxer.hikari.HikariConfig",
+      "sourceType": "aicluster.sample.config.DataSourceConfig",
+      "sourceMethod": "public com.zaxxer.hikari.HikariConfig hikariConfig() "
+    }
+  ],
+  "properties": [
+    {
+      "name": "docs.url",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.DocsConfig"
+    },
+    {
+      "name": "email.app-key",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EmailConfig"
+    },
+    {
+      "name": "email.secret-key",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EmailConfig"
+    },
+    {
+      "name": "email.sender-email",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EmailConfig"
+    },
+    {
+      "name": "email.sender-name",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EmailConfig"
+    },
+    {
+      "name": "email.url",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EmailConfig"
+    },
+    {
+      "name": "env.cookie.domain",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EnvConfig$Cookie"
+    },
+    {
+      "name": "env.cookie.http-only",
+      "type": "java.lang.Boolean",
+      "sourceType": "aicluster.framework.config.EnvConfig$Cookie"
+    },
+    {
+      "name": "env.cookie.max-age",
+      "type": "java.lang.Integer",
+      "sourceType": "aicluster.framework.config.EnvConfig$Cookie"
+    },
+    {
+      "name": "env.cookie.path",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EnvConfig$Cookie"
+    },
+    {
+      "name": "env.cookie.secure",
+      "type": "java.lang.Boolean",
+      "sourceType": "aicluster.framework.config.EnvConfig$Cookie"
+    },
+    {
+      "name": "env.cors.headers",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "aicluster.framework.config.EnvConfig$Cors"
+    },
+    {
+      "name": "env.cors.methods",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "aicluster.framework.config.EnvConfig$Cors"
+    },
+    {
+      "name": "env.cors.origins",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "aicluster.framework.config.EnvConfig$Cors"
+    },
+    {
+      "name": "env.cors.pattern",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EnvConfig$Cors"
+    },
+    {
+      "name": "env.dir.core-log",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EnvConfig$Dir"
+    },
+    {
+      "name": "env.dir.upload",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EnvConfig$Dir"
+    },
+    {
+      "name": "env.system-id",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.EnvConfig"
+    },
+    {
+      "name": "nice-id.site-code",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.common.util.dto.NiceIdConfig"
+    },
+    {
+      "name": "nice-id.site-password",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.common.util.dto.NiceIdConfig"
+    },
+    {
+      "name": "sms.app-key",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.SmsConfig"
+    },
+    {
+      "name": "sms.secret-key",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.SmsConfig"
+    },
+    {
+      "name": "sms.sender-no",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.SmsConfig"
+    },
+    {
+      "name": "sms.url",
+      "type": "java.lang.String",
+      "sourceType": "aicluster.framework.config.SmsConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.allow-pool-suspension",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.auto-commit",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.catalog",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.connection-init-sql",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.connection-test-query",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.connection-timeout",
+      "type": "java.lang.Long",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.data-source-class-name",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.data-source-j-n-d-i",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.data-source-properties",
+      "type": "java.util.Properties",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.driver-class-name",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.exception-override-class-name",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.health-check-properties",
+      "type": "java.util.Properties",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.health-check-registry",
+      "type": "java.lang.Object",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.idle-timeout",
+      "type": "java.lang.Long",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.initialization-fail-timeout",
+      "type": "java.lang.Long",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.isolate-internal-queries",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.jdbc-url",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.keepalive-time",
+      "type": "java.lang.Long",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.leak-detection-threshold",
+      "type": "java.lang.Long",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.max-lifetime",
+      "type": "java.lang.Long",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.maximum-pool-size",
+      "type": "java.lang.Integer",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.metric-registry",
+      "type": "java.lang.Object",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.metrics-tracker-factory",
+      "type": "com.zaxxer.hikari.metrics.MetricsTrackerFactory",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.minimum-idle",
+      "type": "java.lang.Integer",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.password",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.pool-name",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.read-only",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.register-mbeans",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.scheduled-executor",
+      "type": "java.util.concurrent.ScheduledExecutorService",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.schema",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.transaction-isolation",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.username",
+      "type": "java.lang.String",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.hikari.validation-timeout",
+      "type": "java.lang.Long",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    }
+  ],
+  "hints": []
+}

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="aicluster.mvn.common.dao.UsptResrceInvntryInfoHistDao">
+	<insert id="insertList">
+		/** UsptResrceInvntryInfoHistDao.insertList */
+		insert into mvn_api.uspt_resrce_invntry_info_hist (
+			  hist_id
+			, hist_dt
+			, resrce_id
+			, resrce_group_code
+			, resrce_ty_nm
+			, resrce_ty_unit_code
+			, invntry_qy
+			, tot_qy
+			, resrce_calqy
+			, opert_ty_nm
+			, opertor_id
+		) values
+		<foreach item="item" collection="list" separator=",">
+		(
+			  #{item.histId}
+			, #{item.histDt}
+			, #{item.rsrcId}
+			, #{item.rsrcGroupCd}
+			, #{item.rsrcTypeNm}
+			, #{item.rsrcTypeUnitCd}
+			, #{item.invtQy}
+			, #{item.totalQy}
+			, #{item.rsrcCalcQy}
+			, #{item.workTypeNm}
+			, #{item.workerId}
+		)
+		</foreach>
+	</insert>
+
+	<select id="selectList_histDt" resultType="aicluster.mvn.common.entity.UsptResrceInvntryInfoHist">
+		/** UsptResrceInvntryInfoHistDao.selectList_histDt */
+		select
+			  a.hist_id
+			, a.hist_dt
+			, a.resrce_id			as rsrc_id
+			, a.resrce_group_code	as rsrc_group_cd
+			, b.code_nm 			as rsrc_group_nm
+			, a.resrce_ty_nm		as rsrc_type_nm
+			, a.resrce_ty_unit_code	as rsrc_type_unit_cd
+			, fn_cmm_get_code_nm('RSRC_TYPE_UNIT', a.resrce_ty_unit_code) as rsrc_type_unit_nm
+			, a.invntry_qy			as invt_qy
+			, a.tot_qy				as total_qy
+			, a.resrce_calqy		as rsrc_calc_qy
+			, a.opert_ty_nm			as work_type_nm
+			, a.opertor_id			as worker_id
+			, fn_cmm_get_member_nm(a.opertor_id) as worker_nm
+		from mvn_api.uspt_resrce_invntry_info_hist a
+		join com_api.cmmt_code b
+		  on a.resrce_group_code = b.code
+		     and b.code_group_id = 'RSRC_GROUP'
+		where
+			to_char(hist_dt, 'YYYYMMDD') = #{histDt}
+		order by
+			  a.hist_dt
+			, b.sort_ordr
+			, a.resrce_ty_nm
+	</select>
+
+	<select id="selectHistDtGroupList_count" resultType="Long">
+		/** UsptResrceInvntryInfoHistDao.selectHistDtGroupList_count */
+		select
+			 count(*) as cnt
+		from (
+			select
+				 to_char(hist_dt, 'YYYYMMDD') as hist_dt
+			from mvn_api.uspt_resrce_invntry_info_hist
+			group by to_char(hist_dt, 'YYYYMMDD')
+			) x
+	</select>
+
+	<select id="selectHistDtGroupList" resultType="aicluster.mvn.common.dto.HistDtListItemDto">
+		/** UsptResrceInvntryInfoHistDao.selectHistDtGroupList */
+		select
+			  x.hist_dt::date as hist_dt
+			<!-- , #{totalItems} + 1 - (row_number() over(order by x.hist_dt desc)) as rn -->
+		from (
+			select
+				 to_char(hist_dt, 'YYYYMMDD') as hist_dt
+			from mvn_api.uspt_resrce_invntry_info_hist
+			group by to_char(hist_dt, 'YYYYMMDD')
+			) x
+		where
+			1=1
+		offset
+			#{beginRowNum} - 1
+		limit
+			#{itemsPerPage}
+	</select>
+</mapper>

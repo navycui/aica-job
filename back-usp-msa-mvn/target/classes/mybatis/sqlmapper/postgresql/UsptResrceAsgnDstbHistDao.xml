@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="aicluster.mvn.common.dao.UsptResrceAsgnDstbHistDao">
+
+	<insert id="insertList">
+		/** UsptResrceAsgnDstbHistDao.insertList */
+		insert into mvn_api.uspt_resrce_asgn_dstb_hist (
+			 hist_id
+			,hist_dt
+			,frst_dstb_at
+			,resrce_asgn_id
+			,resrce_id
+			,resrce_use_at
+			,resrce_dstb_qy
+			,resrce_dstb_cn
+			,opert_ty_nm
+			,opertor_id
+		) values
+		<foreach item="item" collection="list" separator=",">
+		(
+			  #{item.histId}
+			, #{item.histDt}
+			, #{item.firstDstbYn}
+			, #{item.alrsrcId}
+			, #{item.rsrcId}
+			, #{item.rsrcUseYn}
+			, #{item.rsrcDstbQy}
+			, #{item.rsrcDstbCn}
+			, #{item.workTypeNm}
+			, #{item.workerId}
+		)
+		</foreach>
+	</insert>
+
+	<select id="selectList" resultType="aicluster.mvn.common.dto.AlrsrcDstbHistDto">
+		/** UsptResrceAsgnDstbHistDao.selectList */
+		select
+			x.hist_dt
+			, x.frst_dstb_at		as first_dstb_yn
+			, x.resrce_asgn_id		as alrsrc_id
+			, max(x.gpu_alrsrc_cn)	as gpu_alrsrc_cn
+			, max(x.strg_alrsrc_cn)	as strg_alrsrc_cn
+			, max(x.saas_alrsrc_cn)	as saas_alrsrc_cn
+			, max(x.dtlk_alrsrc_cn)	as dtlk_alrsrc_cn
+			, x.opert_ty_nm			as work_type_nm
+			, x.opertor_id			as worker_id
+			, fn_cmm_get_member_nm(x.opertor_id) as worker_nm
+		from (
+				select
+					  a.hist_dt
+					, a.frst_dstb_at
+					, a.resrce_asgn_id
+					, case
+						when b.resrce_group_code = 'GPU' then b.resrce_ty_nm || '(' || a.resrce_dstb_qy || ')'
+						else null
+					end as gpu_alrsrc_cn
+					, case
+						when b.resrce_group_code = 'STORAGE' then b.resrce_ty_nm || '(' || a.resrce_dstb_qy || ')'
+						else null
+					end as strg_alrsrc_cn
+					, case
+						when b.resrce_group_code = 'SAAS' then case a.resrce_use_at when true then '사용' || '(' || a.resrce_dstb_cn  || ')' else '사용안함' end
+						else null
+					end as saas_alrsrc_cn
+					, case
+						when b.resrce_group_code = 'DATALAKE' then case a.resrce_use_at when true then '사용' else '사용안함' end
+						else null
+					end as dtlk_alrsrc_cn
+					, a.opert_ty_nm
+					, a.opertor_id
+				from mvn_api.uspt_resrce_asgn_dstb_hist a
+				join mvn_api.uspt_resrce_invntry_info b
+				  on a.resrce_id = b.resrce_id
+				where
+					a.resrce_asgn_id = #{alrsrcId}
+					and a.frst_dstb_at = false
+			) x
+		group by x.hist_dt
+			, x.resrce_asgn_id
+			, x.frst_dstb_at
+			, x.opert_ty_nm
+			, x.opertor_id
+		order by x.hist_dt desc
+	</select>
+
+	<select id="selectList_firstDstb" resultType="aicluster.mvn.common.dto.AlrsrcFirstDstbDto">
+		/** UsptResrceAsgnDstbHistDao.selectList_firstDstb */
+		select
+			  a.resrce_asgn_id		as alrsrc_id
+			, a.resrce_id			as rsrc_id
+			, b.resrce_group_code	as rsrc_group_cd
+			, b.resrce_ty_nm		as rsrc_type_nm
+			, b.resrce_ty_unit_code	as rsrc_type_unit_cd
+			, fn_cmm_get_code_nm('RSRC_TYPE_UNIT', b.resrce_ty_unit_code) as rsrc_type_unit_nm
+			, a.resrce_use_at		as rsrc_use_yn
+			, a.resrce_dstb_qy		as rsrc_dstb_qy
+			, a.resrce_dstb_cn		as rsrc_dstb_cn
+		from mvn_api.uspt_resrce_asgn_dstb_hist a
+		join mvn_api.uspt_resrce_invntry_info b
+		  on a.resrce_id = b.resrce_id
+		where
+			a.resrce_asgn_id = #{alrsrcId}
+			and a.frst_dstb_at = true
+		order by
+			hist_dt desc
+	</select>
+
+</mapper>

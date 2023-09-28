@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.CmmtAtchmnflDao">
+
+	<sql id="CmmtAtchmnfl_cols">
+		atchmnfl_id			as attachment_id
+		,atchmnfl_group_id	as attachment_group_id
+		,file_nm			as file_nm
+		,cntnts_ty_nm		as content_type
+		,file_size			as file_size
+		,file_stre_path		as saved_file_path
+		,dwld_numt			as download_cnt
+		,file_delete_at		as file_deleted
+		,creatr_id			as creator_id
+		,creat_dt			as created_dt
+		,updusr_id			as updater_id
+		,updt_dt			as updated_dt
+	</sql>
+
+	<insert id="insertList">
+		/** CmmtAtchmnflDao.insertList */
+		insert into com_api.cmmt_atchmnfl (
+			atchmnfl_id
+			,atchmnfl_group_id
+			,file_nm
+			,cntnts_ty_nm
+			,file_size
+			,file_stre_path
+			,dwld_numt
+			,file_delete_at
+			,creatr_id
+			,creat_dt
+			,updusr_id
+			,updt_dt
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+			(
+				#{item.attachmentId}
+				,#{item.attachmentGroupId}
+				,#{item.fileNm}
+				,#{item.contentType}
+				,#{item.fileSize}
+				,#{item.savedFilePath}
+				,#{item.downloadCnt}
+				,#{item.fileDeleted}
+				,#{item.creatorId}
+				,#{item.createdDt}
+				,#{item.updaterId}
+				,#{item.updatedDt}
+			)
+		</foreach>
+	</insert>
+
+	<select id="select" resultType="aicluster.framework.common.entity.CmmtAtchmnfl">
+		/** CmmtAtchmnflDao.select */
+		select
+			<include refid="CmmtAtchmnfl_cols"/>
+		from com_api.cmmt_atchmnfl
+		where
+			atchmnfl_id = #{attachmentId}
+	</select>
+
+	<update id="increaseDownloadCnt">
+		/** CmmtAtchmnflDao.increaseDownloadCnt */
+		update com_api.cmmt_atchmnfl set
+			dwld_numt = dwld_numt + 1
+		where
+			atchmnfl_id = #{attachmentId}
+	</update>
+
+	<select id="selectList" resultType="aicluster.framework.common.entity.CmmtAtchmnfl">
+		/** CmmtAtchmnflDao.selectList */
+		select
+			<include refid="CmmtAtchmnfl_cols" />
+		from com_api.cmmt_atchmnfl
+		where
+			atchmnfl_group_id = #{attachmentGroupId}
+	</select>
+
+	<select id="selectList_notDeleted" resultType="aicluster.framework.common.entity.CmmtAtchmnfl">
+		/** CmmtAtchmnflDao.selectList_notDeleted */
+		select
+			<include refid="CmmtAtchmnfl_cols" />
+		from com_api.cmmt_atchmnfl
+		where
+			atchmnfl_group_id = #{attachmentGroupId}
+			and file_delete_at = false
+	</select>
+
+	<delete id="delete">
+		/** CmmtAtchmnflDao.delete */
+		delete from com_api.cmmt_atchmnfl
+		where
+			atchmnfl_id = #{attachmentId}
+	</delete>
+
+	<select id="existsGroupFiles" resultType="Boolean">
+		/** CmmtAtchmnflDao.existsGroupFiles */
+		select
+			exists (
+				select 1
+				from com_api.cmmt_atchmnfl
+				where atchmnfl_group_id = #{attachmentGroupId}
+			)
+	</select>
+
+	<update id="updateRemoved_group">
+		/** CmmtAtchmnflDao.updateRemoved_group */
+		update com_api.cmmt_atchmnfl set
+			file_delete_at = true
+		where
+			atchmnfl_group_id = #{attachmentGroupId}
+	</update>
+
+	<update id="updateRemoved">
+		/** CmmtAtchmnflDao.updateRemoved */
+		update com_api.cmmt_atchmnfl set
+			file_delete_at = true
+		where
+			atchmnfl_id = #{attachmentId}
+	</update>
+
+	<select id="selectGroupFileSize" resultType="Long">
+		/** CmmtAtchmnflDao.selectGroupFileSize */
+		select
+			coalesce(sum(file_size),0) as size
+		from com_api.cmmt_atchmnfl
+		where
+			atchmnfl_group_id = #{attachmentGroupId}
+			and file_delete_at = false
+	</select>
+</mapper>

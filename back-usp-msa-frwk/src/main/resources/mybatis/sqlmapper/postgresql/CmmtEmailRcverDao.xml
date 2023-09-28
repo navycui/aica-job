@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.framework.common.dao.CmmtEmailRcverDao">
+
+	<insert id="insertList">
+		/** CmmtEmailRcverDao.insertList */
+		insert into com_api.cmmt_email_rcver (
+			 email_id
+			,rcver_email
+			,rcver_nm
+			,paramtr
+			,succes_at
+			,result_code
+			,result_mssage
+			,creat_dt
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+			 #{item.emailId}
+			,#{item.email}
+			,#{item.recipientNm}
+			,#{item.param}
+			,#{item.success}
+			,#{item.resultCode}
+			,#{item.resultMessage}
+			,#{item.createdDt}
+		)
+		</foreach>
+	</insert>
+</mapper>

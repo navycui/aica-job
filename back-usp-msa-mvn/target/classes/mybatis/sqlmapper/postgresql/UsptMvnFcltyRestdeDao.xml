@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="aicluster.mvn.common.dao.UsptMvnFcltyRestdeDao">
+
+    <insert id="insertList">
+        /** UsptMvnFcltyRestdeDao.insertList */
+        insert into mvn_api.uspt_mvn_fclty_restde (
+            mvn_fclty_id
+            ,bgnde
+            ,endde
+            ,resn
+            ,creatr_id
+            ,creat_dt
+            ,updusr_id
+            ,updt_dt
+        ) values
+        <foreach item="item" collection="list" separator=",">
+        (
+            #{item.mvnFcId}
+            , #{item.beginDay}
+            , #{item.endDay}
+            , #{item.reason}
+            , #{item.creatorId}
+            , #{item.createdDt}
+            , #{item.updaterId}
+            , #{item.updatedDt}
+        )
+        </foreach>
+    </insert>
+
+    <delete id="delete">
+        /** UsptMvnFcltyRestdeDao.delete */
+        delete from mvn_api.uspt_mvn_fclty_restde
+        where
+            mvn_fclty_id = #{mvnFcId}
+    </delete>
+
+    <select id="selectList" resultType="aicluster.mvn.common.entity.UsptMvnFcltyRestde">
+        /** UsptMvnFcltyRestdeDao.selectList */
+        select
+            mvn_fclty_id	as mvn_fc_id
+            ,bgnde			as begin_day
+            ,endde			as end_day
+            ,resn			as reason
+            ,creatr_id		as creator_id
+            ,creat_dt		as created_dt
+            ,updusr_id		as updater_id
+            ,updt_dt		as updated_dt
+        from mvn_api.uspt_mvn_fclty_restde
+        where
+            mvn_fclty_id = #{mvnFcId}
+    </select>
+
+</mapper>
